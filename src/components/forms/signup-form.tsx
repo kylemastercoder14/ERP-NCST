@@ -267,14 +267,7 @@ export function SignupForm() {
                   <div>
                     Password <span className="text-red-600">*</span>
                   </div>
-                  <a
-                    href="#"
-                    className="ml-auto text-sm underline-offset-4 hover:underline"
-                  >
-                    Forgot your password?
-                  </a>
                 </FormLabel>
-
                 <FormControl>
                   <Input type="password" placeholder="--------" {...field} />
                 </FormControl>
