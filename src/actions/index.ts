@@ -119,6 +119,10 @@ export const loginAccount = async (values: z.infer<typeof LoginValidators>) => {
   }
 };
 
+export const logoutUser = async () => {
+  (await cookies()).set("Authorization", "", { maxAge: 0, path: "/" });
+};
+
 export const verifyAccount = async (otpCode: string, email: string) => {
   try {
     const user = await db.user.findUnique({
