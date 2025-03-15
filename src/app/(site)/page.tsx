@@ -1,101 +1,93 @@
 import Image from "next/image";
+import Navigation from "@/components/global/site/navigation";
+import { CogIcon, HandHeartIcon, UsersIcon, WalletIcon } from "lucide-react";
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
+    <div className="relative">
+      <Navigation />
+      <div className="h-[60vh] relative w-full">
         <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
+          src="/assets/hero.jpg"
+          fill
+          alt="Hero"
+          className="w-full h-full object-cover"
         />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      </div>
+      <section className="py-3">
+        <div className="text-4xl px-5 mt-7 font-semibold text-[#91661d]">
+          BAT Security Services INC.
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        <div className="bg-[#d88f28] flex justify-end mt-10 w-full px-40">
+          <div className="bg-white w-40 text-[#91661d] text-center">
+            ERP SOFTWARE
+          </div>
+        </div>
+        <div className="mt-20 px-40">
+          <div className="text-center relative font-normal text-2xl text-[#91661d]">
+            <p>BAT SOLUTIONS</p>
+          </div>
+          <p className="text-center mt-5">
+            Enterprise Resource Planning (ERP) software solution designed to
+            streamline and enhance security service operations. Our ERP system
+            integrates essential business processes, ensuring seamless
+            coordination between different departments, real-time data
+            accessibility, and improved operational efficiency.
+          </p>
+        </div>
+        <div className="mt-20 grid lg:grid-cols-4 px-20 grid-cols-1 gap-4">
+          <div className="bg-[#d88f28] text-white flex items-center justify-center flex-col px-5 py-10">
+            <WalletIcon size={50} />
+            <p className="mt-5 text-xl text-center">
+              ACCOUNTING & FINANCE MANAGEMENT
+            </p>
+          </div>
+          <div className="bg-[#d88f28] text-white flex items-center justify-center flex-col px-5 py-10">
+            <CogIcon size={50} />
+            <p className="mt-5 text-xl text-center">OPERATIONS MANAGEMENT</p>
+          </div>
+          <div className="bg-[#d88f28] text-white flex items-center justify-center flex-col px-5 py-10">
+            <UsersIcon size={50} />
+            <p className="mt-5 text-xl text-center">
+              CUSTOMER RELATIONSHIP MANAGEMENT
+            </p>
+          </div>
+          <div className="bg-[#d88f28] text-white flex items-center justify-center flex-col px-5 py-10">
+            <HandHeartIcon size={50} />
+            <p className="mt-5 text-xl text-center">
+              HUMAN RESOURCE MANAGEMENT
+            </p>
+          </div>
+        </div>
+      </section>
+      <section className="py-5 mt-5 px-5">
+        <h1 className="text-[#91661d]">OUR COMPANY</h1>
+        <p className="mt-5">
+          <b className="text-xl">BAT SECURITY SERVICES, INC.</b> is a
+          corporation duly organized, registered and granted license to manage,
+          operate and maintain a private protective, detective and investigation
+          agency nationwide as authorized under <b>Republic Act 5487.</b>
+        </p>
+        <div className='mt-10'>
+          <b>A. HISTORY</b> <br />
+          <p className='ml-5'>With the overgrowing demand and concerns for TOP QUALITY PROVIDER of
+          Private Security Service, <b>BAT SECURITY SERVICES, INC</b>. was
+          established June 2017 with <b>SEC Reg. No. CS201712621</b>. Operating
+          for almost 8 years this 2025.</p>
+        </div>
+        <div className='mt-10'>
+          <b>B. GOVERNMENT PERMITS (LICENSES/ACCREDITATION/AFFILIATION)</b> <br />
+          <p className='ml-5'>- {"MAYOR'S"} PERMIT (Valid until <b>Dec 31, 2025</b>)</p>
+          <p className='ml-5'>- PNP SOSIA License to Operate No. PSA-R-04-1666-39-4749 (Valid until <b>July 31, 2026</b>)</p>
+          <p className='ml-5'>- SECURITIES AND EXCHANGE COMMISION REG. NO. CS201712621</p>
+          <p className='ml-5'>- DEPARTMENT OF LABOR AND EMPLOYMENT CERTIFICATION NO. ROIVA-CPO-DO174-0224-007-R (Valid until <b>Mar 10, 2026</b>)</p>
+          <p className='ml-5'>- BUREAU OF INTERNAL REVENUE CERTIFICATE OF REGISTRATION</p>
+          <p className='ml-5'>- UNIFIED REGISTRATION RECORD</p>
+          <p className='ml-5'>- SOCIAL SECURITY SYSTEM (SSS)</p>
+          <p className='ml-5'>- PHILHEALTH</p>
+          <p className='ml-5'>- PAGIBIG</p>
+        </div>
+      </section>
     </div>
   );
 }
