@@ -338,8 +338,8 @@ export const createApplicant = async (
           createMany: {
             data:
               children?.map((child) => ({
-                name: child.name,
-                dateOfBirth: child.dateOfBirth,
+                name: child.name || "",
+                dateOfBirth: child.dateOfBirth || "",
               })) || [],
           },
         },
@@ -499,8 +499,8 @@ export const updateApplicant = async (
           createMany: {
             data:
               children?.map((child) => ({
-                name: child.name,
-                dateOfBirth: child.dateOfBirth,
+                name: child.name || "",
+                dateOfBirth: child.dateOfBirth || "",
               })) || [],
           },
         },
