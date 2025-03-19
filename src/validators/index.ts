@@ -77,10 +77,8 @@ export const ApplicantValidators = z.object({
   children: z
     .array(
       z.object({
-        name: z.string().min(1, { message: "Child's name is required" }),
-        dateOfBirth: z
-          .string()
-          .min(1, { message: "Date of birth is required" }),
+        name: z.string().optional(),
+        dateOfBirth: z.string().optional(),
       })
     )
     .optional(),
