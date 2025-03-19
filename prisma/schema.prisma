@@ -34,9 +34,9 @@ model Admin {
 }
 
 model User {
-  id         String  @id @default(cuid())
-  employeeId String? @unique
-  email      String  @unique
+  id         String   @id @default(cuid())
+  employeeId String?  @unique
+  email      String   @unique
   firstName  String
   lastName   String
   password   String
@@ -51,7 +51,118 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  Logs      Logs[]
+  Logs Logs[]
+}
+
+model Applicant {
+  id                String   @id @default(cuid())
+  positionDesired   String
+  licenseNo         String
+  expiryDate        String
+  firstName         String
+  middleName        String?
+  lastName          String
+  presentAddress    String
+  provincialAddress String
+  telNo             String?
+  celNo             String
+  dateOfBirth       String
+  placeOfBirth      String
+  civilStatus       String
+  citizenship       String
+  religion          String
+  height            String
+  weight            String
+  sex               String
+  spouseName        String?
+  spouseOccupation  String?
+  spouseAddress     String?
+  fatherName        String
+  motherName        String
+  fatherOccupation  String
+  motherOccupation  String
+  parentAddress     String
+  languages         String[]
+  contactPerson     String
+  contactAddress    String
+  contactNumber     String
+
+  tinNo        String
+  sssNo        String
+  philhealthNo String
+  pagibigNo    String
+
+  signature String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Children            Children[]
+  EducationRecord     EducationRecord[]
+  EmploymentRecord    EmploymentRecord[]
+  CharacterReferences CharacterReferences[]
+}
+
+model Children {
+  id          String @id @default(cuid())
+  name        String
+  dateOfBirth String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  applicant   Applicant? @relation(fields: [applicantId], references: [id])
+  applicantId String?
+
+  @@index([applicantId])
+}
+
+model EducationRecord {
+  id           String  @id @default(cuid())
+  level        String
+  course       String?
+  school       String
+  address      String
+  yearGraduate String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  applicant   Applicant? @relation(fields: [applicantId], references: [id])
+  applicantId String?
+
+  @@index([applicantId])
+}
+
+model CharacterReferences {
+  id         String @id @default(cuid())
+  name       String
+  occupation String
+  address    String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  applicant   Applicant? @relation(fields: [applicantId], references: [id])
+  applicantId String?
+
+  @@index([applicantId])
+}
+
+model EmploymentRecord {
+  id          String @id @default(cuid())
+  companyName String
+  position    String
+  dateFrom    String
+  dateTo      String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  applicant   Applicant? @relation(fields: [applicantId], references: [id])
+  applicantId String?
+
+  @@index([applicantId])
 }
 
 model Logs {

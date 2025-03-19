@@ -60,7 +60,7 @@ export default function Home() {
           </div>
         </div>
       </section>
-      <section className="py-5 mt-5 px-5">
+      <section className="py-5 pb-10 mt-5 px-5">
         <h1 className="text-[#91661d]">OUR COMPANY</h1>
         <p className="mt-5">
           <b className="text-xl">BAT SECURITY SERVICES, INC.</b> is a
@@ -88,6 +88,9 @@ export default function Home() {
           <p className='ml-5'>- PAGIBIG</p>
         </div>
       </section>
+      <footer className='border-t py-2'>
+        <p className='text-center'>&copy; 2025. <b className='text-[#91661d]'>BAT SECURITY SERVICES, INC</b>. All rights reserved</p>
+      </footer>
     </div>
   );
 }

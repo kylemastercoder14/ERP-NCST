@@ -3,7 +3,11 @@
 
 import db from "@/lib/db";
 import { z } from "zod";
-import { RegistrationValidators, LoginValidators } from "@/validators";
+import {
+  RegistrationValidators,
+  LoginValidators,
+  ApplicantValidators,
+} from "@/validators";
 import nodemailer from "nodemailer";
 import { OtpVerificationHTML } from "@/components/email-templates/otp-verification";
 import { cookies } from "next/headers";
@@ -226,5 +230,343 @@ export const sendOtpCodeEmail = async (email: string, otpCode: string) => {
   } catch (error) {
     console.error("Error sending notification", error);
     return { message: "An error occurred. Please try again." };
+  }
+};
+
+export const createApplicant = async (
+  values: z.infer<typeof ApplicantValidators>
+) => {
+  const validatedField = ApplicantValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const {
+    positionDesired,
+    licenseNo,
+    expiryDate,
+    firstName,
+    middleName,
+    lastName,
+    presentAddress,
+    provincialAddress,
+    telNo,
+    celNo,
+    dateOfBirth,
+    placeOfBirth,
+    civilStatus,
+    citizenship,
+    religion,
+    height,
+    weight,
+    contactAddress,
+    contactPerson,
+    contactNumber,
+    languages,
+    fatherName,
+    motherName,
+    fatherOccupation,
+    motherOccupation,
+    spouseAddress,
+    pagibigNo,
+    parentAddress,
+    philhealthNo,
+    sex,
+    signature,
+    sssNo,
+    tinNo,
+    characterReferences,
+    children,
+    education,
+    employment,
+    spouseName,
+    spouseOccupation,
+  } = validatedField.data;
+
+  try {
+    const existingApplicant = await db.applicant.findFirst({
+      where: {
+        licenseNo,
+        expiryDate,
+      },
+    });
+
+    if (existingApplicant) {
+      return { error: "Applicant with a license no. already exist" };
+    }
+
+    await db.applicant.create({
+      data: {
+        positionDesired,
+        licenseNo,
+        expiryDate,
+        firstName,
+        middleName,
+        lastName,
+        presentAddress,
+        provincialAddress,
+        telNo,
+        celNo,
+        dateOfBirth,
+        placeOfBirth,
+        civilStatus,
+        citizenship,
+        religion,
+        height,
+        weight,
+        contactAddress,
+        contactPerson,
+        contactNumber,
+        languages,
+        fatherName,
+        motherName,
+        fatherOccupation,
+        motherOccupation,
+        spouseAddress,
+        pagibigNo,
+        parentAddress,
+        philhealthNo,
+        sex,
+        signature,
+        sssNo,
+        tinNo,
+        spouseName,
+        spouseOccupation,
+        Children: {
+          createMany: {
+            data:
+              children?.map((child) => ({
+                name: child.name,
+                dateOfBirth: child.dateOfBirth,
+              })) || [],
+          },
+        },
+        EducationRecord: {
+          createMany: {
+            data:
+              education?.map((educ) => ({
+                level: educ.level,
+                course: educ.course || null,
+                school: educ.school,
+                address: educ.address,
+                yearGraduate: educ.yearGraduated,
+              })) || [],
+          },
+        },
+        EmploymentRecord: {
+          createMany: {
+            data:
+              employment?.map((job) => ({
+                companyName: job.company,
+                position: job.position,
+                dateFrom: job.from,
+                dateTo: job.to,
+              })) || [],
+          },
+        },
+        CharacterReferences: {
+          createMany: {
+            data:
+              characterReferences?.map((ref) => ({
+                name: ref.name,
+                occupation: ref.occupation,
+                address: ref.address,
+              })) || [],
+          },
+        },
+      },
+    });
+
+    return { success: "Applicant created successfully" };
+  } catch (error: any) {
+    console.error("Error creating applicant", error);
+    return {
+      error: `Failed to create applicant. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const updateApplicant = async (
+  id: string,
+  values: z.infer<typeof ApplicantValidators>
+) => {
+  if (!id) {
+    return { error: "Applicant ID is required" };
+  }
+
+  const validatedField = ApplicantValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const {
+    positionDesired,
+    licenseNo,
+    expiryDate,
+    firstName,
+    middleName,
+    lastName,
+    presentAddress,
+    provincialAddress,
+    telNo,
+    celNo,
+    dateOfBirth,
+    placeOfBirth,
+    civilStatus,
+    citizenship,
+    religion,
+    height,
+    weight,
+    contactAddress,
+    contactPerson,
+    contactNumber,
+    languages,
+    fatherName,
+    motherName,
+    fatherOccupation,
+    motherOccupation,
+    spouseAddress,
+    pagibigNo,
+    parentAddress,
+    philhealthNo,
+    sex,
+    signature,
+    sssNo,
+    tinNo,
+    characterReferences,
+    children,
+    education,
+    employment,
+    spouseName,
+    spouseOccupation,
+  } = validatedField.data;
+
+  try {
+    const existingApplicant = await db.applicant.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!existingApplicant) {
+      return { error: "Applicant not found" };
+    }
+
+    await db.applicant.update({
+      where: { id },
+      data: {
+        positionDesired,
+        licenseNo,
+        expiryDate,
+        firstName,
+        middleName,
+        lastName,
+        presentAddress,
+        provincialAddress,
+        telNo,
+        celNo,
+        dateOfBirth,
+        placeOfBirth,
+        civilStatus,
+        citizenship,
+        religion,
+        height,
+        weight,
+        contactAddress,
+        contactPerson,
+        contactNumber,
+        languages,
+        fatherName,
+        motherName,
+        fatherOccupation,
+        motherOccupation,
+        spouseAddress,
+        pagibigNo,
+        parentAddress,
+        philhealthNo,
+        sex,
+        signature,
+        sssNo,
+        tinNo,
+        spouseName,
+        spouseOccupation,
+        Children: {
+          deleteMany: { applicantId: id }, // Remove old children
+          createMany: {
+            data:
+              children?.map((child) => ({
+                name: child.name,
+                dateOfBirth: child.dateOfBirth,
+              })) || [],
+          },
+        },
+        EducationRecord: {
+          deleteMany: { applicantId: id }, // Remove old records
+          createMany: {
+            data:
+              education?.map((educ) => ({
+                level: educ.level,
+                course: educ.course || null,
+                school: educ.school,
+                address: educ.address,
+                yearGraduate: educ.yearGraduated,
+              })) || [],
+          },
+        },
+        EmploymentRecord: {
+          deleteMany: { applicantId: id }, // Remove old records
+          createMany: {
+            data:
+              employment?.map((job) => ({
+                companyName: job.company,
+                position: job.position,
+                dateFrom: job.from,
+                dateTo: job.to,
+              })) || [],
+          },
+        },
+        CharacterReferences: {
+          deleteMany: { applicantId: id }, // Remove old records
+          createMany: {
+            data:
+              characterReferences?.map((ref) => ({
+                name: ref.name,
+                occupation: ref.occupation,
+                address: ref.address,
+              })) || [],
+          },
+        },
+      },
+    });
+
+    return { success: "Applicant successfully updated!" };
+  } catch (error: any) {
+    console.error("Error updating applicant", error);
+    return {
+      error: `Failed to update applicant. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const deleteApplicant = async (id: string) => {
+  if (!id) {
+    return { error: "Applicant ID is required" };
+  }
+
+  try {
+    await db.applicant.delete({
+      where: { id },
+    });
+
+    return { success: "Applicant successfully deleted!" };
+  } catch (error: any) {
+    console.error("Error deleting applicant", error);
+    return {
+      error: `Failed to delete applicant. Please try again. ${error.message || ""}`,
+    };
   }
 };

@@ -29,7 +29,9 @@ const HeadLayout = async ({ children }: { children: React.ReactNode }) => {
         <AppSidebar user={user} />
         <SidebarInset>
           <Header />
+          <main className='px-4'>
           {children}
+          </main>
         </SidebarInset>
       </SidebarProvider>
     </ThemeProvider>
