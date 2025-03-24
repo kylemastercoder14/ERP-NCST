@@ -9,10 +9,14 @@ import { format } from "date-fns";
 import ApplicantClient from './_components/client';
 
 const Page = async () => {
-  const data = await db.applicant.findMany({
+  const data = await db.employee.findMany({
     orderBy: {
       createdAt: "desc",
     },
+    include: {
+      JobTitle: true,
+      Department: true,
+    }
   });
 
   const formattedData: ApplicantColumn[] =
@@ -23,7 +27,7 @@ const Page = async () => {
         name: `${item.firstName} ${item.middleName} ${item.lastName}`,
         phoneNumber: item.celNo,
         address: item.presentAddress,
-        positionDesired: item.positionDesired,
+        positionDesired: item.JobTitle.name,
         gender: item.sex,
         civilStatus: item.civilStatus,
         createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),
@@ -33,12 +37,12 @@ const Page = async () => {
     <div>
       <div className="flex items-center justify-between">
         <Heading
-          title="Applicant Management"
-          description="Manage all the applicants information here."
+          title="Employee Management"
+          description="Manage all the employees information here."
         />
         <Button size="sm">
-          <Link href={`/head/applicant-management/create`}>
-            + Add Applicant
+          <Link href={`/head/employee-management/create`}>
+            + Add Employee
           </Link>
         </Button>
       </div>

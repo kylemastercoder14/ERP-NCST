@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { ApplicantWithProps } from "@/types";
+import { EmployeeWithProps } from "@/types";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,7 +22,7 @@ import { createApplicant, updateApplicant } from "@/actions";
 const ApplicantForm = ({
   initialData,
 }: {
-  initialData: ApplicantWithProps | null;
+  initialData: EmployeeWithProps | null;
 }) => {
   const action = initialData ? "Save Changes" : "Submit";
   const router = useRouter();
@@ -30,7 +30,7 @@ const ApplicantForm = ({
   const form = useForm<z.infer<typeof ApplicantValidators>>({
     resolver: zodResolver(ApplicantValidators),
     defaultValues: {
-      positionDesired: initialData?.positionDesired || "",
+      positionDesired: initialData?.JobTitle.name || "",
       licenseNo: initialData?.licenseNo || "",
       expiryDate: initialData?.expiryDate || "",
       firstName: initialData?.firstName || "",

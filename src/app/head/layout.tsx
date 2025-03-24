@@ -8,10 +8,10 @@ import { ThemeProvider } from "@/components/global/theme-provider";
 
 const HeadLayout = async ({ children }: { children: React.ReactNode }) => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const { user } = await useUser();
-  if (!user) {
-    return redirect("/sign-in");
-  }
+  // const { user } = await useUser();
+  // if (!user) {
+  //   return redirect("/sign-in");
+  // }
   return (
     <ThemeProvider
       attribute="class"
@@ -26,7 +26,7 @@ const HeadLayout = async ({ children }: { children: React.ReactNode }) => {
           } as React.CSSProperties
         }
       >
-        <AppSidebar user={user} />
+        {/* <AppSidebar user={user} /> */}
         <SidebarInset>
           <Header />
           <main className='px-4'>

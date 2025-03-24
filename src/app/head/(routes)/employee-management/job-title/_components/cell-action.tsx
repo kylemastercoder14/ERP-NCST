@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import AlertModal from "@/components/ui/alert-modal";
 import React from "react";
-import { deleteApplicant } from "@/actions";
+import { deleteJobTitle } from "@/actions";
 
 interface CellActionProps {
   id: string;
@@ -29,7 +29,7 @@ export const CellAction: React.FC<CellActionProps> = ({ id }) => {
     setLoading(true);
     setOpen(false);
     try {
-      const res = await deleteApplicant(id);
+      const res = await deleteJobTitle(id);
       if (res.success) {
         toast.success(res.success);
         router.refresh();
@@ -62,7 +62,7 @@ export const CellAction: React.FC<CellActionProps> = ({ id }) => {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuItem
-            onClick={() => router.push(`/head/applicant-management/${id}`)}
+            onClick={() => router.push(`/head/employee-management/job-title/${id}`)}
           >
             <Edit className="w-4 h-4 mr-2" />
             Edit

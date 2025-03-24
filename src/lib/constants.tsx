@@ -94,7 +94,7 @@ export const SIDEBAR_HEAD_OPERATION = [
 
 export const SIDEBAR_HEAD_HR = [
   {
-    title: "General",
+    title: "General", // dont mind this
     url: "#",
     items: [
       {
@@ -102,12 +102,67 @@ export const SIDEBAR_HEAD_HR = [
         url: "/head/dashboard",
       },
       {
-        title: "Applicant Management",
-        url: "/head/applicant-management",
+        title: "Employee Management",
+        url: "#",
+        items: [ // show this in collapsible
+          {
+            title: "Employee List",
+            url: "/head/employee-management",
+          },
+          { title: "Add Employee", url: "/head/employee-management/create" },
+          {
+            title: "Job Title",
+            url: "/head/employee-management/job-title",
+          },
+          {
+            title: "Department",
+            url: "/head/employee-management/department",
+          },
+          {
+            title: "Reporting Manager",
+            url: "/head/employee-management/reporting-manager",
+          },
+        ],
       },
       {
-        title: "Employee Records Management",
-        url: "/head/employee-records-management",
+        title: "Attendance Management",
+        url: "#",
+        items: [
+          {
+            title: "Attendance Monitoring",
+            url: "/head/attendance-management",
+          },
+          {
+            title: "Clock In/Out",
+            url: "/head/attendance-management/clock-in-out",
+          },
+          {
+            title: "Overtime & Undertime",
+            url: "/head/attendance-management/overtime-undertime",
+          },
+        ],
+      },
+      {
+        title: "Payroll Management",
+        url: "/head/payroll-management",
+        items: [
+          {
+            title: "Compensation & Benefits",
+            url: "/head/payroll-management/compensation-benefits",
+          },
+          {
+            title: "Base Salary",
+            url: "/head/payroll-management/base-salary",
+          },
+          {
+            title: "Payslip Generation",
+            url: "/head/payroll-management/payslip-generation",
+          },
+        ],
+      },
+      {
+        title: "Leave Management",
+        url: "/head/leave-management", // do not show this in collapsible because there is no sub menu
       },
       {
         title: "Onboarding & Training",
@@ -116,7 +171,7 @@ export const SIDEBAR_HEAD_HR = [
     ],
   },
   {
-    title: "Others",
+    title: "Others", // dont mind this
     url: "#",
     items: [
       {

@@ -8,7 +8,7 @@ const Page = async (props: {
   }>;
 }) => {
   const params = await props.params;
-  const applicant = await db.applicant.findUnique({
+  const applicant = await db.employee.findUnique({
     where: {
       id: params.applicantId,
     },
@@ -17,6 +17,7 @@ const Page = async (props: {
       EducationRecord: true,
       EmploymentRecord: true,
       Children: true,
+      JobTitle: true,
     },
   });
   return (

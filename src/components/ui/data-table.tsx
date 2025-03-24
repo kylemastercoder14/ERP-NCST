@@ -125,13 +125,13 @@ export function DataTable<TData, TValue>({
           onChange={(e) => setGlobalFilter(e.target.value)}
           className="h-8 w-[150px] lg:w-[250px]"
         />
-        {table.getColumn("status") && (
+        {table.getColumn("status") ? (
           <FacetedFilter
             column={table.getColumn("status")}
             title="Status"
             options={statuses}
           />
-        )}
+        ) : null}
         {table.getColumn("gender") && (
           <FacetedFilter
             column={table.getColumn("gender")}

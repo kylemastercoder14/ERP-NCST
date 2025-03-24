@@ -8,20 +8,6 @@ datasource db {
   relationMode = "prisma"
 }
 
-enum Role {
-  EMPLOYEE
-  HEAD
-  ASSISTANT
-  USER
-}
-
-enum Position {
-  ACCOUNTING
-  OPERATION
-  HR
-  CRM
-}
-
 model Admin {
   id        String @id @default(cuid())
   email     String @unique
@@ -33,30 +19,49 @@ model Admin {
   updatedAt DateTime @updatedAt
 }
 
-model User {
-  id         String   @id @default(cuid())
-  employeeId String?  @unique
-  email      String   @unique
-  firstName  String
-  lastName   String
-  password   String
-  role       Role
-  position   Position
+model UserAccount {
+  id       String @id @default(cuid())
+  email    String @unique
+  password String
 
   otpCode         String?
   otpExpiry       DateTime?
   isEmailVerified Boolean   @default(false)
   isAdminVerified Boolean   @default(false)
 
+  employeeId String
+  Employee   Employee @relation(fields: [employeeId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   Logs Logs[]
+
+  @@index([employeeId])
 }
 
-model Applicant {
+model JobTitle {
+  id   String @id @default(cuid())
+  name String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Employee Employee[]
+}
+
+model Department {
+  id   String @id @default(cuid())
+  name String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Employee Employee[]
+}
+
+model Employee {
   id                String   @id @default(cuid())
-  positionDesired   String
   licenseNo         String
   expiryDate        String
   firstName         String
@@ -97,10 +102,20 @@ model Applicant {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  jobTitleId String
+  JobTitle   JobTitle @relation(fields: [jobTitleId], references: [id])
+
+  departmentId String?
+  Department   Department? @relation(fields: [departmentId], references: [id])
+
   Children            Children[]
   EducationRecord     EducationRecord[]
   EmploymentRecord    EmploymentRecord[]
   CharacterReferences CharacterReferences[]
+  UserAccount         UserAccount[]
+
+  @@index([jobTitleId])
+  @@index([departmentId])
 }
 
 model Children {
@@ -111,10 +126,10 @@ model Children {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  applicant   Applicant? @relation(fields: [applicantId], references: [id])
-  applicantId String?
+  employeeId String?
+  Employee   Employee? @relation(fields: [employeeId], references: [id])
 
-  @@index([applicantId])
+  @@index([employeeId])
 }
 
 model EducationRecord {
@@ -128,10 +143,10 @@ model EducationRecord {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  applicant   Applicant? @relation(fields: [applicantId], references: [id])
-  applicantId String?
+  employeeId String?
+  Employee   Employee? @relation(fields: [employeeId], references: [id])
 
-  @@index([applicantId])
+  @@index([employeeId])
 }
 
 model CharacterReferences {
@@ -143,10 +158,10 @@ model CharacterReferences {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  applicant   Applicant? @relation(fields: [applicantId], references: [id])
-  applicantId String?
+  employeeId String?
+  Employee   Employee? @relation(fields: [employeeId], references: [id])
 
-  @@index([applicantId])
+  @@index([employeeId])
 }
 
 model EmploymentRecord {
@@ -159,10 +174,10 @@ model EmploymentRecord {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  applicant   Applicant? @relation(fields: [applicantId], references: [id])
-  applicantId String?
+  employeeId String?
+  Employee   Employee? @relation(fields: [employeeId], references: [id])
 
-  @@index([applicantId])
+  @@index([employeeId])
 }
 
 model Logs {
@@ -172,7 +187,7 @@ model Logs {
   createdAt DateTime @default(now())
 
   userId String
-  user   User   @relation(fields: [userId], references: [id])
+  User   UserAccount @relation(fields: [userId], references: [id])
 
   @@index([userId])
 }

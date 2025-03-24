@@ -4,70 +4,15 @@
 import db from "@/lib/db";
 import { z } from "zod";
 import {
-  RegistrationValidators,
   LoginValidators,
   ApplicantValidators,
+  JobTitleValidators,
+  DepartmentValidators,
 } from "@/validators";
-import nodemailer from "nodemailer";
-import { OtpVerificationHTML } from "@/components/email-templates/otp-verification";
+// import nodemailer from "nodemailer";
+// import { OtpVerificationHTML } from "@/components/email-templates/otp-verification";
 import { cookies } from "next/headers";
 import * as jose from "jose";
-
-export const createAccount = async (
-  values: z.infer<typeof RegistrationValidators>
-) => {
-  const validatedField = RegistrationValidators.safeParse(values);
-
-  if (!validatedField.success) {
-    const errors = validatedField.error.errors.map((err) => err.message);
-    return { error: `Validation Error: ${errors.join(", ")}` };
-  }
-
-  const { firstName, lastName, employeeId, email, password, role, position } =
-    validatedField.data;
-
-  try {
-    const existingUser = await db.user.findUnique({
-      where: {
-        email,
-        employeeId,
-      },
-    });
-
-    if (existingUser) {
-      return { error: "User already exist" };
-    }
-
-    // six-digit OTP code
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-
-    // insert otpExpiry in the database, the value is the current time plus 15 minutes only
-    const otpExpiry = new Date();
-    otpExpiry.setMinutes(otpExpiry.getMinutes() + 15);
-
-    await db.user.create({
-      data: {
-        firstName,
-        lastName,
-        email,
-        password,
-        employeeId,
-        role,
-        position,
-        otpCode,
-        otpExpiry,
-      },
-    });
-
-    await sendOtpCodeEmail(email, otpCode);
-
-    return { success: "User created successfully" };
-  } catch (error: any) {
-    return {
-      error: `Failed to create user. Please try again. ${error.message || ""}`,
-    };
-  }
-};
 
 export const loginAccount = async (values: z.infer<typeof LoginValidators>) => {
   const validatedField = LoginValidators.safeParse(values);
@@ -80,7 +25,7 @@ export const loginAccount = async (values: z.infer<typeof LoginValidators>) => {
   const { email, password } = validatedField.data;
 
   try {
-    const user = await db.user.findFirst({
+    const user = await db.userAccount.findFirst({
       where: {
         email,
       },
@@ -127,111 +72,111 @@ export const logoutUser = async () => {
   (await cookies()).set("Authorization", "", { maxAge: 0, path: "/" });
 };
 
-export const verifyAccount = async (otpCode: string, email: string) => {
-  try {
-    const user = await db.user.findUnique({
-      where: {
-        email,
-      },
-    });
+// export const verifyAccount = async (otpCode: string, email: string) => {
+//   try {
+//     const user = await db.user.findUnique({
+//       where: {
+//         email,
+//       },
+//     });
 
-    if (!user) {
-      return { error: "User not found" };
-    }
+//     if (!user) {
+//       return { error: "User not found" };
+//     }
 
-    if (!user.otpExpiry || user.otpExpiry < new Date()) {
-      return { error: "OTP code has expired" };
-    }
+//     if (!user.otpExpiry || user.otpExpiry < new Date()) {
+//       return { error: "OTP code has expired" };
+//     }
 
-    if (user.otpCode !== otpCode) {
-      return { error: "Invalid OTP code" };
-    }
+//     if (user.otpCode !== otpCode) {
+//       return { error: "Invalid OTP code" };
+//     }
 
-    await db.user.update({
-      where: {
-        email,
-      },
-      data: {
-        isEmailVerified: true,
-      },
-    });
+//     await db.user.update({
+//       where: {
+//         email,
+//       },
+//       data: {
+//         isEmailVerified: true,
+//       },
+//     });
 
-    return { success: "Account verified successfully" };
-  } catch (error: any) {
-    return {
-      error: `Failed to verify account. Please try again. ${error.message || ""}`,
-    };
-  }
-};
+//     return { success: "Account verified successfully" };
+//   } catch (error: any) {
+//     return {
+//       error: `Failed to verify account. Please try again. ${error.message || ""}`,
+//     };
+//   }
+// };
 
-export const resendOtpCode = async (email: string) => {
-  try {
-    const user = await db.user.findUnique({
-      where: {
-        email,
-      },
-    });
+// export const resendOtpCode = async (email: string) => {
+//   try {
+//     const user = await db.user.findUnique({
+//       where: {
+//         email,
+//       },
+//     });
 
-    if (!user) {
-      return { error: "User not found" };
-    }
+//     if (!user) {
+//       return { error: "User not found" };
+//     }
 
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+//     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // insert otpExpiry in the database, the value is the current time plus 15 minutes only
-    const otpExpiry = new Date();
-    otpExpiry.setMinutes(otpExpiry.getMinutes() + 15);
+//     // insert otpExpiry in the database, the value is the current time plus 15 minutes only
+//     const otpExpiry = new Date();
+//     otpExpiry.setMinutes(otpExpiry.getMinutes() + 15);
 
-    await db.user.update({
-      where: {
-        email,
-      },
-      data: {
-        otpCode,
-        otpExpiry,
-      },
-    });
+//     await db.user.update({
+//       where: {
+//         email,
+//       },
+//       data: {
+//         otpCode,
+//         otpExpiry,
+//       },
+//     });
 
-    await sendOtpCodeEmail(email, otpCode);
+//     await sendOtpCodeEmail(email, otpCode);
 
-    return { success: "OTP code sent successfully" };
-  } catch (error: any) {
-    return {
-      error: `Failed to resend OTP code. Please try again. ${error.message || ""}`,
-    };
-  }
-};
+//     return { success: "OTP code sent successfully" };
+//   } catch (error: any) {
+//     return {
+//       error: `Failed to resend OTP code. Please try again. ${error.message || ""}`,
+//     };
+//   }
+// };
 
-export const sendOtpCodeEmail = async (email: string, otpCode: string) => {
-  const htmlContent = await OtpVerificationHTML({
-    otpCode,
-  });
+// export const sendOtpCodeEmail = async (email: string, otpCode: string) => {
+//   const htmlContent = await OtpVerificationHTML({
+//     otpCode,
+//   });
 
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: "kylemastercoder14@gmail.com",
-      pass: "cyjfgkpetrcmjvtb",
-    },
-  });
+//   const transporter = nodemailer.createTransport({
+//     service: "gmail",
+//     auth: {
+//       user: "kylemastercoder14@gmail.com",
+//       pass: "cyjfgkpetrcmjvtb",
+//     },
+//   });
 
-  const message = {
-    from: "kylemastercoder14@gmail.com",
-    to: email,
-    subject: "Verify your email address",
-    text: `Your OTP code is ${otpCode}`,
-    html: htmlContent,
-  };
+//   const message = {
+//     from: "kylemastercoder14@gmail.com",
+//     to: email,
+//     subject: "Verify your email address",
+//     text: `Your OTP code is ${otpCode}`,
+//     html: htmlContent,
+//   };
 
-  try {
-    await transporter.sendMail(message);
+//   try {
+//     await transporter.sendMail(message);
 
-    return { success: "Email has been sent." };
-  } catch (error) {
-    console.error("Error sending notification", error);
-    return { message: "An error occurred. Please try again." };
-  }
-};
+//     return { success: "Email has been sent." };
+//   } catch (error) {
+//     console.error("Error sending notification", error);
+//     return { message: "An error occurred. Please try again." };
+//   }
+// };
 
 export const createApplicant = async (
   values: z.infer<typeof ApplicantValidators>
@@ -286,7 +231,7 @@ export const createApplicant = async (
   } = validatedField.data;
 
   try {
-    const existingApplicant = await db.applicant.findFirst({
+    const existingApplicant = await db.employee.findFirst({
       where: {
         licenseNo,
         expiryDate,
@@ -294,12 +239,12 @@ export const createApplicant = async (
     });
 
     if (existingApplicant) {
-      return { error: "Applicant with a license no. already exist" };
+      return { error: "Employee with a license no. already exist" };
     }
 
-    await db.applicant.create({
+    await db.employee.create({
       data: {
-        positionDesired,
+        jobTitleId: positionDesired,
         licenseNo,
         expiryDate,
         firstName,
@@ -379,11 +324,11 @@ export const createApplicant = async (
       },
     });
 
-    return { success: "Applicant created successfully" };
+    return { success: "Employee created successfully" };
   } catch (error: any) {
-    console.error("Error creating applicant", error);
+    console.error("Error creating employee", error);
     return {
-      error: `Failed to create applicant. Please try again. ${error.message || ""}`,
+      error: `Failed to create employee. Please try again. ${error.message || ""}`,
     };
   }
 };
@@ -393,7 +338,7 @@ export const updateApplicant = async (
   values: z.infer<typeof ApplicantValidators>
 ) => {
   if (!id) {
-    return { error: "Applicant ID is required" };
+    return { error: "Employee ID is required" };
   }
 
   const validatedField = ApplicantValidators.safeParse(values);
@@ -446,20 +391,20 @@ export const updateApplicant = async (
   } = validatedField.data;
 
   try {
-    const existingApplicant = await db.applicant.findUnique({
+    const existingApplicant = await db.employee.findUnique({
       where: {
         id,
       },
     });
 
     if (!existingApplicant) {
-      return { error: "Applicant not found" };
+      return { error: "Employee not found" };
     }
 
-    await db.applicant.update({
+    await db.employee.update({
       where: { id },
       data: {
-        positionDesired,
+        jobTitleId: positionDesired,
         licenseNo,
         expiryDate,
         firstName,
@@ -495,7 +440,7 @@ export const updateApplicant = async (
         spouseName,
         spouseOccupation,
         Children: {
-          deleteMany: { applicantId: id }, // Remove old children
+          deleteMany: { employeeId: id },
           createMany: {
             data:
               children?.map((child) => ({
@@ -505,7 +450,7 @@ export const updateApplicant = async (
           },
         },
         EducationRecord: {
-          deleteMany: { applicantId: id }, // Remove old records
+          deleteMany: { employeeId: id },
           createMany: {
             data:
               education?.map((educ) => ({
@@ -518,7 +463,7 @@ export const updateApplicant = async (
           },
         },
         EmploymentRecord: {
-          deleteMany: { applicantId: id }, // Remove old records
+          deleteMany: { employeeId: id },
           createMany: {
             data:
               employment?.map((job) => ({
@@ -530,7 +475,7 @@ export const updateApplicant = async (
           },
         },
         CharacterReferences: {
-          deleteMany: { applicantId: id }, // Remove old records
+          deleteMany: { employeeId: id }, // Remove old records
           createMany: {
             data:
               characterReferences?.map((ref) => ({
@@ -554,19 +499,181 @@ export const updateApplicant = async (
 
 export const deleteApplicant = async (id: string) => {
   if (!id) {
-    return { error: "Applicant ID is required" };
+    return { error: "Employee ID is required" };
   }
 
   try {
-    await db.applicant.delete({
+    await db.employee.delete({
       where: { id },
     });
 
-    return { success: "Applicant successfully deleted!" };
+    return { success: "Employee successfully deleted!" };
   } catch (error: any) {
-    console.error("Error deleting applicant", error);
+    console.error("Error deleting employee", error);
     return {
-      error: `Failed to delete applicant. Please try again. ${error.message || ""}`,
+      error: `Failed to delete employee. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const createJobTitle = async (
+  values: z.infer<typeof JobTitleValidators>
+) => {
+  const validatedField = JobTitleValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { name } = validatedField.data;
+
+  try {
+    await db.jobTitle.create({
+      data: {
+        name,
+      },
+    });
+
+    return { success: "Job title created successfully" };
+  } catch (error: any) {
+    console.error("Error creating job title", error);
+    return {
+      error: `Failed to create job title. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const updateJobTitle = async (
+  values: z.infer<typeof JobTitleValidators>,
+  id: string
+) => {
+  if (!id) {
+    return { error: "Job title ID is required" };
+  }
+
+  const validatedField = JobTitleValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { name } = validatedField.data;
+
+  try {
+    await db.jobTitle.update({
+      where: { id },
+      data: {
+        name,
+      },
+    });
+
+    return { success: "Job title updated successfully" };
+  } catch (error: any) {
+    console.error("Error updating job title", error);
+    return {
+      error: `Failed to update job title. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const deleteJobTitle = async (id: string) => {
+  if (!id) {
+    return { error: "Job title ID is required" };
+  }
+
+  try {
+    await db.jobTitle.delete({
+      where: { id },
+    });
+
+    return { success: "Job title deleted successfully" };
+  } catch (error: any) {
+    console.error("Error deleting job title", error);
+    return {
+      error: `Failed to delete job title. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const createDepartment = async (
+  values: z.infer<typeof DepartmentValidators>
+) => {
+  const validatedField = DepartmentValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { name } = validatedField.data;
+
+  try {
+    await db.department.create({
+      data: {
+        name,
+      },
+    });
+
+    return { success: "Department created successfully" };
+  } catch (error: any) {
+    console.error("Error creating department", error);
+    return {
+      error: `Failed to create department. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const updateDepartment = async (
+  values: z.infer<typeof DepartmentValidators>,
+  id: string
+) => {
+  if (!id) {
+    return { error: "Department ID is required" };
+  }
+
+  const validatedField = DepartmentValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { name } = validatedField.data;
+
+  try {
+    await db.department.update({
+      where: { id },
+      data: {
+        name,
+      },
+    });
+
+    return { success: "Department updated successfully" };
+  } catch (error: any) {
+    console.error("Error updating department", error);
+    return {
+      error: `Failed to update department. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const deleteDepartment = async (id: string) => {
+  if (!id) {
+    return { error: "Department ID is required" };
+  }
+
+  try {
+    await db.department.delete({
+      where: { id },
+    });
+
+    return { success: "Department deleted successfully" };
+  } catch (error: any) {
+    console.error("Error deleting department", error);
+    return {
+      error: `Failed to delete department. Please try again. ${error.message || ""}`,
     };
   }
 };

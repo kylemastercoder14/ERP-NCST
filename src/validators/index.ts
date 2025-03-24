@@ -115,3 +115,11 @@ export const ApplicantValidators = z.object({
     )
     .optional(),
 });
+
+export const JobTitleValidators = z.object({
+  name: z.string().min(1, { message: "Name is required" }),
+});
+
+export const DepartmentValidators = z.object({
+  name: z.string().min(1, { message: "Name is required" }),
+});
