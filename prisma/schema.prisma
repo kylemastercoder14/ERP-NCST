@@ -30,7 +30,8 @@ model UserAccount {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  Logs Logs[]
+  Logs            Logs[]
+  LeaveManagement LeaveManagement[]
 
   @@index([employeeId])
 }
@@ -103,13 +104,14 @@ model Employee {
   departmentId String
   Department   Department @relation(fields: [departmentId], references: [id])
 
-  Children            Children[]
-  EducationRecord     EducationRecord[]
-  EmploymentRecord    EmploymentRecord[]
-  CharacterReferences CharacterReferences[]
-  UserAccount         UserAccount[]
-  LeaveManagement     LeaveManagement[]
-  ApprovedBy          LeaveManagement[]     @relation("ApprovedBy")
+  Children              Children[]
+  EducationRecord       EducationRecord[]
+  EmploymentRecord      EmploymentRecord[]
+  CharacterReferences   CharacterReferences[]
+  UserAccount           UserAccount[]
+  LeaveManagement       LeaveManagement[]
+  BaseSalary            BaseSalary[]
+  GovernmentMandatories GovernmentMandatories[]
 
   @@index([jobTitleId])
   @@index([departmentId])
@@ -193,10 +195,41 @@ model LeaveManagement {
   Employee   Employee @relation(fields: [employeeId], references: [id])
 
   approvedById String?
-  ApprovedBy   Employee? @relation("ApprovedBy", fields: [approvedById], references: [id])
+  ApprovedBy   UserAccount? @relation(fields: [approvedById], references: [id])
 
   @@index([employeeId])
   @@index([approvedById])
+}
+
+model BaseSalary {
+  id     String @id @default(cuid())
+  type   String //fixed, daily, hourly wages
+  amount Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  employeeId String
+  Employee   Employee @relation(fields: [employeeId], references: [id])
+
+  @@index([employeeId])
+}
+
+model GovernmentMandatories {
+  id         String @id @default(cuid())
+  sss        Float
+  philhealth Float
+  pagibig    Float
+  tin        Float
+  others     Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  employeeId String
+  Employee   Employee @relation(fields: [employeeId], references: [id])
+
+  @@index([employeeId])
 }
 
 model Logs {

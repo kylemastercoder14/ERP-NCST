@@ -31,12 +31,31 @@ const ImageUpload = ({
         return;
       }
 
-      const file = acceptedFiles[0];
+      // eslint-disable-next-line prefer-const
+      let file = acceptedFiles[0];
 
       if (file.size > 10 * 1024 * 1024) {
         toast.error("Please upload a smaller image.");
         return;
       }
+
+      // Get file extension
+      const fileExtension = file.name.split(".").pop();
+
+      // Get current timestamp and format it to MM-DD-YYYY-HH-MM-SS
+      const now = new Date();
+      const formattedTimestamp = `${String(now.getMonth() + 1).padStart(2, "0")}-${String(
+        now.getDate()
+      ).padStart(2, "0")}-${now.getFullYear()}-${String(
+        now.getHours()
+      ).padStart(2, "0")}-${String(now.getMinutes()).padStart(2, "0")}-${String(
+        now.getSeconds()
+      ).padStart(2, "0")}`;
+
+      const newFileName = `${formattedTimestamp}.${fileExtension}`;
+
+      // Rename the file by creating a new File object
+      const renamedFile = new File([file], newFileName, { type: file.type });
 
       // Show initial loading toast and get the toast id
       const toastId = toast.loading("Uploading image...");
@@ -48,20 +67,18 @@ const ImageUpload = ({
         }
 
         // Simulate the upload process and get the URL
-        const { url } = await upload(file);
+        const { url } = await upload(renamedFile);
 
         // Dismiss the loading toast and show success
         toast.dismiss(toastId);
         toast.success("Image uploaded successfully!");
-        // const previewUrl = URL.createObjectURL(file);
-        // setImageUrl(previewUrl);
         setImageUrl(url);
         onImageUpload(url);
       } catch (error) {
         setImageUrl("");
         toast.dismiss(toastId);
         toast.error("Image upload failed.");
-        console.log(error);
+        console.error(error);
       }
     },
   });
@@ -93,7 +110,12 @@ const ImageUpload = ({
                 <X className="w-4 h-4" />
               </Button>
             </div>
-            <Image src={imageUrl} alt="Image" className="object-cover" fill />
+            <Image
+              src={imageUrl}
+              alt="Uploaded Image"
+              className="object-cover"
+              fill
+            />
           </div>
         ) : (
           <>

@@ -7,6 +7,9 @@ import {
   UserAccount,
   JobTitle,
   Department,
+  LeaveManagement,
+  BaseSalary,
+  GovernmentMandatories,
 } from "@prisma/client";
 
 export interface EmployeeWithProps extends Employee {
@@ -20,4 +23,17 @@ export interface EmployeeWithProps extends Employee {
 
 export interface UserWithProps extends UserAccount {
   Employee: EmployeeWithProps;
+}
+
+export interface LeaveManagementWithProps extends LeaveManagement {
+  Employee: Employee;
+  ApprovedBy: Employee | null;
+}
+
+export interface BaseSalaryWithProps extends BaseSalary {
+  Employee: Employee;
+}
+
+export interface GovernmentMandatoriesWithProps extends GovernmentMandatories {
+  Employee: Employee;
 }

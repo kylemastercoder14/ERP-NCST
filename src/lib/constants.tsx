@@ -104,7 +104,8 @@ export const SIDEBAR_HEAD_HR = [
       {
         title: "Employee Management",
         url: "#",
-        items: [ // show this in collapsible
+        items: [
+          // show this in collapsible
           {
             title: "Employee List",
             url: "/head/employee-management",
@@ -147,8 +148,8 @@ export const SIDEBAR_HEAD_HR = [
         url: "/head/payroll-management",
         items: [
           {
-            title: "Compensation & Benefits",
-            url: "/head/payroll-management/compensation-benefits",
+            title: "Government Mandatories",
+            url: "/head/payroll-management/government-mandatories",
           },
           {
             title: "Base Salary",
@@ -291,3 +292,16 @@ export const AcceptedFileTypes = {
     "image/*": [".jpg", ".jpeg", ".png", ".heic", ".heif"],
   },
 };
+
+export const LEAVETYPE = [
+  "Vacation Leave",
+  "Sick Leave",
+  "Maternity Leave",
+  "Paternity Leave",
+  "Special Leave",
+  "Emergency Leave",
+  "Unpaid Leave",
+  "Paid Leave",
+];
+
+export const SALARYTYPE = ["Hourly", "Daily", "Fixed"];

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
@@ -9,11 +10,17 @@ import {
   JobTitleValidators,
   DepartmentValidators,
   AccountValidators,
+  LeaveManagementValidators,
+  RejectLeaveValidators,
+  BaseSalaryValidators,
+  GovernmentMandatoriesValidators,
 } from "@/validators";
 import nodemailer from "nodemailer";
 import { CreateAccountHTML } from "@/components/email-templates/create-account";
 import { cookies } from "next/headers";
 import * as jose from "jose";
+import { useUser } from "../hooks/use-user";
+import { RejectLeaveHTML } from "../components/email-templates/reject-leave";
 
 export const loginAccount = async (values: z.infer<typeof LoginValidators>) => {
   const validatedField = LoginValidators.safeParse(values);
@@ -683,6 +690,380 @@ export const deleteDepartment = async (id: string) => {
     console.error("Error deleting department", error);
     return {
       error: `Failed to delete department. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const createLeave = async (
+  values: z.infer<typeof LeaveManagementValidators>
+) => {
+  const validatedField = LeaveManagementValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { employee, leaveType, startDate, endDate, leaveReason, attachment } =
+    validatedField.data;
+
+  try {
+    await db.leaveManagement.create({
+      data: {
+        employeeId: employee,
+        leaveType,
+        startDate,
+        endDate,
+        leaveReason,
+        attachment,
+      },
+    });
+
+    return { success: "Leave requested successfully" };
+  } catch (error: any) {
+    console.error("Error requesting leave", error);
+    return {
+      error: `Failed to request leave. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const updateLeave = async (
+  values: z.infer<typeof LeaveManagementValidators>,
+  id: string
+) => {
+  if (!id) {
+    return { error: "Leave ID is required" };
+  }
+
+  const validatedField = LeaveManagementValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { employee, leaveType, startDate, endDate, leaveReason, attachment } =
+    validatedField.data;
+
+  try {
+    await db.leaveManagement.update({
+      where: { id },
+      data: {
+        employeeId: employee,
+        leaveType,
+        startDate,
+        endDate,
+        leaveReason,
+        attachment,
+      },
+    });
+
+    return { success: "Leave updated successfully" };
+  } catch (error: any) {
+    console.error("Error updating leave", error);
+    return {
+      error: `Failed to update leave. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const deleteLeave = async (id: string) => {
+  if (!id) {
+    return { error: "Leave ID is required" };
+  }
+
+  try {
+    await db.leaveManagement.delete({
+      where: { id },
+    });
+
+    return { success: "Leave deleted successfully" };
+  } catch (error: any) {
+    console.error("Error deleting leave", error);
+    return {
+      error: `Failed to delete leave. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const approveLeave = async (id: string) => {
+  const { userId } = await useUser();
+  try {
+    await db.leaveManagement.update({
+      where: { id },
+      data: {
+        status: "Approved",
+        approvedById: userId,
+        reasonForRejection: null,
+      },
+    });
+
+    return { success: "Leave approved successfully" };
+  } catch (error: any) {
+    console.error("Error approving leave", error);
+    return {
+      error: `Failed to approve leave. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const rejectLeave = async (
+  values: z.infer<typeof RejectLeaveValidators>,
+  id: string
+) => {
+  const { userId } = await useUser();
+  const validatedField = RejectLeaveValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { reasonForRejection } = validatedField.data;
+
+  try {
+    const res = await db.leaveManagement.update({
+      where: { id },
+      data: {
+        status: "Rejected",
+        reasonForRejection,
+        approvedById: userId,
+      },
+      include: {
+        Employee: { include: { UserAccount: true } },
+      },
+    });
+
+    const name =
+      res.Employee.firstName +
+      " " +
+      res.Employee.middleName +
+      " " +
+      res.Employee.lastName;
+    const email = res.Employee.UserAccount[0].email;
+
+    await sendReasonForRejection(name, email, reasonForRejection);
+
+    return { success: "Leave rejected successfully" };
+  } catch (error: any) {
+    console.error("Error rejecting leave", error);
+    return {
+      error: `Failed to reject leave. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const sendReasonForRejection = async (
+  name: string,
+  email: string,
+  reason: string
+) => {
+  const htmlContent = await RejectLeaveHTML({
+    name,
+    reason,
+  });
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: "kylemastercoder14@gmail.com",
+      pass: "cyjfgkpetrcmjvtb",
+    },
+  });
+
+  const message = {
+    from: "kylemastercoder14@gmail.com",
+    to: email,
+    subject: "Leave Request Rejected",
+    text: `Hello ${name}, your requested leave has been rejected due to the following reason: \n${reason}`,
+    html: htmlContent,
+  };
+
+  try {
+    await transporter.sendMail(message);
+
+    return { success: "Email has been sent." };
+  } catch (error) {
+    console.error("Error sending notification", error);
+    return { message: "An error occurred. Please try again." };
+  }
+};
+
+export const createBaseSalary = async (
+  values: z.infer<typeof BaseSalaryValidators>
+) => {
+  const validatedField = BaseSalaryValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { employee, type, amount } = validatedField.data;
+
+  try {
+    await db.baseSalary.create({
+      data: {
+        employeeId: employee,
+        type,
+        amount,
+      },
+    });
+
+    return { success: "Base salary created successfully" };
+  } catch (error: any) {
+    console.error("Error creating base salary", error);
+    return {
+      error: `Failed to create base salary. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const updateBaseSalary = async (
+  values: z.infer<typeof BaseSalaryValidators>,
+  id: string
+) => {
+  if (!id) {
+    return { error: "Base salary ID is required" };
+  }
+
+  const validatedField = BaseSalaryValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { employee, type, amount } = validatedField.data;
+
+  try {
+    await db.baseSalary.update({
+      where: { id },
+      data: {
+        employeeId: employee,
+        type,
+        amount,
+      },
+    });
+
+    return { success: "Base salary updated successfully" };
+  } catch (error: any) {
+    console.error("Error updating base salary", error);
+    return {
+      error: `Failed to update base salary. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const deleteBaseSalary = async (id: string) => {
+  if (!id) {
+    return { error: "Base salary ID is required" };
+  }
+
+  try {
+    await db.baseSalary.delete({
+      where: { id },
+    });
+
+    return { success: "Base salary deleted successfully" };
+  } catch (error: any) {
+    console.error("Error deleting base salary", error);
+    return {
+      error: `Failed to delete base salary. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const createGovernmentMandatories = async (
+  values: z.infer<typeof GovernmentMandatoriesValidators>
+) => {
+  const validatedField = GovernmentMandatoriesValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { employee, sss, philhealth, pagibig, tin, others } =
+    validatedField.data;
+
+  try {
+    await db.governmentMandatories.create({
+      data: {
+        employeeId: employee,
+        sss,
+        philhealth,
+        pagibig,
+        tin,
+        others,
+      },
+    });
+
+    return { success: "Government Mandatories created successfully" };
+  } catch (error: any) {
+    console.error("Error creating government mandatories", error);
+    return {
+      error: `Failed to create government mandatories. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const updateGovernmentMandatories = async (
+  values: z.infer<typeof GovernmentMandatoriesValidators>,
+  id: string
+) => {
+  if (!id) {
+    return { error: "Government Mandatories ID is required" };
+  }
+
+  const validatedField = GovernmentMandatoriesValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { employee, sss, philhealth, pagibig, tin, others } =
+    validatedField.data;
+
+  try {
+    await db.governmentMandatories.update({
+      where: { id },
+      data: {
+        employeeId: employee,
+        sss,
+        philhealth,
+        pagibig,
+        tin,
+        others,
+      },
+    });
+
+    return { success: "Government Mandatories updated successfully" };
+  } catch (error: any) {
+    console.error("Error updating government mandatories", error);
+    return {
+      error: `Failed to update government mandatories. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const deleteGovernmentMandatories = async (id: string) => {
+  if (!id) {
+    return { error: "Government Mandatories ID is required" };
+  }
+
+  try {
+    await db.governmentMandatories.delete({
+      where: { id },
+    });
+
+    return { success: "Government Mandatories deleted successfully" };
+  } catch (error: any) {
+    console.error("Error deleting government mandatories", error);
+    return {
+      error: `Failed to delete government mandatories. Please try again. ${error.message || ""}`,
     };
   }
 };

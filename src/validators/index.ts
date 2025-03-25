@@ -129,3 +129,50 @@ export const AccountValidators = z.object({
   email: z.string().min(1, { message: "Email address is required" }),
   password: z.string().min(1, { message: "Password is required" }),
 });
+
+export const LeaveManagementValidators = z
+  .object({
+    employee: z.string().min(1, { message: "Employee is required" }),
+    leaveType: z.string().min(1, { message: "Leave type is required" }),
+    startDate: z.string().min(1, { message: "Start date is required" }),
+    endDate: z.string().min(1, { message: "End date is required" }),
+    leaveReason: z.string().min(1, { message: "Leave reason is required" }),
+    attachment: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.leaveType === "Sick Leave") {
+        return !!data.attachment;
+      }
+      return true;
+    },
+    {
+      message: "Attachment is required for sick leave.",
+      path: ["attachment"],
+    }
+  );
+
+export const RejectLeaveValidators = z.object({
+  reasonForRejection: z
+    .string()
+    .min(1, { message: "Reason for rejection is required" }),
+});
+
+export const BaseSalaryValidators = z.object({
+  type: z.string().min(1, { message: "Type is required" }),
+  amount: z.coerce.number().min(1, { message: "Amount is required" }),
+  employee: z.string().min(1, { message: "Employee is required" }),
+});
+
+export const GovernmentMandatoriesValidators = z.object({
+  sss: z.coerce.number().min(1, { message: "SSS deduction is required" }),
+  pagibig: z.coerce
+    .number()
+    .min(1, { message: "Pag-IBIG deduction is required" }),
+  philhealth: z.coerce
+    .number()
+    .min(1, { message: "PhilHealth deduction is required" }),
+  tin: z.coerce.number().min(1, { message: "TIN deduction is required" }),
+  others: z.coerce.number().optional(),
+  employee: z.string().min(1, { message: "Employee is required" }),
+});
