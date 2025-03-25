@@ -1282,3 +1282,21 @@ export const rejectExtraShift = async (id: string) => {
     };
   }
 };
+
+export const submitPayslip = async (file: string, employeeId: string) => {
+  try {
+    const res = await db.paySlip.create({
+      data: {
+        employeeId,
+        file,
+      },
+    });
+
+    return { success: "Payslip submitted successfully", fileUrl: res.file };
+  } catch (error: any) {
+    console.error("Error submitting payslip", error);
+    return {
+      error: `Failed to submit payslip. Please try again. ${error.message || ""}`,
+    };
+  }
+};

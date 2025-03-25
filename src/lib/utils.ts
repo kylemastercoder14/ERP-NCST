@@ -26,6 +26,25 @@ export const getSidebarItems = (position: string) => {
   }
 };
 
+export const calculateOvertimeHours = (
+  extraShifts: {
+    type: string;
+    timeStart: string;
+    timeEnd: string;
+    status: string;
+  }[]
+) => {
+  return extraShifts
+    .filter((shift) => shift.type === "Overtime" && shift.status === "Approved")
+    .reduce((totalHours, shift) => {
+      const start = new Date(shift.timeStart);
+      const end = new Date(shift.timeEnd);
+
+      const hours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+      return totalHours + hours;
+    }, 0);
+};
+
 export function generateRandomPassword(length: number = 10): string {
   const uppercaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const lowercaseChars = "abcdefghijklmnopqrstuvwxyz";

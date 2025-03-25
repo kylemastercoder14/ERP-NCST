@@ -114,6 +114,7 @@ model Employee {
   GovernmentMandatories GovernmentMandatories[]
   Attendance            Attendance[]
   ExtraShift            ExtraShift[]
+  PaySlip               PaySlip[]
 
   @@index([jobTitleId])
   @@index([departmentId])
@@ -256,6 +257,18 @@ model ExtraShift {
   timeStart String
   timeEnd   String
   status    String   @default("Pending")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  employeeId String
+  Employee   Employee @relation(fields: [employeeId], references: [id])
+
+  @@index([employeeId])
+}
+
+model PaySlip {
+  id        String   @id @default(cuid())
+  file      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

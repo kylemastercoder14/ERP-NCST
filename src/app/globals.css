@@ -6,6 +6,21 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+@media print {
+  @page {
+    size: legal portrait;
+  }
+
+  /* Hide buttons in print mode */
+  .print-hidden {
+    display: none !important;
+  }
+
+  .print-block {
+    display: block !important;
+  }
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

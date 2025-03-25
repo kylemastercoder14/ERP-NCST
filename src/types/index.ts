@@ -52,6 +52,8 @@ export interface PayslipGenerationWithProps extends Employee {
   BaseSalary: BaseSalary[];
   Department: Department;
   JobTitle: JobTitle;
+  Attendance: Attendance[];
+  ExtraShift: ExtraShift[];
   GovernmentMandatories: GovernmentMandatories[];
   LeaveManagement: LeaveManagement[];
 }
