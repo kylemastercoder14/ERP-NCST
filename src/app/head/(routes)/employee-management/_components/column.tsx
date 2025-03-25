@@ -25,7 +25,7 @@ export const columns: ColumnDef<ApplicantColumn>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="cursor-pointer flex items-center"
         >
-          Resident
+          Employee
           <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
         </span>
       );
@@ -136,6 +136,8 @@ export const columns: ColumnDef<ApplicantColumn>[] = [
   {
     accessorKey: "actions",
     header: "",
-    cell: ({ row }) => <CellAction id={row.original.id} />,
+    cell: ({ row }) => (
+      <CellAction id={row.original.id} name={row.original.name} />
+    ),
   },
 ];

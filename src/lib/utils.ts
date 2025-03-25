@@ -17,7 +17,7 @@ export const getSidebarItems = (position: string) => {
       return SIDEBAR_HEAD_ACCOUNTING;
     case "OPERATION":
       return SIDEBAR_HEAD_OPERATION;
-    case "HR":
+    case "Human Resource":
       return SIDEBAR_HEAD_HR;
     case "CRM":
       return SIDEBAR_HEAD_CRM;
@@ -25,3 +25,31 @@ export const getSidebarItems = (position: string) => {
       return [];
   }
 };
+
+export function generateRandomPassword(length: number = 10): string {
+  const uppercaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const lowercaseChars = "abcdefghijklmnopqrstuvwxyz";
+  const numberChars = "0123456789";
+  const specialChars = "!@#$%^&*()_+-=[]{}|;:,.<>?";
+
+  const allChars = uppercaseChars + lowercaseChars + numberChars + specialChars;
+
+  let password = "";
+
+  // Ensure at least one character from each character set
+  password += uppercaseChars[Math.floor(Math.random() * uppercaseChars.length)];
+  password += lowercaseChars[Math.floor(Math.random() * lowercaseChars.length)];
+  password += numberChars[Math.floor(Math.random() * numberChars.length)];
+  password += specialChars[Math.floor(Math.random() * specialChars.length)];
+
+  // Fill the rest of the password with random characters
+  for (let i = password.length; i < length; i++) {
+    password += allChars[Math.floor(Math.random() * allChars.length)];
+  }
+
+  // Shuffle the password to randomize the position of the initial characters
+  return password
+    .split("")
+    .sort(() => 0.5 - Math.random())
+    .join("");
+}

@@ -8,9 +8,10 @@ import {
   ApplicantValidators,
   JobTitleValidators,
   DepartmentValidators,
+  AccountValidators,
 } from "@/validators";
-// import nodemailer from "nodemailer";
-// import { OtpVerificationHTML } from "@/components/email-templates/otp-verification";
+import nodemailer from "nodemailer";
+import { CreateAccountHTML } from "@/components/email-templates/create-account";
 import { cookies } from "next/headers";
 import * as jose from "jose";
 
@@ -28,6 +29,14 @@ export const loginAccount = async (values: z.infer<typeof LoginValidators>) => {
     const user = await db.userAccount.findFirst({
       where: {
         email,
+      },
+      include: {
+        Employee: {
+          include: {
+            Department: true,
+            JobTitle: true,
+          },
+        },
       },
     });
 
@@ -72,111 +81,107 @@ export const logoutUser = async () => {
   (await cookies()).set("Authorization", "", { maxAge: 0, path: "/" });
 };
 
-// export const verifyAccount = async (otpCode: string, email: string) => {
-//   try {
-//     const user = await db.user.findUnique({
-//       where: {
-//         email,
-//       },
-//     });
+export const isThereAccount = async (id: string) => {
+  try {
+    const user = await db.userAccount.findFirst({
+      where: {
+        employeeId: id,
+      },
+    });
 
-//     if (!user) {
-//       return { error: "User not found" };
-//     }
+    return { isThereAccount: !!user };
+  } catch (error: any) {
+    console.error("Error checking account", error);
+    return {
+      error: `Failed to check account. Please try again. ${error.message || ""}`,
+    };
+  }
+};
 
-//     if (!user.otpExpiry || user.otpExpiry < new Date()) {
-//       return { error: "OTP code has expired" };
-//     }
+export const createAccount = async (
+  values: z.infer<typeof AccountValidators>,
+  employeeId: string
+) => {
+  const validatedField = AccountValidators.safeParse(values);
 
-//     if (user.otpCode !== otpCode) {
-//       return { error: "Invalid OTP code" };
-//     }
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
 
-//     await db.user.update({
-//       where: {
-//         email,
-//       },
-//       data: {
-//         isEmailVerified: true,
-//       },
-//     });
+  const { email, password } = validatedField.data;
 
-//     return { success: "Account verified successfully" };
-//   } catch (error: any) {
-//     return {
-//       error: `Failed to verify account. Please try again. ${error.message || ""}`,
-//     };
-//   }
-// };
+  try {
+    const existingUser = await db.userAccount.findFirst({
+      where: {
+        email,
+      },
+    });
 
-// export const resendOtpCode = async (email: string) => {
-//   try {
-//     const user = await db.user.findUnique({
-//       where: {
-//         email,
-//       },
-//     });
+    if (existingUser) {
+      return { error: "User with the email already exist" };
+    }
 
-//     if (!user) {
-//       return { error: "User not found" };
-//     }
+    const res = await db.userAccount.create({
+      data: {
+        email,
+        password,
+        employeeId,
+      },
+      include: {
+        Employee: true,
+      },
+    });
 
-//     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const name = res.Employee?.firstName + " " + res.Employee?.lastName;
 
-//     // insert otpExpiry in the database, the value is the current time plus 15 minutes only
-//     const otpExpiry = new Date();
-//     otpExpiry.setMinutes(otpExpiry.getMinutes() + 15);
+    await sendAccountToEmail(email, password, name);
 
-//     await db.user.update({
-//       where: {
-//         email,
-//       },
-//       data: {
-//         otpCode,
-//         otpExpiry,
-//       },
-//     });
+    return { success: "Account created successfully" };
+  } catch (error: any) {
+    console.error("Error creating account", error);
+    return {
+      error: `Failed to create account. Please try again. ${error.message || ""}`,
+    };
+  }
+};
 
-//     await sendOtpCodeEmail(email, otpCode);
+export const sendAccountToEmail = async (
+  email: string,
+  password: string,
+  name: string
+) => {
+  const htmlContent = await CreateAccountHTML({
+    email,
+    password,
+    name,
+  });
 
-//     return { success: "OTP code sent successfully" };
-//   } catch (error: any) {
-//     return {
-//       error: `Failed to resend OTP code. Please try again. ${error.message || ""}`,
-//     };
-//   }
-// };
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: "kylemastercoder14@gmail.com",
+      pass: "cyjfgkpetrcmjvtb",
+    },
+  });
 
-// export const sendOtpCodeEmail = async (email: string, otpCode: string) => {
-//   const htmlContent = await OtpVerificationHTML({
-//     otpCode,
-//   });
+  const message = {
+    from: "kylemastercoder14@gmail.com",
+    to: email,
+    subject: "This is your account details",
+    text: `Hello ${name}, your account has been created. Here are your account details: \nEmail: ${email}\nPassword: ${password}`,
+    html: htmlContent,
+  };
 
-//   const transporter = nodemailer.createTransport({
-//     service: "gmail",
-//     auth: {
-//       user: "kylemastercoder14@gmail.com",
-//       pass: "cyjfgkpetrcmjvtb",
-//     },
-//   });
+  try {
+    await transporter.sendMail(message);
 
-//   const message = {
-//     from: "kylemastercoder14@gmail.com",
-//     to: email,
-//     subject: "Verify your email address",
-//     text: `Your OTP code is ${otpCode}`,
-//     html: htmlContent,
-//   };
-
-//   try {
-//     await transporter.sendMail(message);
-
-//     return { success: "Email has been sent." };
-//   } catch (error) {
-//     console.error("Error sending notification", error);
-//     return { message: "An error occurred. Please try again." };
-//   }
-// };
+    return { success: "Email has been sent." };
+  } catch (error) {
+    console.error("Error sending notification", error);
+    return { message: "An error occurred. Please try again." };
+  }
+};
 
 export const createApplicant = async (
   values: z.infer<typeof ApplicantValidators>
@@ -190,6 +195,7 @@ export const createApplicant = async (
 
   const {
     positionDesired,
+    department,
     licenseNo,
     expiryDate,
     firstName,
@@ -245,6 +251,7 @@ export const createApplicant = async (
     await db.employee.create({
       data: {
         jobTitleId: positionDesired,
+        departmentId: department,
         licenseNo,
         expiryDate,
         firstName,
@@ -350,6 +357,7 @@ export const updateApplicant = async (
 
   const {
     positionDesired,
+    department,
     licenseNo,
     expiryDate,
     firstName,
@@ -405,6 +413,7 @@ export const updateApplicant = async (
       where: { id },
       data: {
         jobTitleId: positionDesired,
+        departmentId: department,
         licenseNo,
         expiryDate,
         firstName,

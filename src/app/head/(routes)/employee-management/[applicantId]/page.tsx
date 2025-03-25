@@ -18,11 +18,27 @@ const Page = async (props: {
       EmploymentRecord: true,
       Children: true,
       JobTitle: true,
+      Department: true,
     },
   });
+
+  // jobTitle Lists
+  const jobTitles = await db.jobTitle.findMany({
+    orderBy: {
+      name: "asc",
+    },
+  });
+
+  // department Lists
+  const departments = await db.department.findMany({
+    orderBy: {
+      name: "asc",
+    },
+  });
+
   return (
     <div>
-      <ApplicantForm initialData={applicant} />
+      <ApplicantForm jobTitles={jobTitles} departments={departments} initialData={applicant} />
     </div>
   );
 };

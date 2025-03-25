@@ -30,6 +30,7 @@ export const ApplicantValidators = z.object({
   positionDesired: z
     .string()
     .min(1, { message: "Position desired is required" }),
+  department: z.string().min(1, { message: "Department is required" }),
   licenseNo: z.string().min(1, { message: "License number is required" }),
   expiryDate: z.string().min(1, { message: "License validity is required" }),
   firstName: z.string().min(1, { message: "First name is required" }),
@@ -122,4 +123,9 @@ export const JobTitleValidators = z.object({
 
 export const DepartmentValidators = z.object({
   name: z.string().min(1, { message: "Name is required" }),
+});
+
+export const AccountValidators = z.object({
+  email: z.string().min(1, { message: "Email address is required" }),
+  password: z.string().min(1, { message: "Password is required" }),
 });

@@ -18,11 +18,16 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import CustomFieldArray from "@/components/global/custom-field-array";
 import { createApplicant, updateApplicant } from "@/actions";
+import { Department, JobTitle } from "@prisma/client";
 
 const ApplicantForm = ({
   initialData,
+  jobTitles,
+  departments,
 }: {
   initialData: EmployeeWithProps | null;
+  jobTitles: JobTitle[];
+  departments: Department[];
 }) => {
   const action = initialData ? "Save Changes" : "Submit";
   const router = useRouter();
@@ -30,7 +35,8 @@ const ApplicantForm = ({
   const form = useForm<z.infer<typeof ApplicantValidators>>({
     resolver: zodResolver(ApplicantValidators),
     defaultValues: {
-      positionDesired: initialData?.JobTitle.name || "",
+      positionDesired: initialData?.JobTitle.id || "",
+      department: initialData?.Department.id || "",
       licenseNo: initialData?.licenseNo || "",
       expiryDate: initialData?.expiryDate || "",
       firstName: initialData?.firstName || "",
@@ -256,7 +262,7 @@ const ApplicantForm = ({
         const res = await updateApplicant(initialData.id, values);
         if (res.success) {
           toast.success(res.success);
-          router.push("/head/applicant-management");
+          router.push("/head/employee-management");
         } else {
           toast.error(res.error);
         }
@@ -264,14 +270,14 @@ const ApplicantForm = ({
         const res = await createApplicant(values);
         if (res.success) {
           toast.success(res.success);
-          router.push("/head/applicant-management");
+          router.push("/head/employee-management");
         } else {
           toast.error(res.error);
         }
       }
     } catch (error) {
       console.error(error);
-      toast.error("An error occurred while creating the applicant.");
+      toast.error("An error occurred while creating the employee.");
     }
   };
 
@@ -288,16 +294,35 @@ const ApplicantForm = ({
           className="mt-5"
         >
           <div className="space-y-4">
-            <div className="grid lg:grid-cols-3 grid-cols-1 gap-4">
+            <div className="grid lg:grid-cols-2 grid-cols-1 gap-4">
               <CustomFormField
                 control={form.control}
-                fieldType={FormFieldType.INPUT}
+                fieldType={FormFieldType.COMBOBOX}
                 isRequired={true}
                 name="positionDesired"
+                dynamicOptions={jobTitles.map((job) => ({
+                  value: job.id,
+                  label: job.name,
+                }))}
                 disabled={isSubmitting}
                 label="Position Desired"
-                placeholder="Enter position desired"
+                placeholder="Select position desired"
               />
+              <CustomFormField
+                control={form.control}
+                fieldType={FormFieldType.COMBOBOX}
+                isRequired={true}
+                name="department"
+                dynamicOptions={departments.map((department) => ({
+                  value: department.id,
+                  label: department.name,
+                }))}
+                disabled={isSubmitting}
+                label="Department"
+                placeholder="Select department"
+              />
+            </div>
+            <div className="grid lg:grid-cols-2 grid-cols-1 gap-4">
               <CustomFormField
                 control={form.control}
                 fieldType={FormFieldType.INPUT}

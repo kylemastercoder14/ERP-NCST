@@ -24,11 +24,6 @@ model UserAccount {
   email    String @unique
   password String
 
-  otpCode         String?
-  otpExpiry       DateTime?
-  isEmailVerified Boolean   @default(false)
-  isAdminVerified Boolean   @default(false)
-
   employeeId String
   Employee   Employee @relation(fields: [employeeId], references: [id])
 
@@ -105,14 +100,16 @@ model Employee {
   jobTitleId String
   JobTitle   JobTitle @relation(fields: [jobTitleId], references: [id])
 
-  departmentId String?
-  Department   Department? @relation(fields: [departmentId], references: [id])
+  departmentId String
+  Department   Department @relation(fields: [departmentId], references: [id])
 
   Children            Children[]
   EducationRecord     EducationRecord[]
   EmploymentRecord    EmploymentRecord[]
   CharacterReferences CharacterReferences[]
   UserAccount         UserAccount[]
+  LeaveManagement     LeaveManagement[]
+  ApprovedBy          LeaveManagement[]     @relation("ApprovedBy")
 
   @@index([jobTitleId])
   @@index([departmentId])
@@ -178,6 +175,28 @@ model EmploymentRecord {
   Employee   Employee? @relation(fields: [employeeId], references: [id])
 
   @@index([employeeId])
+}
+
+model LeaveManagement {
+  id                 String   @id @default(cuid())
+  leaveType          String
+  startDate          String
+  endDate            String
+  leaveReason        String
+  status             String   @default("Pending")
+  attachment         String?
+  reasonForRejection String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  employeeId String
+  Employee   Employee @relation(fields: [employeeId], references: [id])
+
+  approvedById String?
+  ApprovedBy   Employee? @relation("ApprovedBy", fields: [approvedById], references: [id])
+
+  @@index([employeeId])
+  @@index([approvedById])
 }
 
 model Logs {

@@ -53,6 +53,7 @@ import {
   MultiSelectorTrigger,
 } from "@/components/ui/multi-select";
 import { TagsInput } from "@/components/ui/tags-input";
+import ComboBox from "@/components/ui/combo-box";
 import {
   Tooltip,
   TooltipContent,
@@ -91,7 +92,7 @@ interface CustomProps {
 }
 
 const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const {
     fieldType,
     placeholder,
@@ -116,7 +117,7 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
       return (
         <>
           <FormControl>
-            <div className="shad-input-outer">
+            <div className="relative">
               {/* Input field */}
               <Input
                 type={
@@ -129,7 +130,7 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
                 placeholder={placeholder}
                 disabled={disabled}
                 {...field}
-                className="shad-input"
+                className="relative"
                 autoFocus={autoFocus}
                 onChange={(event) => {
                   let value = event.target.value;
@@ -147,7 +148,7 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
                   type="button"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                   onClick={toggleShowPassword}
-                  className="floating-right-btn"
+                  className="absolute top-2.5 right-2.5"
                 >
                   {showPassword ? (
                     <EyeOff className="w-4 h-4" /> // Icon to indicate password visibility is off
@@ -223,6 +224,29 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
               value={field.value}
               onValueChange={field.onChange}
               className="!border-input !border"
+            />
+          </FormControl>
+
+          {description && <FormDescription>{description}</FormDescription>}
+        </>
+      );
+
+    case FormFieldType.COMBOBOX:
+      return (
+        <>
+          <FormControl>
+            <ComboBox
+              data={
+                dynamicOptions?.map((option) => ({
+                  label: option.label,
+                  value: option.value,
+                })) || []
+              }
+              disabled={disabled}
+              placeholder={placeholder}
+              value={field.value}
+              onChange={field.onChange}
+              className={`!border-input !border w-[500px]`}
             />
           </FormControl>
 
@@ -494,7 +518,7 @@ const CustomFormField = (props: CustomProps) => {
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger className="ml-1">
-                        <CircleHelp className="size-4" />
+                        <CircleHelp className="size-3" />
                       </TooltipTrigger>
                       <TooltipContent className="max-w-60" side="right">
                         <p>{tooltipContent}</p>

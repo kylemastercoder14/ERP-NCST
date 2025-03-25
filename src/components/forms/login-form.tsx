@@ -39,15 +39,15 @@ export function LoginForm() {
         toast.error(res.error);
       } else {
         toast.success("Successfully logged in your account");
-        if (res.user?.role === "EMPLOYEE") {
+        if (res.user?.Employee.JobTitle.name === "EMPLOYEE") {
           setTimeout(() => {
             router.push("/employee/dashboard");
           }, 1000);
-        } else if (res.user?.role === "HEAD") {
+        } else if (res.user?.Employee.JobTitle.name === "Head Supervisor") {
           setTimeout(() => {
             router.push("/head/dashboard");
           }, 1000);
-        } else if (res.user?.role === "ASSISTANT") {
+        } else if (res.user?.Employee.JobTitle.name === "Assistant Supervisor") {
           setTimeout(() => {
             router.push("/assistant/dashboard");
           }, 1000);

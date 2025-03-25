@@ -103,7 +103,7 @@ export function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar> & { user: UserWithProps }) {
   const pathname = usePathname();
-  const sidebarItems = getSidebarItems(user?.JobTitle?.name);
+  const sidebarItems = getSidebarItems(user?.Employee.Department.name);
 
   return (
     <Sidebar variant="floating" {...props}>

@@ -22,9 +22,21 @@ export const useUser = async () => {
     const userId = decodedToken.sub;
 
     // Fetch user from database
-    const user = await db.user.findFirst({
+    const user = await db.userAccount.findFirst({
       where: {
         id: userId,
+      },
+      include: {
+        Employee: {
+          include: {
+            JobTitle: true,
+            Department: true,
+            Children: true,
+            EducationRecord: true,
+            EmploymentRecord: true,
+            CharacterReferences: true,
+          },
+        },
       },
     });
 

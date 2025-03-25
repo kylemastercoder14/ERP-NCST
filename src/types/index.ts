@@ -6,6 +6,7 @@ import {
   EmploymentRecord,
   UserAccount,
   JobTitle,
+  Department,
 } from "@prisma/client";
 
 export interface EmployeeWithProps extends Employee {
@@ -14,9 +15,9 @@ export interface EmployeeWithProps extends Employee {
   EmploymentRecord: EmploymentRecord[];
   CharacterReferences: CharacterReferences[];
   JobTitle: JobTitle;
+  Department: Department;
 }
 
 export interface UserWithProps extends UserAccount {
-  JobTitle: JobTitle;
   Employee: EmployeeWithProps;
 }

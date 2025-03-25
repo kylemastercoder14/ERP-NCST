@@ -14,11 +14,17 @@ import {
 } from "@react-email/components";
 import * as React from "react";
 
-interface OtpVerificationProps {
-  otpCode: string;
+interface CreateAccountProps {
+  email: string;
+  password: string;
+  name: string;
 }
 
-export const OtpVerification = ({ otpCode }: OtpVerificationProps) => (
+export const CreateAccount = ({
+  email,
+  password,
+  name,
+}: CreateAccountProps) => (
   <Html>
     <Head />
     <Body style={main}>
@@ -36,20 +42,21 @@ export const OtpVerification = ({ otpCode }: OtpVerificationProps) => (
             />
           </Section>
           <Section style={upperSection}>
-            <Heading style={h1}>Verify your email address</Heading>
+            <Heading style={h1}>
+              Hi {name}, welcome to BAT Security Services INC.
+            </Heading>
             <Text style={mainText}>
               Thanks for starting the new BAT Security Services account creation
-              process. We want to make sure it&apos;s really you. Please enter
-              the following verification code when prompted. If you don&apos;t
-              want to create an account, you can ignore this message.
+              process. We&apos;re excited to have you on board. Your account has
+              been created successfully.
             </Text>
             <Section style={verificationSection}>
-              <Text style={verifyText}>Verification code</Text>
-
-              <Text style={codeText}>{otpCode}</Text>
+              <Text style={verifyText}>Email Address</Text>
+              <Text style={codeText}>{email}</Text>
               <Text style={validityText}>
-                (This code is valid for 15 minutes)
+                (This is your password: {password})
               </Text>
+              <Text>Please keep it safe. You can change it later.</Text>
             </Section>
           </Section>
           <Hr />
@@ -90,8 +97,8 @@ export const OtpVerification = ({ otpCode }: OtpVerificationProps) => (
   </Html>
 );
 
-export const OtpVerificationHTML = (props: OtpVerificationProps) =>
-  render(<OtpVerification {...props} />, {
+export const CreateAccountHTML = (props: CreateAccountProps) =>
+  render(<CreateAccount {...props} />, {
     pretty: true,
   });
 
@@ -161,7 +168,7 @@ const verifyText = {
 const codeText = {
   ...text,
   fontWeight: "bold",
-  fontSize: "36px",
+  fontSize: "30px",
   margin: "10px 0",
   textAlign: "center" as const,
 };
@@ -169,7 +176,7 @@ const codeText = {
 const validityText = {
   ...text,
   margin: "0px",
-  textAlign: "center" as const,
+  fontWeight: "bold"
 };
 
 const verificationSection = {
