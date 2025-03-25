@@ -119,7 +119,7 @@ export const columns: ColumnDef<AttendanceColumn>[] = [
     accessorKey: "actions",
     header: "",
     cell: ({ row }) => (
-      <CellAction id={row.original.id} status={row.original.attendanceStatus} />
+      <CellAction id={row.original.id} />
     ),
   },
 ];
