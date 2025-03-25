@@ -61,6 +61,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import SignatureInput from "@/components/ui/signature-input";
+import { TimePicker } from "@/components/ui/time-picker";
 
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {}
@@ -111,7 +112,6 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
   const toggleShowPassword = () => {
     setShowPassword((prev) => !prev);
   };
-
   switch (fieldType) {
     case FormFieldType.INPUT:
       return (
@@ -394,6 +394,21 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
             </PopoverContent>
           </Popover>
         </div>
+      );
+
+    case FormFieldType.TIME_PICKER:
+      return (
+        <>
+          <FormControl>
+            <TimePicker
+              disabled={disabled}
+              value={field.value}
+              onChangeAction={field.onChange}
+            />
+          </FormControl>
+
+          {description && <FormDescription>{description}</FormDescription>}
+        </>
       );
 
     case FormFieldType.RADIO:

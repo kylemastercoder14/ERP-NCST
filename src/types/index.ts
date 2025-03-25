@@ -10,6 +10,8 @@ import {
   LeaveManagement,
   BaseSalary,
   GovernmentMandatories,
+  Attendance,
+  ExtraShift,
 } from "@prisma/client";
 
 export interface EmployeeWithProps extends Employee {
@@ -27,7 +29,15 @@ export interface UserWithProps extends UserAccount {
 
 export interface LeaveManagementWithProps extends LeaveManagement {
   Employee: Employee;
-  ApprovedBy: Employee | null;
+  ApprovedBy: UserAccount | null;
+}
+
+export interface AttendanceManagementWithProps extends Attendance {
+  Employee: Employee;
+}
+
+export interface ExtraShiftWithProps extends ExtraShift {
+  Employee: Employee;
 }
 
 export interface BaseSalaryWithProps extends BaseSalary {
@@ -36,4 +46,12 @@ export interface BaseSalaryWithProps extends BaseSalary {
 
 export interface GovernmentMandatoriesWithProps extends GovernmentMandatories {
   Employee: Employee;
+}
+
+export interface PayslipGenerationWithProps extends Employee {
+  BaseSalary: BaseSalary[];
+  Department: Department;
+  JobTitle: JobTitle;
+  GovernmentMandatories: GovernmentMandatories[];
+  LeaveManagement: LeaveManagement[];
 }

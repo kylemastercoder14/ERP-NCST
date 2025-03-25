@@ -112,6 +112,8 @@ model Employee {
   LeaveManagement       LeaveManagement[]
   BaseSalary            BaseSalary[]
   GovernmentMandatories GovernmentMandatories[]
+  Attendance            Attendance[]
+  ExtraShift            ExtraShift[]
 
   @@index([jobTitleId])
   @@index([departmentId])
@@ -223,6 +225,37 @@ model GovernmentMandatories {
   tin        Float
   others     Float?
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  employeeId String
+  Employee   Employee @relation(fields: [employeeId], references: [id])
+
+  @@index([employeeId])
+}
+
+model Attendance {
+  id        String   @id @default(cuid())
+  date      String
+  timeIn    String
+  timeOut   String
+  status    String // Present, Absent, Late
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  employeeId String
+  Employee   Employee @relation(fields: [employeeId], references: [id])
+
+  @@index([employeeId])
+}
+
+model ExtraShift {
+  id        String   @id @default(cuid())
+  type      String // Overtime, Graveyard, Undertime
+  date      String
+  timeStart String
+  timeEnd   String
+  status    String   @default("Pending")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

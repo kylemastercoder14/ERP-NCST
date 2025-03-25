@@ -247,6 +247,7 @@ export enum FormFieldType {
   SWITCH = "switch",
   SLIDER = "slider",
   DATE_PICKER = "datePicker",
+  TIME_PICKER = "timePicker",
   DROP_ZONE = "dropZone",
   SKELETON = "skeleton",
   HIDDEN = "hidden",

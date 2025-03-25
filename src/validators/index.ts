@@ -152,6 +152,28 @@ export const LeaveManagementValidators = z
     }
   );
 
+export const AttendanceManagementValidators = z.object({
+  employee: z.string().min(1, { message: "Employee is required" }),
+  timeIn: z.date().refine((val) => val instanceof Date, {
+    message: "Clock in must be a valid date",
+  }),
+  timeOut: z.date().refine((val) => val instanceof Date, {
+    message: "Clock out must be a valid date",
+  }),
+  status: z.string().min(1, { message: "Status is required" }),
+});
+
+export const ExtraShiftValidators = z.object({
+  employee: z.string().min(1, { message: "Employee is required" }),
+  timeIn: z.date().refine((val) => val instanceof Date, {
+    message: "Clock in must be a valid date",
+  }),
+  timeOut: z.date().refine((val) => val instanceof Date, {
+    message: "Clock out must be a valid date",
+  }),
+  type: z.string().min(1, { message: "Type is required" }),
+});
+
 export const RejectLeaveValidators = z.object({
   reasonForRejection: z
     .string()

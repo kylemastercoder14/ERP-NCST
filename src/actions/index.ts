@@ -14,6 +14,8 @@ import {
   RejectLeaveValidators,
   BaseSalaryValidators,
   GovernmentMandatoriesValidators,
+  AttendanceManagementValidators,
+  ExtraShiftValidators,
 } from "@/validators";
 import nodemailer from "nodemailer";
 import { CreateAccountHTML } from "@/components/email-templates/create-account";
@@ -1064,6 +1066,219 @@ export const deleteGovernmentMandatories = async (id: string) => {
     console.error("Error deleting government mandatories", error);
     return {
       error: `Failed to delete government mandatories. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const createAttendance = async (
+  values: z.infer<typeof AttendanceManagementValidators>
+) => {
+  const validatedField = AttendanceManagementValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { employee, timeIn, timeOut, status } = validatedField.data;
+
+  try {
+    await db.attendance.create({
+      data: {
+        employeeId: employee,
+        timeIn: timeIn.toISOString(),
+        timeOut: timeOut.toISOString(),
+        date: new Date().toISOString(),
+        status,
+      },
+    });
+
+    return { success: "Attendance created successfully" };
+  } catch (error: any) {
+    console.error("Error creating attendance", error);
+    return {
+      error: `Failed to create attendance. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const updateAttendance = async (
+  values: z.infer<typeof AttendanceManagementValidators>,
+  id: string
+) => {
+  if (!id) {
+    return { error: "Attendance ID is required" };
+  }
+
+  const validatedField = AttendanceManagementValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { employee, timeIn, timeOut, status } = validatedField.data;
+
+  try {
+    await db.attendance.update({
+      where: { id },
+      data: {
+        employeeId: employee,
+        timeIn: timeIn.toISOString(),
+        timeOut: timeOut.toISOString(),
+        status,
+      },
+    });
+
+    return { success: "Attendance updated successfully" };
+  } catch (error: any) {
+    console.error("Error updating attendance", error);
+    return {
+      error: `Failed to update attendance. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const deleteAttendance = async (id: string) => {
+  if (!id) {
+    return { error: "Attendance ID is required" };
+  }
+
+  try {
+    await db.attendance.delete({
+      where: { id },
+    });
+
+    return { success: "Attendance deleted successfully" };
+  } catch (error: any) {
+    console.error("Error deleting attendance", error);
+    return {
+      error: `Failed to delete attendance. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const createExtraShift = async (
+  values: z.infer<typeof ExtraShiftValidators>
+) => {
+  const validatedField = ExtraShiftValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { employee, type, timeIn, timeOut } = validatedField.data;
+
+  try {
+    await db.extraShift.create({
+      data: {
+        employeeId: employee,
+        type,
+        timeStart: timeIn.toISOString(),
+        timeEnd: timeOut.toISOString(),
+        date: new Date().toISOString(),
+        status: "Pending",
+      },
+    });
+
+    return { success: "Extra shift created successfully" };
+  } catch (error: any) {
+    console.error("Error creating extra shift", error);
+    return {
+      error: `Failed to create extra shift. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const updateExtraShift = async (
+  values: z.infer<typeof ExtraShiftValidators>,
+  id: string
+) => {
+  if (!id) {
+    return { error: "Extra shift ID is required" };
+  }
+
+  const validatedField = ExtraShiftValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { employee, type, timeIn, timeOut } = validatedField.data;
+
+  try {
+    await db.extraShift.update({
+      where: { id },
+      data: {
+        employeeId: employee,
+        type,
+        timeStart: timeIn.toISOString(),
+        timeEnd: timeOut.toISOString(),
+      },
+    });
+
+    return { success: "Extra shift updated successfully" };
+  } catch (error: any) {
+    console.error("Error updating extra shift", error);
+    return {
+      error: `Failed to update extra shift. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const deleteExtraShift = async (id: string) => {
+  if (!id) {
+    return { error: "Extra shift ID is required" };
+  }
+
+  try {
+    await db.extraShift.delete({
+      where: { id },
+    });
+
+    return { success: "Extra shift deleted successfully" };
+  } catch (error: any) {
+    console.error("Error deleting extra shift", error);
+    return {
+      error: `Failed to delete extra shift. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const approveExtraShift = async (id: string) => {
+  try {
+    await db.extraShift.update({
+      where: { id },
+      data: {
+        status: "Approved",
+      },
+    });
+
+    return { success: "Extra shift approved successfully" };
+  } catch (error: any) {
+    console.error("Error approving extra shift", error);
+    return {
+      error: `Failed to approve extra shift. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const rejectExtraShift = async (id: string) => {
+  try {
+    await db.extraShift.update({
+      where: { id },
+      data: {
+        status: "Rejected",
+      },
+    });
+
+    return { success: "Extra shift rejected successfully" };
+  } catch (error: any) {
+    console.error("Error rejecting extra shift", error);
+    return {
+      error: `Failed to reject extra shift. Please try again. ${error.message || ""}`,
     };
   }
 };
