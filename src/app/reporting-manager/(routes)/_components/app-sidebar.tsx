@@ -103,7 +103,7 @@ export function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar> & { user: UserWithProps }) {
   const pathname = usePathname();
-  const sidebarItems = getSidebarItems(user?.Employee.Department.name, user?.Employee.JobTitle.name);
+  const sidebarItems = getSidebarItems(user?.Employee.Department.name);
 
   return (
     <Sidebar variant="floating" {...props}>
@@ -113,7 +113,7 @@ export function AppSidebar({
       <SidebarContent>
         <SidebarGroup>
           <SidebarMenu className="gap-2">
-            {(sidebarItems ?? []).map((item) =>
+            {sidebarItems.map((item) =>
               renderMenuItem(item, pathname, 0, true)
             )}
           </SidebarMenu>

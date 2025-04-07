@@ -1,8 +1,8 @@
 import React from "react";
 import { DataTable } from "@/components/ui/data-table";
-import { columns, JobTitleColumn } from "./column";
+import { columns, AttendanceColumn } from "./column";
 
-const JobTitleClient = ({ data }: { data: JobTitleColumn[] }) => {
+const AttendanceClient = ({ data }: { data: AttendanceColumn[] }) => {
   return (
     <div>
       <DataTable searchKey="name" columns={columns} data={data} />
@@ -10,4 +10,4 @@ const JobTitleClient = ({ data }: { data: JobTitleColumn[] }) => {
   );
 };
 
-export default JobTitleClient;
+export default AttendanceClient;

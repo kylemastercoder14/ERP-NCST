@@ -49,7 +49,23 @@ const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
            *
            * @param {E164Number | undefined} value - The entered value
            */
-          onChange={(value) => onChange?.(value || ("" as RPNInput.Value))}
+          onChange={(value) => {
+            if (!value) return onChange?.("" as RPNInput.Value);
+
+            const digitsOnly = value.replace(/\D/g, ""); // Remove non-digits
+            const prefix = "63";
+            let limited = digitsOnly.startsWith(prefix)
+              ? digitsOnly
+              : prefix + digitsOnly;
+
+            // Enforce 13 digits max (including "63")
+            limited = limited.slice(0, 13);
+
+            // Format back to +631234567890
+            const final = `+${limited}`;
+
+            onChange?.(final as RPNInput.Value);
+          }}
           {...props}
         />
       );

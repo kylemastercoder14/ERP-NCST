@@ -113,7 +113,7 @@ export function AppSidebar({
       <SidebarContent>
         <SidebarGroup>
           <SidebarMenu className="gap-2">
-            {(sidebarItems ?? []).map((item) =>
+            {sidebarItems.map((item) =>
               renderMenuItem(item, pathname, 0, true)
             )}
           </SidebarMenu>

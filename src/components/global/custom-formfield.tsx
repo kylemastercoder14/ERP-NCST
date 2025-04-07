@@ -22,7 +22,8 @@ import {
   OPT_LENGTH,
 } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-import { PhoneInput } from "@/components/ui/phone-input";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 import { InputOTP, InputOTPSlot } from "@/components/ui/input-otp";
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
 import {
@@ -89,6 +90,7 @@ interface CustomProps {
   renderSkeleton?: (field: any) => React.ReactNode;
   onChange?: (value: any) => void;
   tooltip?: boolean;
+  government?: boolean;
   tooltipContent?: string;
 }
 
@@ -106,6 +108,7 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
     autoFocus,
     renderedValue,
     onChange,
+    government,
   } = props;
 
   const [showPassword, setShowPassword] = useState(false);
@@ -134,11 +137,38 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
                 autoFocus={autoFocus}
                 onChange={(event) => {
                   let value = event.target.value;
-                  // Handle number type and ensure empty values do not result in NaN
-                  if (type === "number") {
-                    value = value === "" ? "" : String(parseFloat(value));
+
+                  if (government) {
+                    value = value.replace(/\D/g, ""); // Remove non-numeric
+
+                    switch (field.name) {
+                      case "sssNo":
+                        value = value
+                          .slice(0, 11)
+                          .replace(/^(\d{2})(\d{7})(\d{0,1})$/, "$1-$2-$3");
+                        break;
+                      case "pagibigNo":
+                        value = value
+                          .slice(0, 12)
+                          .replace(/^(\d{4})(\d{4})(\d{0,4})$/, "$1-$2-$3");
+                        break;
+                      case "philhealthNo":
+                        value = value
+                          .slice(0, 12)
+                          .replace(/^(\d{4})(\d{4})(\d{0,4})$/, "$1-$2-$3");
+                        break;
+                      case "tinNo":
+                        value = value
+                          .slice(0, 12)
+                          .replace(
+                            /^(\d{3})(\d{3})(\d{3})(\d{0,3})$/,
+                            "$1-$2-$3-$4"
+                          );
+                        break;
+                    }
                   }
-                  field.onChange(value); // Trigger field onChange with the processed value
+
+                  field.onChange(value);
                 }}
               />
 
@@ -187,12 +217,20 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
         <>
           <FormControl>
             <PhoneInput
+              className={`flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm`}
               placeholder={placeholder}
               defaultCountry="PH"
+              countries={["PH"]}
               international
               countryCallingCodeEditable={false}
-              value={field.value as string}
+              withCountryCallingCode
+              limitMaxLength={true}
+              value={field.value}
               onChange={field.onChange}
+              numberInputProps={{
+                className: `rounded-md px-4 focus:outline-none bg-transparent h-full w-full !bg-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:cursor-not-allowed`,
+              }}
+              maxLength={16}
               disabled={disabled}
             />
           </FormControl>

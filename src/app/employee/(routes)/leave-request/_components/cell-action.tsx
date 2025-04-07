@@ -9,12 +9,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, MoreHorizontal, Trash } from "lucide-react";
+import { Edit, MoreHorizontal, Trash} from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import AlertModal from "@/components/ui/alert-modal";
 import React from "react";
-import { deleteJobTitle } from "@/actions";
+import { deleteLeave } from "@/actions";
 
 interface CellActionProps {
   id: string;
@@ -29,7 +29,7 @@ export const CellAction: React.FC<CellActionProps> = ({ id }) => {
     setLoading(true);
     setOpen(false);
     try {
-      const res = await deleteJobTitle(id);
+      const res = await deleteLeave(id);
       if (res.success) {
         toast.success(res.success);
         router.refresh();
@@ -62,7 +62,7 @@ export const CellAction: React.FC<CellActionProps> = ({ id }) => {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuItem
-            onClick={() => router.push(`/head/employee-management/job-title/${id}`)}
+            onClick={() => router.push(`/employee/leave-request/${id}`)}
           >
             <Edit className="w-4 h-4 mr-2" />
             Edit

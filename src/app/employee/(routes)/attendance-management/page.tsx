@@ -5,9 +5,31 @@ import db from "@/lib/db";
 import { AttendanceColumn } from "./_components/column";
 import { format } from "date-fns";
 import AttendanceClient from "./_components/client";
+import { useUser } from "@/hooks/use-user";
+import ClockInOut from "./_components/clock-in-out";
 
 const Page = async () => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { userId } = await useUser();
+
+  const now = new Date();
+  const todayDate = format(now, "MMMM dd, yyyy");
+  const currentTime = format(now, "hh:mm:ss a");
+
+  const user = await db.userAccount.findUnique({
+    where: { id: userId },
+    select: { employeeId: true },
+  });
+
+  if (!user?.employeeId) {
+	console.log("⚠️ No employeeId found for this user");
+	return;
+  }
+
   const data = await db.attendance.findMany({
+    where: {
+      employeeId: user.employeeId,
+    },
     orderBy: {
       createdAt: "desc",
     },
@@ -20,12 +42,10 @@ const Page = async () => {
     data.map((item) => {
       return {
         id: item.id,
-        licenseNo: item.Employee.licenseNo,
-        name: `${item.Employee.firstName} ${item.Employee.middleName || ""} ${item.Employee.lastName}`.trim(),
-        timeIn: format(new Date(item.timeIn), "hh:mm a"),
-        timeOut: format(new Date(item.timeOut), "hh:mm a"),
+        timeIn: item.timeIn || "--",
+        timeOut: item.timeOut || "--",
         attendanceStatus: item.status,
-        date: format(new Date(item.date), "MMMM dd, yyyy"),
+        date: item.date,
         createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),
       };
     }) || [];
@@ -34,9 +54,10 @@ const Page = async () => {
     <div>
       <div className="flex items-center justify-between">
         <Heading
-          title="Attendance Monitoring"
-          description="Monitor all the attendance of the employees. You can also time in and time out for a specific employee."
+          title={`Today's Attendance: ${todayDate} at ${currentTime}`}
+          description="Monitor all your attendance records here."
         />
+        <ClockInOut todayDate={todayDate} employeeId={user.employeeId} />
       </div>
       <Separator className="my-5" />
       <AttendanceClient data={formattedData} />

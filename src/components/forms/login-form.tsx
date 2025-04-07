@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { LoginValidators } from "@/validators";
 import { loginAccount } from "@/actions";
+import { Eye, EyeOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +24,7 @@ import { toast } from "sonner";
 
 export function LoginForm() {
   const router = useRouter();
+  const [showPassword, setShowPassword] = React.useState(false);
   const form = useForm<z.infer<typeof LoginValidators>>({
     resolver: zodResolver(LoginValidators),
     defaultValues: {
@@ -39,21 +42,23 @@ export function LoginForm() {
         toast.error(res.error);
       } else {
         toast.success("Successfully logged in your account");
-        if (res.user?.Employee.JobTitle.name === "EMPLOYEE") {
+        if (res.user?.Employee.JobTitle.name === "Regular Employee") {
           setTimeout(() => {
             router.push("/employee/dashboard");
           }, 1000);
-        } else if (res.user?.Employee.JobTitle.name === "Head Supervisor") {
+        } else if (res.user?.Employee.JobTitle.name === "Head Department") {
           setTimeout(() => {
             router.push("/head/dashboard");
           }, 1000);
-        } else if (res.user?.Employee.JobTitle.name === "Assistant Supervisor") {
+        } else if (
+          res.user?.Employee.JobTitle.name === "Assistant Supervisor"
+        ) {
           setTimeout(() => {
             router.push("/assistant/dashboard");
           }, 1000);
         } else {
           setTimeout(() => {
-            router.push("/user/dashboard");
+            router.push("/reporting-manager/dashboard");
           }, 1000);
         }
       }
@@ -107,8 +112,26 @@ export function LoginForm() {
                 </FormLabel>
 
                 <FormControl>
-                  <Input type="password" placeholder="--------" {...field} />
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="--------"
+                      {...field}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
                 </FormControl>
+
                 <FormMessage />
               </FormItem>
             )}

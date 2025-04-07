@@ -74,6 +74,7 @@ export const ApplicantValidators = z.object({
   philhealthNo: z.string().min(1, { message: "PhilHealth number is required" }),
   pagibigNo: z.string().min(1, { message: "Pag-IBIG number is required" }),
   signature: z.string().min(1, { message: "Signature is required" }),
+  isNewEmployee: z.boolean().default(true),
   isOnlyChild: z.boolean().default(true),
   children: z
     .array(
@@ -132,7 +133,6 @@ export const AccountValidators = z.object({
 
 export const LeaveManagementValidators = z
   .object({
-    employee: z.string().min(1, { message: "Employee is required" }),
     leaveType: z.string().min(1, { message: "Leave type is required" }),
     startDate: z.string().min(1, { message: "Start date is required" }),
     endDate: z.string().min(1, { message: "End date is required" }),
@@ -164,7 +164,6 @@ export const AttendanceManagementValidators = z.object({
 });
 
 export const ExtraShiftValidators = z.object({
-  employee: z.string().min(1, { message: "Employee is required" }),
   timeIn: z.date().refine((val) => val instanceof Date, {
     message: "Clock in must be a valid date",
   }),

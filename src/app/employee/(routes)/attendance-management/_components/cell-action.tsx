@@ -9,12 +9,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, MoreHorizontal, Trash } from "lucide-react";
+import { MoreHorizontal, Trash } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import AlertModal from "@/components/ui/alert-modal";
 import React from "react";
-import { deleteDepartment } from "@/actions";
+import { deleteAttendance } from "@/actions";
 
 interface CellActionProps {
   id: string;
@@ -29,7 +29,7 @@ export const CellAction: React.FC<CellActionProps> = ({ id }) => {
     setLoading(true);
     setOpen(false);
     try {
-      const res = await deleteDepartment(id);
+      const res = await deleteAttendance(id);
       if (res.success) {
         toast.success(res.success);
         router.refresh();
@@ -61,14 +61,8 @@ export const CellAction: React.FC<CellActionProps> = ({ id }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem
-            onClick={() => router.push(`/head/employee-management/department/${id}`)}
-          >
-            <Edit className="w-4 h-4 mr-2" />
-            Edit
-          </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setOpen(true)}>
+          <DropdownMenuItem disabled onClick={() => setOpen(true)}>
             <Trash className="w-4 h-4 mr-2" />
             Delete
           </DropdownMenuItem>

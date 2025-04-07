@@ -111,18 +111,6 @@ export const SIDEBAR_HEAD_HR = [
             url: "/head/employee-management",
           },
           { title: "Add Employee", url: "/head/employee-management/create" },
-          {
-            title: "Job Title",
-            url: "/head/employee-management/job-title",
-          },
-          {
-            title: "Department",
-            url: "/head/employee-management/department",
-          },
-          {
-            title: "Reporting Manager",
-            url: "/head/employee-management/reporting-manager",
-          },
         ],
       },
       {
@@ -134,11 +122,7 @@ export const SIDEBAR_HEAD_HR = [
             url: "/head/attendance-management",
           },
           {
-            title: "Clock In/Out",
-            url: "/head/attendance-management/clock-in-out",
-          },
-          {
-            title: "Overtime & Undertime",
+            title: "Overtime Request",
             url: "/head/attendance-management/overtime-undertime",
           },
         ],
@@ -163,7 +147,7 @@ export const SIDEBAR_HEAD_HR = [
       },
       {
         title: "Leave Management",
-        url: "/head/leave-management", // do not show this in collapsible because there is no sub menu
+        url: "/head/leave-management",
       },
       {
         title: "Onboarding & Training",
@@ -175,6 +159,10 @@ export const SIDEBAR_HEAD_HR = [
     title: "Others", // dont mind this
     url: "#",
     items: [
+      {
+        title: "Purchase Request",
+        url: "/head/purchase-request",
+      },
       {
         title: "Reports Management",
         url: "/head/reports-management",
@@ -229,6 +217,35 @@ export const SIDEBAR_HEAD_CRM = [
       {
         title: "Logs",
         url: "/head/logs",
+      },
+    ],
+  },
+];
+
+export const SIDEBAR_EMPLOYEE = [
+  {
+    title: "General",
+    url: "#",
+    items: [
+      {
+        title: "Dashboard",
+        url: "/employee/dashboard",
+      },
+      {
+        title: "Attendance Management",
+        url: "/employee/attendance-management",
+      },
+      {
+        title: "Leave Request",
+        url: "/employee/leave-request",
+      },
+      {
+        title: "Overtime Request",
+        url: "/employee/overtime-request",
+      },
+      {
+        title: "Payroll Management",
+        url: "/employee/payroll-management",
       },
     ],
   },

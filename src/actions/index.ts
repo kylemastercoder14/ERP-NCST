@@ -243,6 +243,7 @@ export const createApplicant = async (
     employment,
     spouseName,
     spouseOccupation,
+    isNewEmployee,
   } = validatedField.data;
 
   try {
@@ -256,6 +257,8 @@ export const createApplicant = async (
     if (existingApplicant) {
       return { error: "Employee with a license no. already exist" };
     }
+
+    const trainingStatus = isNewEmployee ? "Initial Interview" : "";
 
     await db.employee.create({
       data: {
@@ -295,6 +298,7 @@ export const createApplicant = async (
         tinNo,
         spouseName,
         spouseOccupation,
+        trainingStatus,
         Children: {
           createMany: {
             data:
@@ -345,6 +349,41 @@ export const createApplicant = async (
     console.error("Error creating employee", error);
     return {
       error: `Failed to create employee. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const changeTrainingStatus = async (
+  employeeId: string,
+  status: string
+) => {
+  if (!employeeId) {
+    return { error: "Employee ID is required" };
+  }
+
+  try {
+    if (status === "Deployment") {
+      await db.employee.update({
+        where: { id: employeeId },
+        data: {
+          isNewEmployee: false,
+          trainingStatus: "",
+        },
+      });
+    }
+
+    await db.employee.update({
+      where: { id: employeeId },
+      data: {
+        trainingStatus: status,
+      },
+    });
+
+    return { success: "Employee successfully changed to Orientation" };
+  } catch (error: any) {
+    console.error("Error changing employee status", error);
+    return {
+      error: `Failed to change employee status. Please try again. ${error.message || ""}`,
     };
   }
 };
@@ -699,6 +738,7 @@ export const deleteDepartment = async (id: string) => {
 export const createLeave = async (
   values: z.infer<typeof LeaveManagementValidators>
 ) => {
+  const { userId } = await useUser();
   const validatedField = LeaveManagementValidators.safeParse(values);
 
   if (!validatedField.success) {
@@ -706,13 +746,18 @@ export const createLeave = async (
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
-  const { employee, leaveType, startDate, endDate, leaveReason, attachment } =
+  const { leaveType, startDate, endDate, leaveReason, attachment } =
     validatedField.data;
 
   try {
+    const user = await db.userAccount.findUnique({
+      where: { id: userId },
+      select: { employeeId: true },
+    });
+
     await db.leaveManagement.create({
       data: {
-        employeeId: employee,
+        employeeId: user?.employeeId as string,
         leaveType,
         startDate,
         endDate,
@@ -745,14 +790,13 @@ export const updateLeave = async (
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
-  const { employee, leaveType, startDate, endDate, leaveReason, attachment } =
+  const { leaveType, startDate, endDate, leaveReason, attachment } =
     validatedField.data;
 
   try {
     await db.leaveManagement.update({
       where: { id },
       data: {
-        employeeId: employee,
         leaveType,
         startDate,
         endDate,
@@ -1161,6 +1205,7 @@ export const deleteAttendance = async (id: string) => {
 export const createExtraShift = async (
   values: z.infer<typeof ExtraShiftValidators>
 ) => {
+  const { userId } = await useUser();
   const validatedField = ExtraShiftValidators.safeParse(values);
 
   if (!validatedField.success) {
@@ -1168,12 +1213,40 @@ export const createExtraShift = async (
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
-  const { employee, type, timeIn, timeOut } = validatedField.data;
+  const { type, timeIn, timeOut } = validatedField.data;
 
   try {
+    const user = await db.userAccount.findUnique({
+      where: { id: userId },
+      select: { employeeId: true },
+    });
+
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+
+    // ✅ Check if a request already exists for today
+    const existingShift = await db.extraShift.findFirst({
+      where: {
+        employeeId: user?.employeeId,
+        date: {
+          gte: todayStart.toISOString(),
+          lte: todayEnd.toISOString(),
+        },
+      },
+    });
+
+    if (existingShift) {
+      return {
+        error: "You have already requested overtime today.",
+      };
+    }
+
     await db.extraShift.create({
       data: {
-        employeeId: employee,
+        employeeId: user?.employeeId as string,
         type,
         timeStart: timeIn.toISOString(),
         timeEnd: timeOut.toISOString(),
@@ -1182,7 +1255,7 @@ export const createExtraShift = async (
       },
     });
 
-    return { success: "Extra shift created successfully" };
+    return { success: "Overtime requested successfully" };
   } catch (error: any) {
     console.error("Error creating extra shift", error);
     return {
@@ -1206,20 +1279,19 @@ export const updateExtraShift = async (
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
-  const { employee, type, timeIn, timeOut } = validatedField.data;
+  const { type, timeIn, timeOut } = validatedField.data;
 
   try {
     await db.extraShift.update({
       where: { id },
       data: {
-        employeeId: employee,
         type,
         timeStart: timeIn.toISOString(),
         timeEnd: timeOut.toISOString(),
       },
     });
 
-    return { success: "Extra shift updated successfully" };
+    return { success: "Requested overtime updated successfully" };
   } catch (error: any) {
     console.error("Error updating extra shift", error);
     return {
@@ -1297,6 +1369,76 @@ export const submitPayslip = async (file: string, employeeId: string) => {
     console.error("Error submitting payslip", error);
     return {
       error: `Failed to submit payslip. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const getAttendanceDate = async (
+  todayDate: string,
+  employeeId: string
+) => {
+  try {
+    const attendance = await db.attendance.findFirst({
+      where: {
+        employeeId,
+        date: todayDate,
+      },
+    });
+
+    return { attendance };
+  } catch (error: any) {
+    console.error("Error fetching attendance", error);
+    return {
+      error: `Failed to fetch attendance. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const clockInEmployee = async (
+  employeeId: string,
+  todayDate: string,
+  timeIn: string,
+  status: string
+) => {
+  try {
+    const attendance = await db.attendance.create({
+      data: {
+        employeeId,
+        date: todayDate,
+        timeIn,
+        status,
+        timeOut: "",
+      },
+    });
+
+    return { attendance };
+  } catch (error: any) {
+    console.error("Error creating attendance", error);
+    return {
+      error: `Failed to create attendance. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const clockOutEmployee = async (
+  attendanceId: string,
+  timeOut: string,
+  status: string
+) => {
+  try {
+    const attendance = await db.attendance.update({
+      where: { id: attendanceId },
+      data: {
+        timeOut,
+        status,
+      },
+    });
+
+    return { attendance };
+  } catch (error: any) {
+    console.error("Error updating attendance", error);
+    return {
+      error: `Failed to update attendance. Please try again. ${error.message || ""}`,
     };
   }
 };

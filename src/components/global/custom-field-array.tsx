@@ -32,6 +32,7 @@ interface CustomFieldArrayProps {
   remove: (index: number) => void;
   columns: Column[];
   disabled?: boolean;
+  isRequired?: boolean;
 }
 
 const CustomFieldArray: React.FC<CustomFieldArrayProps> = ({
@@ -42,6 +43,7 @@ const CustomFieldArray: React.FC<CustomFieldArrayProps> = ({
   remove,
   columns,
   disabled = false,
+  isRequired
 }) => {
   return (
     <div className="space-y-1">
@@ -49,7 +51,7 @@ const CustomFieldArray: React.FC<CustomFieldArrayProps> = ({
         <TableHeader>
           <TableRow>
             {columns.map((col) => (
-              <TableHead key={col.fieldName}>{col.label}</TableHead>
+              <TableHead key={col.fieldName}>{col.label} {isRequired ? <span className='text-red-600'>*</span> : <span className='text-muted-foreground'>(optional)</span>}</TableHead>
             ))}
             <TableHead>Action</TableHead>
           </TableRow>

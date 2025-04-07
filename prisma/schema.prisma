@@ -94,6 +94,8 @@ model Employee {
   pagibigNo    String
 
   signature String
+  isNewEmployee Boolean @default(true)
+  trainingStatus String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

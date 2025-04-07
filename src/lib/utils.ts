@@ -1,28 +1,34 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import {
+  SIDEBAR_EMPLOYEE,
   SIDEBAR_HEAD_ACCOUNTING,
   SIDEBAR_HEAD_CRM,
   SIDEBAR_HEAD_HR,
   SIDEBAR_HEAD_OPERATION,
-} from "./constants";
+} from "@/lib/constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const getSidebarItems = (position: string) => {
-  switch (position) {
-    case "ACCOUNTING":
-      return SIDEBAR_HEAD_ACCOUNTING;
-    case "OPERATION":
-      return SIDEBAR_HEAD_OPERATION;
-    case "Human Resource":
-      return SIDEBAR_HEAD_HR;
-    case "CRM":
-      return SIDEBAR_HEAD_CRM;
-    default:
-      return [];
+export const getSidebarItems = (department?: string, position?: string) => {
+  if (!department || !position) return [];
+
+  if (department === "Human Resource" && position === "Head Department") {
+    return SIDEBAR_HEAD_HR;
+  } else if (
+    department === "Human Resource" &&
+    position === "Assistant Supervisor"
+  ) {
+    return SIDEBAR_HEAD_HR;
+  } else if (
+    department === "Human Resource" &&
+    position === "Reporting Manager"
+  ) {
+    return SIDEBAR_HEAD_HR;
+  } else if (position === "Regular Employee") {
+    return SIDEBAR_EMPLOYEE;
   }
 };
 

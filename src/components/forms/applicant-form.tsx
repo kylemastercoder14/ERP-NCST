@@ -73,6 +73,7 @@ const ApplicantForm = ({
       pagibigNo: initialData?.pagibigNo || "",
       signature: initialData?.signature || "",
       isOnlyChild: true,
+      isNewEmployee: initialData?.isNewEmployee || true,
       children:
         initialData?.Children && initialData.Children.length > 0
           ? initialData.Children
@@ -294,10 +295,19 @@ const ApplicantForm = ({
           className="mt-5"
         >
           <div className="space-y-4">
+            <CustomFormField
+              control={form.control}
+              fieldType={FormFieldType.CHECKBOX}
+              isRequired={true}
+              name="isNewEmployee"
+              disabled={isSubmitting}
+              label="Is this a new employee?"
+              description="Check this box if this is a new employee."
+            />
             <div className="grid lg:grid-cols-2 grid-cols-1 gap-4">
               <CustomFormField
                 control={form.control}
-                fieldType={FormFieldType.COMBOBOX}
+                fieldType={FormFieldType.SELECT}
                 isRequired={true}
                 name="positionDesired"
                 dynamicOptions={jobTitles.map((job) => ({
@@ -310,7 +320,7 @@ const ApplicantForm = ({
               />
               <CustomFormField
                 control={form.control}
-                fieldType={FormFieldType.COMBOBOX}
+                fieldType={FormFieldType.SELECT}
                 isRequired={true}
                 name="department"
                 dynamicOptions={departments.map((department) => ({
@@ -667,6 +677,7 @@ const ApplicantForm = ({
             <CustomFieldArray
               control={form.control}
               name="education"
+              isRequired={true}
               fields={educationFields}
               append={appendEducation}
               remove={removeEducation}
@@ -681,6 +692,7 @@ const ApplicantForm = ({
             <CustomFieldArray
               control={form.control}
               name="employment"
+              isRequired={true}
               fields={employmentFields}
               append={appendEmployment}
               remove={removeEmployment}
@@ -695,6 +707,7 @@ const ApplicantForm = ({
             <CustomFieldArray
               control={form.control}
               name="characterReferences"
+              isRequired={true}
               fields={characterReferencesFields}
               append={appendCharacterReferences}
               remove={removeCharacterReferences}
@@ -714,6 +727,7 @@ const ApplicantForm = ({
                 name="tinNo"
                 disabled={isSubmitting}
                 label="Tin No."
+                government={true}
                 placeholder="Enter tin number"
               />
               <CustomFormField
@@ -723,6 +737,7 @@ const ApplicantForm = ({
                 name="sssNo"
                 disabled={isSubmitting}
                 label="SSS No."
+                government={true}
                 placeholder="Enter sss number"
               />
             </div>
@@ -733,6 +748,7 @@ const ApplicantForm = ({
                 isRequired={true}
                 name="philhealthNo"
                 disabled={isSubmitting}
+                government={true}
                 label="Philhealth No."
                 placeholder="Enter philhealth number"
               />
@@ -742,6 +758,7 @@ const ApplicantForm = ({
                 isRequired={true}
                 name="pagibigNo"
                 disabled={isSubmitting}
+                government={true}
                 label="Pagibig No."
                 placeholder="Enter pagibig number"
               />

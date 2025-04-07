@@ -1,8 +1,8 @@
 import React from "react";
 import { DataTable } from "@/components/ui/data-table";
-import { columns, DepartmentColumn } from "./column";
+import { columns, ExtraShiftColumn } from "./column";
 
-const DepartmentClient = ({ data }: { data: DepartmentColumn[] }) => {
+const ExtraShiftClient = ({ data }: { data: ExtraShiftColumn[] }) => {
   return (
     <div>
       <DataTable searchKey="name" columns={columns} data={data} />
@@ -10,4 +10,4 @@ const DepartmentClient = ({ data }: { data: DepartmentColumn[] }) => {
   );
 };
 
-export default DepartmentClient;
+export default ExtraShiftClient;
