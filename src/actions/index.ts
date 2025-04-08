@@ -299,6 +299,7 @@ export const createApplicant = async (
         tinNo,
         spouseName,
         spouseOccupation,
+        isNewEmployee,
         trainingStatus,
         Children: {
           createMany: {
@@ -897,6 +898,40 @@ export const rejectLeave = async (
     console.error("Error rejecting leave", error);
     return {
       error: `Failed to reject leave. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const approvePurchaseRequest = async (
+  id: string,
+  status: string,
+  department: string
+) => {
+  try {
+    const updateData: any = {};
+
+    if (department === "Procurement") {
+      updateData.procurementStatus = status;
+    } else if (department === "Finance") {
+      updateData.financeStatus = status;
+    } else {
+      return {
+        error: "Only Procurement or Finance can approve/reject this request.",
+      };
+    }
+
+    await db.purchaseRequest.update({
+      where: { id },
+      data: updateData,
+    });
+
+    return { success: `Purchase request ${status.toLowerCase()} successfully` };
+  } catch (error: any) {
+    console.error("Error approving purchase request", error);
+    return {
+      error: `Failed to approve purchase request. Please try again. ${
+        error.message || ""
+      }`,
     };
   }
 };
