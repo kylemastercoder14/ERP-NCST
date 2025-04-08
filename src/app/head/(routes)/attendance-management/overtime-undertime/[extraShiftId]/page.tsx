@@ -17,16 +17,9 @@ const Page = async (props: {
 	},
   });
 
-  // employee Lists
-  const employees = await db.employee.findMany({
-	orderBy: {
-	  lastName: "asc",
-	},
-  });
-
   return (
 	<div>
-	  <ExtraShiftForm employees={employees} initialData={extraShift} />
+	  <ExtraShiftForm initialData={extraShift} />
 	</div>
   );
 };
