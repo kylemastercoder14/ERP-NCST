@@ -16,6 +16,7 @@ import {
   GovernmentMandatoriesValidators,
   AttendanceManagementValidators,
   ExtraShiftValidators,
+  PurchaseRequestValidators,
 } from "@/validators";
 import nodemailer from "nodemailer";
 import { CreateAccountHTML } from "@/components/email-templates/create-account";
@@ -1454,6 +1455,88 @@ export const savePayslipToPdf = async (
     console.error("Error saving payslip to PDF", error);
     return {
       error: `Failed to save payslip. ${error.message || ""}`,
+    };
+  }
+};
+
+export const createPurchaseRequest = async (
+  values: z.infer<typeof PurchaseRequestValidators>
+) => {
+  const { user } = await useUser();
+  const validatedField = PurchaseRequestValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { name, quantity, unitPrice } = validatedField.data;
+
+  try {
+    const employee = await db.employee.findUnique({
+      where: {
+        id: user?.employeeId,
+      },
+      include: {
+        Department: true,
+      },
+    });
+
+    if (!employee) {
+      return { error: "Employee not found" };
+    }
+
+    await db.purchaseRequest.create({
+      data: {
+        item: name,
+        quantity,
+        unitPrice,
+        department: employee.Department.name,
+        employeeId: user?.employeeId as string,
+      },
+    });
+
+    return { success: "Purchase request created successfully" };
+  } catch (error: any) {
+    console.error("Error creating purchase request", error);
+    return {
+      error: `Failed to create purchase request. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const updatePurchaseRequest = async (
+  values: z.infer<typeof PurchaseRequestValidators>,
+  purchaseId: string
+) => {
+  if (!purchaseId) {
+    return { error: "Purchase request ID is required" };
+  }
+
+  const validatedField = PurchaseRequestValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { name, quantity, unitPrice } = validatedField.data;
+
+  try {
+    await db.purchaseRequest.update({
+      where: { id: purchaseId },
+      data: {
+        item: name,
+        quantity,
+        unitPrice,
+      },
+    });
+
+    return { success: "Purchase request updated successfully" };
+  } catch (error: any) {
+    console.error("Error updating purchase request", error);
+    return {
+      error: `Failed to update purchase request. Please try again. ${error.message || ""}`,
     };
   }
 };

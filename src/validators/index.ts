@@ -131,6 +131,12 @@ export const AccountValidators = z.object({
   password: z.string().min(1, { message: "Password is required" }),
 });
 
+export const PurchaseRequestValidators = z.object({
+  name: z.string().min(1, { message: "Item name is required" }),
+  quantity: z.coerce.number().min(1, { message: "Quantity is required" }),
+  unitPrice: z.coerce.number().min(1, { message: "Unit price is required" }),
+});
+
 export const LeaveManagementValidators = z
   .object({
     leaveType: z.string().min(1, { message: "Leave type is required" }),

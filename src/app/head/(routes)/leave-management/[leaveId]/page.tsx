@@ -18,16 +18,9 @@ const Page = async (props: {
 	},
   });
 
-  // employee Lists
-  const employees = await db.employee.findMany({
-	orderBy: {
-	  lastName: "asc",
-	},
-  });
-
   return (
 	<div>
-	  <LeaveForm employees={employees} initialData={leave} />
+	  <LeaveForm initialData={leave} />
 	</div>
   );
 };

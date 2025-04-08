@@ -32,6 +32,7 @@ model UserAccount {
 
   Logs            Logs[]
   LeaveManagement LeaveManagement[]
+  PurchaseRequest PurchaseRequest[]
 
   @@index([employeeId])
 }
@@ -117,6 +118,7 @@ model Employee {
   Attendance            Attendance[]
   ExtraShift            ExtraShift[]
   PaySlip               PaySlip[]
+  PurchaseRequest       PurchaseRequest[]
 
   @@index([jobTitleId])
   @@index([departmentId])
@@ -279,6 +281,57 @@ model PaySlip {
   Employee   Employee @relation(fields: [employeeId], references: [id])
 
   @@index([employeeId])
+}
+
+model PurchaseRequest {
+  id         String @id @default(cuid())
+  item       String
+  quantity   Int
+  unitPrice  Float
+  department String
+
+  procurementStatus String  @default("Pending") // Pending, Approved, Rejected
+  procurementRemark String?
+
+  financeStatus String  @default("Pending") // Pending, Approved, Rejected
+  financeRemark String?
+
+  supplierStatus String  @default("Pending") // Pending, Preparing, In transit, Delivered, Rejected
+  supplierRemark String?
+
+  inventoryStatus String  @default("Pending") // Pending, Received, Rejected
+  inventoryRemark String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  employeeId String
+  Employee   Employee @relation(fields: [employeeId], references: [id])
+
+  receivedBy String?
+  ReceivedBy UserAccount? @relation(fields: [receivedBy], references: [id])
+
+  Inventory Inventory[]
+
+  @@index([employeeId])
+  @@index([receivedBy])
+}
+
+model Inventory {
+  id           String   @id @default(cuid())
+  item         String
+  quantity     Int
+  unitPrice    Float
+  totalPrice   Float
+  supplier     String
+  dateReceived String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  purchaseRequestId String?
+  PurchaseRequest   PurchaseRequest? @relation(fields: [purchaseRequestId], references: [id])
+
+  @@index([purchaseRequestId])
 }
 
 model Logs {

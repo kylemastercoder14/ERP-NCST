@@ -12,6 +12,7 @@ import {
   GovernmentMandatories,
   Attendance,
   ExtraShift,
+  PurchaseRequest,
 } from "@prisma/client";
 
 export interface EmployeeWithProps extends Employee {
@@ -30,6 +31,11 @@ export interface UserWithProps extends UserAccount {
 export interface LeaveManagementWithProps extends LeaveManagement {
   Employee: Employee;
   ApprovedBy: UserAccount | null;
+}
+
+export interface PurchaseRequestWithProps extends PurchaseRequest {
+  Employee: Employee;
+  ReceivedBy: UserAccount | null;
 }
 
 export interface AttendanceManagementWithProps extends Attendance {
