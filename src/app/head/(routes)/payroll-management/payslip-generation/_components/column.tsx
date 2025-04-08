@@ -13,6 +13,7 @@ export type PayslipGenerationColumn = {
   deductions: string;
   position: string;
   department: string;
+  payrollDate: string;
   createdAt: string;
 };
 
@@ -83,7 +84,7 @@ export const columns: ColumnDef<PayslipGenerationColumn>[] = [
         <div className="flex flex-col">
           <span className="text-sm">{row.original.amount}</span>
           <span className="text-muted-foreground text-[12px]">
-            Type: {row.original.type}
+            Payroll Date: {row.original.payrollDate}
           </span>
         </div>
       );
@@ -98,6 +99,20 @@ export const columns: ColumnDef<PayslipGenerationColumn>[] = [
           className="cursor-pointer flex items-center"
         >
           Total Deductions
+          <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "payrollDate",
+    header: ({ column }) => {
+      return (
+        <span
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="cursor-pointer flex items-center"
+        >
+          Payroll Date
           <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
         </span>
       );

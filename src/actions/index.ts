@@ -21,8 +21,8 @@ import nodemailer from "nodemailer";
 import { CreateAccountHTML } from "@/components/email-templates/create-account";
 import { cookies } from "next/headers";
 import * as jose from "jose";
-import { useUser } from "../hooks/use-user";
-import { RejectLeaveHTML } from "../components/email-templates/reject-leave";
+import { useUser } from "@/hooks/use-user";
+import { RejectLeaveHTML } from "@/components/email-templates/reject-leave";
 
 export const loginAccount = async (values: z.infer<typeof LoginValidators>) => {
   const validatedField = LoginValidators.safeParse(values);
@@ -1355,24 +1355,6 @@ export const rejectExtraShift = async (id: string) => {
   }
 };
 
-export const submitPayslip = async (file: string, employeeId: string) => {
-  try {
-    const res = await db.paySlip.create({
-      data: {
-        employeeId,
-        file,
-      },
-    });
-
-    return { success: "Payslip submitted successfully", fileUrl: res.file };
-  } catch (error: any) {
-    console.error("Error submitting payslip", error);
-    return {
-      error: `Failed to submit payslip. Please try again. ${error.message || ""}`,
-    };
-  }
-};
-
 export const getAttendanceDate = async (
   todayDate: string,
   employeeId: string
@@ -1439,6 +1421,39 @@ export const clockOutEmployee = async (
     console.error("Error updating attendance", error);
     return {
       error: `Failed to update attendance. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const savePayslipToPdf = async (
+  fileName: string,
+  monthToday: string,
+  employeeId: string
+) => {
+  try {
+    const existingPayslip = await db.paySlip.findFirst({
+      where: {
+        employeeId,
+        date: monthToday,
+      },
+    });
+
+    if (existingPayslip) {
+      return { error: "Payslip already exists for this month." };
+    }
+
+    await db.paySlip.create({
+      data: {
+        file: fileName,
+        date: monthToday,
+        employeeId,
+      },
+    });
+    return { success: "Payslip saved successfully", fileName };
+  } catch (error: any) {
+    console.error("Error saving payslip to PDF", error);
+    return {
+      error: `Failed to save payslip. ${error.message || ""}`,
     };
   }
 };

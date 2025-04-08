@@ -49,6 +49,7 @@ import {
 } from "./select";
 import { availability, gender, statuses } from "@/data/constants";
 import { FacetedFilter } from "./faceted-filter";
+import { MONTHS } from '@/lib/constants';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -137,6 +138,13 @@ export function DataTable<TData, TValue>({
             column={table.getColumn("gender")}
             title="Filter Gender"
             options={gender}
+          />
+        )}
+        {table.getColumn("payrollDate") && (
+          <FacetedFilter
+            column={table.getColumn("payrollDate")}
+            title="Filter Payroll Date"
+            options={MONTHS.map((month) => ({ label: month, value: month }))}
           />
         )}
         {table.getColumn("availability") && (

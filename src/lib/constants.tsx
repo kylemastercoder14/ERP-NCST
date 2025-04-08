@@ -132,10 +132,6 @@ export const SIDEBAR_HEAD_HR = [
         url: "/head/payroll-management",
         items: [
           {
-            title: "Government Mandatories",
-            url: "/head/payroll-management/government-mandatories",
-          },
-          {
             title: "Base Salary",
             url: "/head/payroll-management/base-salary",
           },
@@ -323,3 +319,39 @@ export const LEAVETYPE = [
 ];
 
 export const SALARYTYPE = ["Hourly", "Daily", "Fixed"];
+
+export const regularHolidays = [
+  "2025-01-01", // New Year's Day
+  "2025-04-08", // Maundy Thursday
+  "2025-04-09", // Araw ng Kagitingan
+  "2025-05-01", // Labor Day
+  "2025-06-12", // Independence Day
+  "2025-08-26", // National Heroes Day
+  "2025-11-30", // Bonifacio Day
+  "2025-12-25", // Christmas Day
+  "2025-12-30", // Rizal Day
+];
+
+export const specialHolidays = [
+  "2025-02-10", // Chinese New Year
+  "2025-04-18", // Black Saturday
+  "2025-08-21", // Ninoy Aquino Day
+  "2025-11-01", // All Saints Day
+  "2025-12-08", // Feast of the Immaculate Conception
+  "2025-12-31", // Last Day of the Year
+];
+
+export const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+]

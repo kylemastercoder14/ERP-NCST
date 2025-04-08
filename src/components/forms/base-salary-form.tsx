@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import CustomFormField from "@/components/global/custom-formfield";
-import { FormFieldType, SALARYTYPE } from "@/lib/constants";
+import { FormFieldType } from "@/lib/constants";
 import { Employee } from "@prisma/client";
 import { createBaseSalary, updateBaseSalary } from "@/actions";
 import Heading from "@/components/ui/heading";
@@ -34,7 +34,7 @@ const BaseSalaryForm = ({
     resolver: zodResolver(BaseSalaryValidators),
     defaultValues: {
       employee: initialData?.employeeId || "",
-      type: initialData?.type || "",
+      type: "Fixed",
       amount: initialData?.amount || 0,
     },
   });
@@ -88,14 +88,10 @@ const BaseSalaryForm = ({
           />
           <CustomFormField
             control={form.control}
-            fieldType={FormFieldType.SELECT}
-            dynamicOptions={SALARYTYPE.map((type) => ({
-              label: type,
-              value: type,
-            }))}
+            fieldType={FormFieldType.INPUT}
             isRequired={true}
             name="type"
-            disabled={isSubmitting}
+            disabled
             label="Salary Type"
             placeholder="Select salary type"
           />

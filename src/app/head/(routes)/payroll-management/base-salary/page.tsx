@@ -30,7 +30,7 @@ const Page = async () => {
         licenseNo: item.Employee.licenseNo,
         name: `${item.Employee.firstName} ${item.Employee.middleName || ""} ${item.Employee.lastName}`.trim(),
         type: item.type,
-        amount: `₱${item.amount.toFixed(2)}`,
+        amount: `₱${parseFloat(item.amount.toFixed(2)).toLocaleString()}`,
         department: item.Employee.Department.name,
         position: item.Employee.JobTitle.name,
         createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),

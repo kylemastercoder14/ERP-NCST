@@ -8,6 +8,14 @@ import PayslipGenerationClient from "./_components/client";
 
 const Page = async () => {
   const data = await db.employee.findMany({
+    where: {
+      isNewEmployee: false,
+      BaseSalary: {
+        some: {
+          amount: { gt: 0 },
+        }
+      }
+    },
     orderBy: {
       createdAt: "desc",
     },
@@ -16,20 +24,19 @@ const Page = async () => {
       Department: true,
       JobTitle: true,
       GovernmentMandatories: true,
+      PaySlip: true,
     },
   });
 
   const formattedData: PayslipGenerationColumn[] =
     data.map((item) => {
-      const deductions = item.GovernmentMandatories.reduce((acc, curr) => {
-        acc +=
-          curr.sss +
-          curr.philhealth +
-          curr.pagibig +
-          curr.tin +
-          (curr.others ?? 0);
-        return acc;
-      }, 0);
+      const baseSalary = item.BaseSalary[0]?.amount || 0;
+
+      const sss = baseSalary * 0.05;
+      const philhealth = baseSalary * 0.035;
+      const pagibig = baseSalary * 0.03;
+      const tin = baseSalary * 0.1;
+      const totalDeductions = sss + philhealth + pagibig + tin;
 
       return {
         id: item.id,
@@ -39,11 +46,18 @@ const Page = async () => {
           item.BaseSalary.find((id) => id.employeeId === item.id)?.type ||
           "N/A",
         amount: item.BaseSalary.find((id) => id.employeeId === item.id)
-          ? `₱${item.BaseSalary.find((id) => id.employeeId === item.id)!.amount.toFixed(2).toLocaleString()}`
+          ? `₱${item.BaseSalary.find((id) => id.employeeId === item.id)!
+              .amount.toFixed(2)
+              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}` // Add commas after formatting
           : "N/A",
         department: item.Department.name,
         position: item.JobTitle.name,
-        deductions: `₱${deductions.toFixed(2).toLocaleString()}`,
+        deductions: `₱${totalDeductions
+          .toFixed(2)
+          .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, // Add commas after formatting
+        payrollDate: item.PaySlip[0]?.date
+          ? `${item.PaySlip[0]?.date}, 2025`
+          : "N/A",
         createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),
       };
     }) || [];

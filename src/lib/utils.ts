@@ -79,6 +79,16 @@ export function generateRandomPassword(length: number = 10): string {
     .join("");
 }
 
+export function isSameDate(a: string | Date, b: string | Date) {
+  const dateA = new Date(a);
+  const dateB = new Date(b);
+  return (
+    dateA.getFullYear() === dateB.getFullYear() &&
+    dateA.getMonth() === dateB.getMonth() &&
+    dateA.getDate() === dateB.getDate()
+  );
+}
+
 /**
  * regular expression to check for valid hour format (01-23)
  */
