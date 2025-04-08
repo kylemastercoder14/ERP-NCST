@@ -247,6 +247,35 @@ export const SIDEBAR_EMPLOYEE = [
   },
 ];
 
+export const SIDEBAR_REPORTING_MANAGER = [
+  {
+    title: "General",
+    url: "#",
+    items: [
+      {
+        title: "Dashboard",
+        url: "/reporting-manager/dashboard",
+      },
+      {
+        title: "Attendance Management",
+        url: "/reporting-manager/attendance-management",
+      },
+      {
+        title: "Leave Request",
+        url: "/reporting-manager/leave-management",
+      },
+      {
+        title: "Overtime Request",
+        url: "/reporting-manager/overtime-request",
+      },
+      {
+        title: "Payroll Management",
+        url: "/reporting-manager/payroll-management",
+      },
+    ],
+  },
+];
+
 export enum FormFieldType {
   INPUT = "input",
   TEXTAREA = "textarea",

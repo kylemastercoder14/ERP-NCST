@@ -901,6 +901,40 @@ export const rejectLeave = async (
   }
 };
 
+export const rejectOvertime = async (
+  values: z.infer<typeof RejectLeaveValidators>,
+  id: string
+) => {
+  const validatedField = RejectLeaveValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { reasonForRejection } = validatedField.data;
+
+  try {
+    await db.extraShift.update({
+      where: { id },
+      data: {
+        status: "Rejected",
+        reasonForRejection,
+      },
+      include: {
+        Employee: { include: { UserAccount: true } },
+      },
+    });
+
+    return { success: "Overtime rejected successfully" };
+  } catch (error: any) {
+    console.error("Error rejecting overtime", error);
+    return {
+      error: `Failed to reject overtime. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
 export const sendReasonForRejection = async (
   name: string,
   email: string,

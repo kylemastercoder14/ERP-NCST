@@ -48,7 +48,7 @@ const LeaveForm = ({
         const res = await updateLeave(values, initialData?.id as string);
         if (res.success) {
           toast.success(res.success);
-          router.push("/employee/leave-request");
+          router.back();
         } else {
           toast.error(res.error);
         }
@@ -56,7 +56,7 @@ const LeaveForm = ({
         const res = await createLeave(values);
         if (res.success) {
           toast.success(res.success);
-          router.push("/employee/leave-request");
+          router.back();
         } else {
           toast.error(res.error);
         }

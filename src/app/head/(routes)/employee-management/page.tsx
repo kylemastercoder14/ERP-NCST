@@ -10,6 +10,9 @@ import ApplicantClient from './_components/client';
 
 const Page = async () => {
   const data = await db.employee.findMany({
+    where: {
+      isNewEmployee: false
+    },
     orderBy: {
       createdAt: "desc",
     },

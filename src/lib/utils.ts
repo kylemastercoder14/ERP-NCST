@@ -6,6 +6,7 @@ import {
   SIDEBAR_HEAD_CRM,
   SIDEBAR_HEAD_HR,
   SIDEBAR_HEAD_OPERATION,
+  SIDEBAR_REPORTING_MANAGER,
 } from "@/lib/constants";
 
 export function cn(...inputs: ClassValue[]) {
@@ -29,6 +30,8 @@ export const getSidebarItems = (department?: string, position?: string) => {
     return SIDEBAR_HEAD_HR;
   } else if (position === "Regular Employee") {
     return SIDEBAR_EMPLOYEE;
+  } else if (position === "Reporting Manager") {
+    return SIDEBAR_REPORTING_MANAGER;
   }
 };
 

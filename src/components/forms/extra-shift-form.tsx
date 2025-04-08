@@ -45,7 +45,7 @@ const ExtraShiftForm = ({
         const res = await updateExtraShift(values, initialData?.id as string);
         if (res.success) {
           toast.success(res.success);
-          router.push("/employee/overtime-request");
+          router.back();
         } else {
           toast.error(res.error);
         }
@@ -53,7 +53,7 @@ const ExtraShiftForm = ({
         const res = await createExtraShift(values);
         if (res.success) {
           toast.success(res.success);
-          router.push("/employee/overtime-request");
+          router.back();
         } else {
           toast.error(res.error);
         }

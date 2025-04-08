@@ -261,6 +261,7 @@ model ExtraShift {
   timeStart String
   timeEnd   String
   status    String   @default("Pending")
+  reasonForRejection String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
