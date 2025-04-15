@@ -6,6 +6,7 @@ import {
   SIDEBAR_HEAD_CRM,
   SIDEBAR_HEAD_HR,
   SIDEBAR_HEAD_OPERATION,
+  SIDEBAR_HEAD_PROCUREMENT,
   SIDEBAR_REPORTING_MANAGER,
   SIDEBAR_REPORTING_MANAGER_PROCUREMENT,
 } from "@/lib/constants";
@@ -19,6 +20,8 @@ export const getSidebarItems = (department?: string, position?: string) => {
 
   if (department === "Human Resource" && position === "Head Department") {
     return SIDEBAR_HEAD_HR;
+  } else if (department === "Procurement" && position === "Head Department") {
+    return SIDEBAR_HEAD_PROCUREMENT;
   } else if (
     department === "Human Resource" &&
     position === "Assistant Supervisor"
@@ -29,6 +32,8 @@ export const getSidebarItems = (department?: string, position?: string) => {
     position === "Reporting Manager"
   ) {
     return SIDEBAR_HEAD_HR;
+  } else if (department === "Operation" && position === "Head Department") {
+    return SIDEBAR_HEAD_OPERATION;
   } else if (position === "Regular Employee") {
     return SIDEBAR_EMPLOYEE;
   } else if (position === "Reporting Manager") {

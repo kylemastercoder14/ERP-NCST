@@ -70,12 +70,20 @@ export const SIDEBAR_HEAD_OPERATION = [
         title: "Shift Monitoring",
         url: "/head/shift-monitoring",
       },
+      {
+        title: "Onboarding & Training",
+        url: "/head/onboarding-training",
+      },
     ],
   },
   {
     title: "Others",
     url: "#",
     items: [
+      {
+        title: "Purchase Request",
+        url: "/head/purchase-request",
+      },
       {
         title: "Reports Management",
         url: "/head/reports-management",
@@ -145,10 +153,6 @@ export const SIDEBAR_HEAD_HR = [
         title: "Leave Management",
         url: "/head/leave-management",
       },
-      {
-        title: "Onboarding & Training",
-        url: "/head/onboarding-training",
-      },
     ],
   },
   {
@@ -195,6 +199,45 @@ export const SIDEBAR_HEAD_CRM = [
       {
         title: "Sales Monitoring",
         url: "/head/sales-monitoring",
+      },
+    ],
+  },
+  {
+    title: "Others",
+    url: "#",
+    items: [
+      {
+        title: "Reports Management",
+        url: "/head/reports-management",
+      },
+      {
+        title: "Settings",
+        url: "/head/settings",
+      },
+      {
+        title: "Logs",
+        url: "/head/logs",
+      },
+    ],
+  },
+];
+
+export const SIDEBAR_HEAD_PROCUREMENT = [
+  {
+    title: "General",
+    url: "#",
+    items: [
+      {
+        title: "Dashboard",
+        url: "/head/dashboard",
+      },
+      {
+        title: "Supplier Management",
+        url: "/head/supplier-management",
+      },
+      {
+        title: "Purchase Request",
+        url: "/head/purchase-request",
       },
     ],
   },

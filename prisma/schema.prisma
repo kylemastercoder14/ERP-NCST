@@ -88,6 +88,7 @@ model Employee {
   contactPerson     String
   contactAddress    String
   contactNumber     String
+  branch            String   @default("Cavite") // Cavite or Batangas
 
   tinNo        String
   sssNo        String
@@ -119,6 +120,7 @@ model Employee {
   ExtraShift            ExtraShift[]
   PaySlip               PaySlip[]
   PurchaseRequest       PurchaseRequest[]
+  AccomplishmentReport  AccomplishmentReport[]
 
   @@index([jobTitleId])
   @@index([departmentId])
@@ -255,15 +257,15 @@ model Attendance {
 }
 
 model ExtraShift {
-  id        String   @id @default(cuid())
-  type      String // Overtime, Graveyard, Undertime
-  date      String
-  timeStart String
-  timeEnd   String
-  status    String   @default("Pending")
+  id                 String   @id @default(cuid())
+  type               String // Overtime, Graveyard, Undertime
+  date               String
+  timeStart          String
+  timeEnd            String
+  status             String   @default("Pending")
   reasonForRejection String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   employeeId String
   Employee   Employee @relation(fields: [employeeId], references: [id])
@@ -333,6 +335,20 @@ model Inventory {
   PurchaseRequest   PurchaseRequest? @relation(fields: [purchaseRequestId], references: [id])
 
   @@index([purchaseRequestId])
+}
+
+model AccomplishmentReport {
+  id        String   @id @default(cuid())
+  report    String
+  images    String[]
+  date      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  employeeId String
+  Employee   Employee @relation(fields: [employeeId], references: [id])
+
+  @@index([employeeId])
 }
 
 model Logs {

@@ -72,6 +72,7 @@ const ApplicantForm = ({
       philhealthNo: initialData?.philhealthNo || "",
       pagibigNo: initialData?.pagibigNo || "",
       signature: initialData?.signature || "",
+      branch: initialData?.branch || "",
       isOnlyChild: true,
       isNewEmployee: initialData?.isNewEmployee || true,
       children:
@@ -304,7 +305,7 @@ const ApplicantForm = ({
               label="Is this a new employee?"
               description="Check this box if this is a new employee."
             />
-            <div className="grid lg:grid-cols-2 grid-cols-1 gap-4">
+            <div className="grid lg:grid-cols-3 grid-cols-1 gap-4">
               <CustomFormField
                 control={form.control}
                 fieldType={FormFieldType.SELECT}
@@ -330,6 +331,19 @@ const ApplicantForm = ({
                 disabled={isSubmitting}
                 label="Department"
                 placeholder="Select department"
+              />
+              <CustomFormField
+                control={form.control}
+                fieldType={FormFieldType.SELECT}
+                isRequired={true}
+                name="branch"
+                dynamicOptions={["Cavite", "Batangas"].map((branch) => ({
+                  value: branch,
+                  label: branch,
+                }))}
+                disabled={isSubmitting}
+                label="Branch"
+                placeholder="Select branch"
               />
             </div>
             <div className="grid lg:grid-cols-2 grid-cols-1 gap-4">

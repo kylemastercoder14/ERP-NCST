@@ -49,7 +49,6 @@ const PayslipGenerationForm = ({
   const leavePay = numberOfPaidLeaves * dailyRate;
 
   // Holiday pay
-
   const workedRegularHolidayCount =
     initialData?.Attendance.filter((att) =>
       regularHolidays.some((holiday) => isSameDate(att.date, holiday))

@@ -74,6 +74,7 @@ export const ApplicantValidators = z.object({
   philhealthNo: z.string().min(1, { message: "PhilHealth number is required" }),
   pagibigNo: z.string().min(1, { message: "Pag-IBIG number is required" }),
   signature: z.string().min(1, { message: "Signature is required" }),
+  branch: z.string().min(1, { message: "Branch is required" }),
   isNewEmployee: z.boolean().default(true),
   isOnlyChild: z.boolean().default(true),
   children: z

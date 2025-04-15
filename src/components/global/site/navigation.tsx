@@ -2,6 +2,7 @@ import { Mail, Search, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import { Button } from "@/components/ui/button";
 
 const Navigation = () => {
   return (
@@ -51,7 +52,12 @@ const Navigation = () => {
               POLICIES
             </Link>
           </div>
-          <Image src="/assets/logo.png" alt="Logo" width={50} height={50} />
+          <div className="flex items-center gap-3">
+            <Button asChild>
+              <Link href="/new-applicant">Apply Now &rarr;</Link>
+            </Button>
+            <Image src="/assets/logo.png" alt="Logo" width={50} height={50} />
+          </div>
         </div>
       </div>
     </div>

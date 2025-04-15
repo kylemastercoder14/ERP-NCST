@@ -6,12 +6,16 @@ import Heading from "@/components/ui/heading";
 import db from "@/lib/db";
 import { ApplicantColumn } from "./_components/column";
 import { format } from "date-fns";
-import ApplicantClient from './_components/client';
+import ApplicantClient from "./_components/client";
+import { useUser } from "@/hooks/use-user";
 
 const Page = async () => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { user } = await useUser();
   const data = await db.employee.findMany({
     where: {
-      isNewEmployee: false
+      isNewEmployee: false,
+      branch: user?.Employee?.branch,
     },
     orderBy: {
       createdAt: "desc",
@@ -19,7 +23,7 @@ const Page = async () => {
     include: {
       JobTitle: true,
       Department: true,
-    }
+    },
   });
 
   const formattedData: ApplicantColumn[] =
@@ -44,9 +48,7 @@ const Page = async () => {
           description="Manage all the employees information here."
         />
         <Button size="sm">
-          <Link href={`/head/employee-management/create`}>
-            + Add Employee
-          </Link>
+          <Link href={`/head/employee-management/create`}>+ Add Employee</Link>
         </Button>
       </div>
       <Separator className="my-5" />

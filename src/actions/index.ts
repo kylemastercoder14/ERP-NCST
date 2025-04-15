@@ -170,13 +170,13 @@ export const sendAccountToEmail = async (
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: "kylemastercoder14@gmail.com",
-      pass: "cyjfgkpetrcmjvtb",
+      user: "bats3curity.9395@gmail.com",
+      pass: "wfffyihhttplludl",
     },
   });
 
   const message = {
-    from: "kylemastercoder14@gmail.com",
+    from: "bats3curity.9395@gmail.com",
     to: email,
     subject: "This is your account details",
     text: `Hello ${name}, your account has been created. Here are your account details: \nEmail: ${email}\nPassword: ${password}`,
@@ -245,6 +245,7 @@ export const createApplicant = async (
     spouseName,
     spouseOccupation,
     isNewEmployee,
+    branch,
   } = validatedField.data;
 
   try {
@@ -301,6 +302,7 @@ export const createApplicant = async (
         spouseOccupation,
         isNewEmployee,
         trainingStatus,
+        branch,
         Children: {
           createMany: {
             data:
@@ -446,6 +448,7 @@ export const updateApplicant = async (
     employment,
     spouseName,
     spouseOccupation,
+    branch,
   } = validatedField.data;
 
   try {
@@ -498,6 +501,7 @@ export const updateApplicant = async (
         tinNo,
         spouseName,
         spouseOccupation,
+        branch,
         Children: {
           deleteMany: { employeeId: id },
           createMany: {
@@ -983,13 +987,13 @@ export const sendReasonForRejection = async (
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: "kylemastercoder14@gmail.com",
-      pass: "cyjfgkpetrcmjvtb",
+      user: "bats3curity.9395@gmail.com",
+      pass: "wfffyihhttplludl",
     },
   });
 
   const message = {
-    from: "kylemastercoder14@gmail.com",
+    from: "bats3curity.9395@gmail.com",
     to: email,
     subject: "Leave Request Rejected",
     text: `Hello ${name}, your requested leave has been rejected due to the following reason: \n${reason}`,
