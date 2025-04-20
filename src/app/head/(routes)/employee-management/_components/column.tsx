@@ -13,6 +13,7 @@ export type ApplicantColumn = {
   gender: string;
   civilStatus: string;
   positionDesired: string;
+  department: string;
   createdAt: string;
 };
 
@@ -127,9 +128,19 @@ export const columns: ColumnDef<ApplicantColumn>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="cursor-pointer flex items-center"
         >
-          Position Desired
+          Position
           <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
         </span>
+      );
+    },
+    cell: ({ row }) => {
+      return (
+        <div className="flex flex-col">
+          <span className="text-sm">{row.original.positionDesired}</span>
+          <span className="text-muted-foreground text-[12px]">
+            Department: {row.original.department}
+          </span>
+        </div>
       );
     },
   },

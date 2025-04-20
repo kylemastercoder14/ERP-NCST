@@ -35,6 +35,7 @@ const Page = async () => {
         phoneNumber: item.celNo,
         address: item.presentAddress,
         positionDesired: item.JobTitle.name,
+        department: item.Department.name,
         gender: item.sex,
         civilStatus: item.civilStatus,
         createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),
