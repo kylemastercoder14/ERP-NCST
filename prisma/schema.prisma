@@ -108,6 +108,9 @@ model Employee {
   departmentId String
   Department   Department @relation(fields: [departmentId], references: [id])
 
+  clientId String?
+  Client   Client? @relation(fields: [clientId], references: [id])
+
   Children              Children[]
   EducationRecord       EducationRecord[]
   EmploymentRecord      EmploymentRecord[]
@@ -124,6 +127,7 @@ model Employee {
 
   @@index([jobTitleId])
   @@index([departmentId])
+  @@index([clientId])
 }
 
 model Children {
@@ -349,6 +353,21 @@ model AccomplishmentReport {
   Employee   Employee @relation(fields: [employeeId], references: [id])
 
   @@index([employeeId])
+}
+
+model Client {
+  id        String  @id @default(cuid())
+  name      String
+  email     String  @unique
+  password  String
+  logo      String?
+  address   String
+  contactNo String
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  Employee  Employee[]
 }
 
 model Logs {

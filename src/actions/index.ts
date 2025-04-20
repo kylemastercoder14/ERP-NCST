@@ -17,6 +17,7 @@ import {
   AttendanceManagementValidators,
   ExtraShiftValidators,
   PurchaseRequestValidators,
+  ClientManagementValidators,
 } from "@/validators";
 import nodemailer from "nodemailer";
 import { CreateAccountHTML } from "@/components/email-templates/create-account";
@@ -1613,3 +1614,104 @@ export const updatePurchaseRequest = async (
     };
   }
 };
+
+export const createClient = async (
+  values: z.infer<typeof ClientManagementValidators>
+) => {
+  const validatedField = ClientManagementValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { name, email, password } = validatedField.data;
+
+  try {
+    await db.client.create({
+      data: {
+        name,
+        email,
+        password,
+        address: "",
+        contactNo: "",
+      },
+    });
+
+    return { success: "Client created successfully" };
+  } catch (error: any) {
+    console.error("Error creating client", error);
+    return {
+      error: `Failed to create client. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const updateClient = async (
+  values: z.infer<typeof ClientManagementValidators>,
+  id: string
+) => {
+  if (!id) {
+    return { error: "Client ID is required" };
+  }
+
+  const validatedField = ClientManagementValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { name, email, password, address, contactNo, logo } =
+    validatedField.data;
+
+  try {
+    await db.client.update({
+      where: { id },
+      data: {
+        name,
+        email,
+        password,
+        address,
+        contactNo,
+        logo,
+      },
+    });
+
+    return { success: "Client updated successfully" };
+  } catch (error: any) {
+    console.error("Error updating client", error);
+    return {
+      error: `Failed to update client. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const deleteClient = async (id: string) => {
+  if (!id) {
+    return { error: "Client ID is required" };
+  }
+
+  try {
+    await db.employee.updateMany({
+      where: {
+        clientId: id,
+      },
+      data: {
+        clientId: null,
+      },
+    });
+
+    await db.client.delete({
+      where: { id },
+    });
+
+    return { success: "Client deleted successfully" };
+  } catch (error: any) {
+    console.error("Error deleting client", error);
+    return {
+      error: `Failed to delete client. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+

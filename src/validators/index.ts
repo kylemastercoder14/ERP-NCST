@@ -204,3 +204,12 @@ export const GovernmentMandatoriesValidators = z.object({
   others: z.coerce.number().optional(),
   employee: z.string().min(1, { message: "Employee is required" }),
 });
+
+export const ClientManagementValidators = z.object({
+  name: z.string().min(1, { message: "Name is required" }),
+  email: z.string().min(1, { message: "Email is required" }),
+  password: z.string().min(1, { message: "Password is required" }),
+  address: z.string().optional(),
+  contactNo: z.string().optional(),
+  logo: z.string().optional(),
+});

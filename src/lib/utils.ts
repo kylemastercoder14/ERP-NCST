@@ -20,6 +20,11 @@ export const getSidebarItems = (department?: string, position?: string) => {
 
   if (department === "Human Resource" && position === "Head Department") {
     return SIDEBAR_HEAD_HR;
+  } else if (
+    department === "Customer Relationship" &&
+    position === "Head Department"
+  ) {
+    return SIDEBAR_HEAD_CRM;
   } else if (department === "Procurement" && position === "Head Department") {
     return SIDEBAR_HEAD_PROCUREMENT;
   } else if (

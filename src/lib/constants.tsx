@@ -194,7 +194,15 @@ export const SIDEBAR_HEAD_CRM = [
       },
       {
         title: "Client Management",
-        url: "/head/client-management",
+        url: "#",
+        items: [
+          // show this in collapsible
+          {
+            title: "Client List",
+            url: "/head/client-management",
+          },
+          { title: "Add Client", url: "/head/client-management/create" },
+        ],
       },
       {
         title: "Sales Monitoring",
