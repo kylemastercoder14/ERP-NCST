@@ -213,3 +213,9 @@ export const ClientManagementValidators = z.object({
   contactNo: z.string().optional(),
   logo: z.string().optional(),
 });
+
+export const AccomplishmentReportValidators = z.object({
+  report: z.string().min(1, { message: "Title is required" }),
+  date: z.string().min(1, { message: "Date is required" }),
+  images: z.array(z.string()).optional(),
+});

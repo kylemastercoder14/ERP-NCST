@@ -294,6 +294,10 @@ export const SIDEBAR_EMPLOYEE = [
         title: "Payroll Management",
         url: "/employee/payroll-management",
       },
+      {
+        title: "Accomplishment Report",
+        url: "/employee/accomplishment-report",
+      },
     ],
   },
 ];
@@ -375,6 +379,7 @@ export enum FormFieldType {
   DATE_PICKER = "datePicker",
   TIME_PICKER = "timePicker",
   DROP_ZONE = "dropZone",
+  MULTIPLE_IMAGES = "multipleImages",
   SKELETON = "skeleton",
   HIDDEN = "hidden",
   HONEY_POT = "honeyPot",

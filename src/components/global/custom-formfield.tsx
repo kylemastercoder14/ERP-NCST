@@ -63,6 +63,7 @@ import {
 } from "@/components/ui/tooltip";
 import SignatureInput from "@/components/ui/signature-input";
 import { TimePicker } from "@/components/ui/time-picker";
+import MultipleImageUpload from "../ui/multiple-images-upload";
 
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {}
@@ -92,6 +93,7 @@ interface CustomProps {
   tooltip?: boolean;
   government?: boolean;
   tooltipContent?: string;
+  imageCount?: number;
 }
 
 const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
@@ -109,6 +111,7 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
     renderedValue,
     onChange,
     government,
+    imageCount,
   } = props;
 
   const [showPassword, setShowPassword] = useState(false);
@@ -506,6 +509,23 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
             onImageUpload={(url) => field.onChange(url)}
           />
         </FormControl>
+      );
+
+    case FormFieldType.MULTIPLE_IMAGES:
+      return (
+        <>
+          <FormControl>
+            <MultipleImageUpload
+              maxImages={imageCount || 3}
+              onImageUpload={(urls: string[]) => field.onChange(urls)}
+              disabled={disabled}
+              defaultValues={field.value?.map((file: File | string) =>
+                typeof file === "string" ? file : URL.createObjectURL(file)
+              )}
+            />
+          </FormControl>
+          {description && <FormDescription>{description}</FormDescription>}
+        </>
       );
 
     case FormFieldType.HIDDEN:

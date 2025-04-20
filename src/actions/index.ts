@@ -18,6 +18,7 @@ import {
   ExtraShiftValidators,
   PurchaseRequestValidators,
   ClientManagementValidators,
+  AccomplishmentReportValidators,
 } from "@/validators";
 import nodemailer from "nodemailer";
 import { CreateAccountHTML } from "@/components/email-templates/create-account";
@@ -1729,5 +1730,73 @@ export const getAllClients = async () => {
   } catch (error) {
     console.error("Error fetching clients", error);
     return { success: false, error: "Failed to fetch clients" };
+  }
+};
+
+export const createAccomplishmentReport = async (
+  values: z.infer<typeof AccomplishmentReportValidators>
+) => {
+  const { user } = await useUser();
+  const validatedField = AccomplishmentReportValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { report, date, images } = validatedField.data;
+
+  try {
+    await db.accomplishmentReport.create({
+      data: {
+        report,
+        date,
+        images,
+        employeeId: user?.employeeId as string,
+      },
+    });
+
+    return { success: "Accomplishment report created successfully" };
+  } catch (error: any) {
+    console.error("Error creating accomplishment report", error);
+    return {
+      error: `Failed to create accomplishment report. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const updateAccomplishmentReport = async (
+  values: z.infer<typeof AccomplishmentReportValidators>,
+  id: string
+) => {
+  if (!id) {
+    return { error: "Accomplishment report ID is required" };
+  }
+
+  const validatedField = AccomplishmentReportValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { report, date, images } = validatedField.data;
+
+  try {
+    await db.accomplishmentReport.update({
+      where: { id },
+      data: {
+        report,
+        date,
+        images,
+      },
+    });
+
+    return { success: "Accomplishment report updated successfully" };
+  } catch (error: any) {
+    console.error("Error updating accomplishment report", error);
+    return {
+      error: `Failed to update accomplishment report. Please try again. ${error.message || ""}`,
+    };
   }
 };
