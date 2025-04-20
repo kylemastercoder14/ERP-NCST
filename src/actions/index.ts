@@ -360,19 +360,21 @@ export const createApplicant = async (
 
 export const changeTrainingStatus = async (
   employeeId: string,
-  status: string
+  status: string,
+  clientId?: string
 ) => {
   if (!employeeId) {
     return { error: "Employee ID is required" };
   }
 
   try {
-    if (status === "Deployment") {
+    if (status === "Assigned") {
       await db.employee.update({
         where: { id: employeeId },
         data: {
           isNewEmployee: false,
           trainingStatus: "",
+          clientId,
         },
       });
     }
@@ -1715,3 +1717,17 @@ export const deleteClient = async (id: string) => {
   }
 };
 
+export const getAllClients = async () => {
+  try {
+    const clients = await db.client.findMany({
+      orderBy: {
+        name: "asc",
+      },
+    });
+
+    return { success: true, data: clients };
+  } catch (error) {
+    console.error("Error fetching clients", error);
+    return { success: false, error: "Failed to fetch clients" };
+  }
+};
