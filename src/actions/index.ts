@@ -1800,3 +1800,45 @@ export const updateAccomplishmentReport = async (
     };
   }
 };
+
+export const getAllNotificationsOperations = async (branch: string) => {
+  try {
+    const notifications = await db.accomplishmentReport.findMany({
+      where: {
+        isViewed: false,
+        Employee: {
+          branch,
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        Employee: true,
+      },
+    });
+
+    return { success: true, data: notifications };
+  } catch (error) {
+    console.error("Error fetching notifications", error);
+    return { success: false, error: "Failed to fetch notifications" };
+  }
+};
+
+export const viewedNotificationOperations = async (id: string) => {
+  try {
+    const notifications = await db.accomplishmentReport.update({
+      where: {
+        id,
+      },
+      data: {
+        isViewed: true,
+      },
+    });
+
+    return { success: true, data: notifications };
+  } catch (error) {
+    console.error("Error updating notifications", error);
+    return { success: false, error: "Failed to update notifications" };
+  }
+};

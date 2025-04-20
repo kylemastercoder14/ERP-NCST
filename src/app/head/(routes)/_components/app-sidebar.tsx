@@ -103,8 +103,14 @@ export function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar> & { user: UserWithProps }) {
   const pathname = usePathname();
-  const sidebarItems = getSidebarItems(user?.Employee.Department.name, user?.Employee.JobTitle.name);
-
+  const sidebarItems = getSidebarItems(
+    user?.Employee.Department.name,
+    user?.Employee.JobTitle.name
+  );
+  const isVisibleNotification =
+    user?.Employee.Department.name === "Operation" &&
+    user?.Employee.JobTitle.name === "Head Department";
+  const branch = user?.Employee.branch;
   return (
     <Sidebar variant="floating" {...props}>
       <SidebarHeader>
@@ -121,6 +127,8 @@ export function AppSidebar({
       </SidebarContent>
       <SidebarFooter>
         <NavUser
+          branch={branch}
+          visibleNotification={isVisibleNotification}
           name={`${user.Employee.firstName} ${user.Employee.lastName}`}
           email={user.email}
         />

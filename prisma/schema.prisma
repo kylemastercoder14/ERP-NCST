@@ -346,6 +346,7 @@ model AccomplishmentReport {
   report    String
   images    String[]
   date      String
+  isViewed  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -364,10 +365,10 @@ model Client {
   address   String
   contactNo String
 
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  Employee  Employee[]
+  Employee Employee[]
 }
 
 model Logs {

@@ -3,13 +3,17 @@
 import { ImageIcon } from "lucide-react";
 import React from "react";
 import { Modal } from "@/components/ui/modal";
-import Image from 'next/image';
+import Image from "next/image";
 
 const ImagesViewer = ({ images }: { images: string[] }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   return (
     <>
-      <Modal title='Accomplishment Report Images' isOpen={isOpen} onClose={() => setIsOpen(false)}>
+      <Modal
+        title="Accomplishment Report Images"
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+      >
         <div className="grid lg:grid-cols-2 grid-cols-1 gap-2">
           {images.map((image, index) => (
             <div
@@ -19,7 +23,7 @@ const ImagesViewer = ({ images }: { images: string[] }) => {
               <Image
                 src={image}
                 alt={`Image ${index + 1}`}
-				fill
+                fill
                 className="object-cover w-full h-full"
               />
             </div>
