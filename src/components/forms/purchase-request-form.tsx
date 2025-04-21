@@ -2,7 +2,7 @@
 
 import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { PurchaseRequestValidators } from "@/validators";
@@ -15,11 +15,16 @@ import { FormFieldType } from "@/lib/constants";
 import { createPurchaseRequest, updatePurchaseRequest } from "@/actions";
 import Heading from "@/components/ui/heading";
 import { PurchaseRequestWithProps } from "@/types";
+import { Items } from "@prisma/client";
 
 const PurchaseRequestForm = ({
   initialData,
+  items,
+  department,
 }: {
   initialData: PurchaseRequestWithProps | null;
+  items: Items[];
+  department: string | null;
 }) => {
   const router = useRouter();
   const title = initialData ? "Edit Requested Purchase" : "Request Purchase";
@@ -30,35 +35,68 @@ const PurchaseRequestForm = ({
   const form = useForm<z.infer<typeof PurchaseRequestValidators>>({
     resolver: zodResolver(PurchaseRequestValidators),
     defaultValues: {
-      name: initialData?.item || "",
-      quantity: initialData?.quantity || 0,
-      unitPrice: initialData?.unitPrice || 0,
+      department: department || "",
+      items: initialData?.PurchaseRequestItem.map((item) => ({
+        itemId: item.itemId,
+        quantity: item.quantity,
+        totalAmount: item.totalAmount,
+      })) || [{ itemId: "", quantity: 1, totalAmount: 0 }],
     },
   });
 
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "items",
+  });
+
   const { isSubmitting } = form.formState;
+
 
   const onSubmit = async (
     values: z.infer<typeof PurchaseRequestValidators>
   ) => {
     try {
-        if (initialData) {
-      	const res = await updatePurchaseRequest(values, initialData?.id as string);
-      	if (res.success) {
-      	  toast.success(res.success);
-      	  router.push("/head/purchase-request");
-      	} else {
-      	  toast.error(res.error);
-      	}
+      const itemsWithPrice = values.items.map((item) => {
+        const selectedItem = items.find((i) => i.id === item.itemId);
+        if (!selectedItem) throw new Error("Invalid item selected.");
+
+        const unitPrice = selectedItem.unitPrice;
+        const totalAmount = item.quantity * unitPrice; // Calculate totalAmount here
+
+        return {
+          ...item,
+          unitPrice, // Make sure unitPrice is sent
+          totalAmount, // Add totalAmount to each item
+        };
+      });
+
+      const payload = {
+        ...values,
+        items: itemsWithPrice, // Send the computed items with totalAmount per item
+      };
+
+      console.log("Payload:", payload); // Debugging line
+
+      if (initialData) {
+        const res = await updatePurchaseRequest(
+          payload,
+          initialData?.id as string
+        );
+        if (res.success) {
+          toast.success(res.success);
+          router.push("/head/purchase-request");
         } else {
-      	const res = await createPurchaseRequest(values);
-      	if (res.success) {
-      	  toast.success(res.success);
-      	  router.push("/head/purchase-request");
-      	} else {
-      	  toast.error(res.error);
-      	}
+          toast.error(res.error);
         }
+      } else {
+        const res = await createPurchaseRequest(payload);
+        if (res.success) {
+          toast.success(res.success);
+          router.push("/head/purchase-request");
+        } else {
+          toast.error(res.error);
+        }
+      }
     } catch (error) {
       toast.error("An error occurred while requesting a purchase.");
       console.error(error);
@@ -76,33 +114,60 @@ const PurchaseRequestForm = ({
           <CustomFormField
             control={form.control}
             fieldType={FormFieldType.INPUT}
+            name="department"
+            label="Department"
             isRequired={true}
-            name="name"
-            disabled={isSubmitting}
-            label="Item name"
-            placeholder="Enter input name"
+            disabled
           />
-          <div className="grid lg:grid-cols-2 grid-cols-1 gap-4">
-            <CustomFormField
-              control={form.control}
-              fieldType={FormFieldType.INPUT}
-              isRequired={true}
-              type="number"
-              name="quantity"
-              disabled={isSubmitting}
-              label="Quantity"
-              placeholder="Enter quantity"
-            />
-            <CustomFormField
-              control={form.control}
-              fieldType={FormFieldType.INPUT}
-              isRequired={true}
-              type="number"
-              name="unitPrice"
-              disabled={isSubmitting}
-              label="Unit Price"
-              placeholder="Enter unit price"
-            />
+          <div className="space-y-4">
+            {fields.map((field, index) => (
+              <div
+                key={field.id}
+                className="border p-4 rounded relative space-y-4"
+              >
+                <div className="grid lg:grid-cols-2 gap-4 items-end">
+                  <CustomFormField
+                    control={form.control}
+                    fieldType={FormFieldType.COMBOBOX}
+                    name={`items.${index}.itemId`}
+                    dynamicOptions={items.map((item) => ({
+                      label: item.name,
+                      value: item.id,
+                    }))}
+                    label="Item"
+                    placeholder="Select item"
+                    isRequired={true}
+                  />
+                  <CustomFormField
+                    control={form.control}
+                    fieldType={FormFieldType.INPUT}
+                    name={`items.${index}.quantity`}
+                    type="number"
+                    label="Quantity"
+                    placeholder="Enter quantity"
+                    isRequired={true}
+                  />
+                </div>
+                {fields.length > 1 && (
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      onClick={() => remove(index)}
+                    >
+                      Delete Column
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => append({ itemId: "", quantity: 1 })}
+            >
+              + Add Item
+            </Button>
           </div>
           <div className="flex items-center justify-end">
             <Button onClick={() => router.back()} type="button" variant="ghost">

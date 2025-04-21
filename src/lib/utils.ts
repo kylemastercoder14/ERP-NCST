@@ -15,11 +15,23 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export const generatePurchaseCode = () => {
+  const now = new Date();
+  const year = now.getFullYear().toString().slice(-2); // last 2 digits ng year
+  const month = String(now.getMonth() + 1).padStart(2, "0"); // 01-12
+  const day = String(now.getDate()).padStart(2, "0"); // 01-31
+  const random = Math.floor(1000 + Math.random() * 9000); // random 4 digits
+
+  return `PR-${year}${month}${day}-${random}`;
+};
+
 export const getSidebarItems = (department?: string, position?: string) => {
   if (!department || !position) return [];
 
   if (department === "Human Resource" && position === "Head Department") {
     return SIDEBAR_HEAD_HR;
+  } else if (department === "Finance" && position === "Head Department") {
+    return SIDEBAR_HEAD_ACCOUNTING;
   } else if (
     department === "Customer Relationship" &&
     position === "Head Department"

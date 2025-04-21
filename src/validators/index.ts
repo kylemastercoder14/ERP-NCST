@@ -133,9 +133,14 @@ export const AccountValidators = z.object({
 });
 
 export const PurchaseRequestValidators = z.object({
-  name: z.string().min(1, { message: "Item name is required" }),
-  quantity: z.coerce.number().min(1, { message: "Quantity is required" }),
-  unitPrice: z.coerce.number().min(1, { message: "Unit price is required" }),
+  department: z.string().nonempty("Department is required"),
+  items: z.array(
+    z.object({
+      itemId: z.string().nonempty("Item is required"),
+      quantity: z.coerce.number().min(1, "Quantity must be at least 1"),
+      totalAmount: z.coerce.number().optional(),
+    })
+  ),
 });
 
 export const LeaveManagementValidators = z
@@ -214,8 +219,37 @@ export const ClientManagementValidators = z.object({
   logo: z.string().optional(),
 });
 
+export const SupplierManagementValidators = z.object({
+  name: z.string().min(1, { message: "Name is required" }),
+  email: z.string().min(1, { message: "Email is required" }),
+  password: z.string().min(1, { message: "Password is required" }),
+  address: z.string().optional(),
+  contactNo: z.string().optional(),
+  logo: z.string().optional(),
+});
+
 export const AccomplishmentReportValidators = z.object({
   report: z.string().min(1, { message: "Title is required" }),
   date: z.string().min(1, { message: "Date is required" }),
   images: z.array(z.string()).optional(),
+});
+
+export const ItemValidators = z.object({
+  unitPrice: z.coerce
+    .number()
+    .min(1, { message: "Unit price is required" })
+    .positive({ message: "Unit price must be greater than 0" }),
+  name: z.string().min(1, { message: "Name is required" }),
+  supplierId: z.string().min(1, { message: "Supplier is required" }),
+  sku: z.string().optional(),
+  isSmallItem: z.boolean().default(true),
+});
+
+export const AccountPayableValidators = z.object({
+  amount: z.coerce
+    .number()
+    .min(1, { message: "Amount is required" })
+    .positive({ message: "Amount must be greater than 0" }),
+  supplierId: z.string().min(1, { message: "Supplier is required" }),
+  description: z.string().optional(),
 });

@@ -290,15 +290,28 @@ model PaySlip {
   @@index([employeeId])
 }
 
-model PurchaseRequest {
-  id         String @id @default(cuid())
-  item       String
-  quantity   Int
-  unitPrice  Float
-  department String
+model Items {
+  id          String   @id @default(cuid())
+  name        String
+  unitPrice   Float
+  sku         String?
+  supplierId  String
+  Supplier    Supplier @relation(fields: [supplierId], references: [id])
+  isSmallItem Boolean  @default(true)
 
-  procurementStatus String  @default("Pending") // Pending, Approved, Rejected
-  procurementRemark String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  PurchaseRequestItem PurchaseRequestItem[]
+  Inventory           Inventory[]
+
+  @@index([supplierId])
+}
+
+model PurchaseRequest {
+  id           String @id @default(cuid())
+  purchaseCode String
+  department   String
 
   financeStatus String  @default("Pending") // Pending, Approved, Rejected
   financeRemark String?
@@ -318,27 +331,49 @@ model PurchaseRequest {
   receivedBy String?
   ReceivedBy UserAccount? @relation(fields: [receivedBy], references: [id])
 
-  Inventory Inventory[]
+  PurchaseRequestItem PurchaseRequestItem[]
 
   @@index([employeeId])
   @@index([receivedBy])
 }
 
+model PurchaseRequestItem {
+  id          String @id @default(cuid())
+  itemId      String
+  Item        Items  @relation(fields: [itemId], references: [id])
+  quantity    Int
+  totalAmount Float
+
+  financeItemStatus   String @default("Pending") // Pending, Approved, Rejected
+  supplierItemStatus  String @default("Pending") // Pending, Preparing, In transit, Delivered, Rejected
+  inventoryItemStatus String @default("Pending") // Pending, Received, Rejected
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  purchaseRequestId String
+  PurchaseRequest   PurchaseRequest @relation(fields: [purchaseRequestId], references: [id])
+
+  @@index([purchaseRequestId])
+  @@index([itemId])
+}
+
 model Inventory {
   id           String   @id @default(cuid())
-  item         String
+  itemId       String
+  Item         Items    @relation(fields: [itemId], references: [id])
   quantity     Int
   unitPrice    Float
   totalPrice   Float
-  supplier     String
-  dateReceived String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  supplierId   String
+  Supplier     Supplier @relation(fields: [supplierId], references: [id])
+  dateReceived DateTime
 
-  purchaseRequestId String?
-  PurchaseRequest   PurchaseRequest? @relation(fields: [purchaseRequestId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  @@index([purchaseRequestId])
+  @@index([itemId])
+  @@index([supplierId])
 }
 
 model AccomplishmentReport {
@@ -368,7 +403,67 @@ model Client {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  Employee Employee[]
+  Employee    Employee[]
+  Transaction Transaction[]
+}
+
+model Supplier {
+  id        String  @id @default(cuid())
+  name      String
+  email     String  @unique
+  password  String
+  logo      String?
+  address   String
+  contactNo String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Transaction Transaction[]
+  Items       Items[]
+  Inventory   Inventory[]
+}
+
+enum AccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  INCOME
+  EXPENSE
+}
+
+enum TransactionType {
+  DEBIT
+  CREDIT
+}
+
+model Account {
+  id           String        @id @default(cuid())
+  name         String
+  type         AccountType // enum: ASSET, LIABILITY, EQUITY, INCOME, EXPENSE
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Transaction {
+  id          String          @id @default(cuid())
+  amount      Float
+  type        TransactionType // enum: DEBIT or CREDIT
+  accountId   String
+  account     Account         @relation(fields: [accountId], references: [id])
+  supplierId  String?
+  Supplier    Supplier?       @relation(fields: [supplierId], references: [id])
+  clientId    String?
+  Client      Client?         @relation(fields: [clientId], references: [id])
+  description String?
+  status      String          @default("Unpaid")
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([accountId])
+  @@index([supplierId])
+  @@index([clientId])
 }
 
 model Logs {

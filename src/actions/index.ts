@@ -16,9 +16,10 @@ import {
   GovernmentMandatoriesValidators,
   AttendanceManagementValidators,
   ExtraShiftValidators,
-  PurchaseRequestValidators,
   ClientManagementValidators,
   AccomplishmentReportValidators,
+  ItemValidators,
+  SupplierManagementValidators,
 } from "@/validators";
 import nodemailer from "nodemailer";
 import { CreateAccountHTML } from "@/components/email-templates/create-account";
@@ -26,6 +27,7 @@ import { cookies } from "next/headers";
 import * as jose from "jose";
 import { useUser } from "@/hooks/use-user";
 import { RejectLeaveHTML } from "@/components/email-templates/reject-leave";
+import { generatePurchaseCode } from "@/lib/utils";
 
 export const loginAccount = async (values: z.infer<typeof LoginValidators>) => {
   const validatedField = LoginValidators.safeParse(values);
@@ -1536,18 +1538,8 @@ export const savePayslipToPdf = async (
   }
 };
 
-export const createPurchaseRequest = async (
-  values: z.infer<typeof PurchaseRequestValidators>
-) => {
+export const createPurchaseRequest = async (values: any) => {
   const { user } = await useUser();
-  const validatedField = PurchaseRequestValidators.safeParse(values);
-
-  if (!validatedField.success) {
-    const errors = validatedField.error.errors.map((err) => err.message);
-    return { error: `Validation Error: ${errors.join(", ")}` };
-  }
-
-  const { name, quantity, unitPrice } = validatedField.data;
 
   try {
     const employee = await db.employee.findUnique({
@@ -1563,17 +1555,31 @@ export const createPurchaseRequest = async (
       return { error: "Employee not found" };
     }
 
-    await db.purchaseRequest.create({
+    console.log("Passed Data", values);
+
+    const purchaseRequest = await db.purchaseRequest.create({
       data: {
-        item: name,
-        quantity,
-        unitPrice,
-        department: employee.Department.name,
+        department: values.department || employee.Department.name,
         employeeId: user?.employeeId as string,
+        purchaseCode: generatePurchaseCode(),
+        PurchaseRequestItem: {
+          create: values.items.map(
+            (item: { itemId: any; quantity: any; totalAmount: any }) => {
+              return {
+                itemId: item.itemId,
+                quantity: item.quantity,
+                totalAmount: item.totalAmount,
+              };
+            }
+          ),
+        },
       },
     });
 
-    return { success: "Purchase request created successfully" };
+    return {
+      success: "Purchase request created successfully",
+      data: purchaseRequest,
+    };
   } catch (error: any) {
     console.error("Error creating purchase request", error);
     return {
@@ -1583,29 +1589,34 @@ export const createPurchaseRequest = async (
 };
 
 export const updatePurchaseRequest = async (
-  values: z.infer<typeof PurchaseRequestValidators>,
+  values: any,
   purchaseId: string
 ) => {
   if (!purchaseId) {
     return { error: "Purchase request ID is required" };
   }
 
-  const validatedField = PurchaseRequestValidators.safeParse(values);
-
-  if (!validatedField.success) {
-    const errors = validatedField.error.errors.map((err) => err.message);
-    return { error: `Validation Error: ${errors.join(", ")}` };
-  }
-
-  const { name, quantity, unitPrice } = validatedField.data;
-
   try {
+    // First, delete all existing PurchaseRequestItems for this purchase request
+    await db.purchaseRequestItem.deleteMany({
+      where: {
+        purchaseRequestId: purchaseId,
+      },
+    });
+    // Then, update the purchase request itself (like department)
     await db.purchaseRequest.update({
       where: { id: purchaseId },
       data: {
-        item: name,
-        quantity,
-        unitPrice,
+        department: values.department,
+        PurchaseRequestItem: {
+          create: values.items.map((item: any) => ({
+            quantity: item.quantity,
+            totalAmount: item.totalAmount,
+            Item: {
+              connect: { id: item.itemId },
+            },
+          })),
+        },
       },
     });
 
@@ -1714,6 +1725,103 @@ export const deleteClient = async (id: string) => {
     console.error("Error deleting client", error);
     return {
       error: `Failed to delete client. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const createSupplier = async (
+  values: z.infer<typeof SupplierManagementValidators>
+) => {
+  const validatedField = SupplierManagementValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { name, email, password } = validatedField.data;
+
+  try {
+    await db.supplier.create({
+      data: {
+        name,
+        email,
+        password,
+        address: "",
+        contactNo: "",
+      },
+    });
+
+    return { success: "Supplier created successfully" };
+  } catch (error: any) {
+    console.error("Error creating Supplier", error);
+    return {
+      error: `Failed to create Supplier. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const updateSupplier = async (
+  values: z.infer<typeof SupplierManagementValidators>,
+  id: string
+) => {
+  if (!id) {
+    return { error: "Supplier ID is required" };
+  }
+
+  const validatedField = SupplierManagementValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { name, email, password, address, contactNo, logo } =
+    validatedField.data;
+
+  try {
+    await db.supplier.update({
+      where: { id },
+      data: {
+        name,
+        email,
+        password,
+        address,
+        contactNo,
+        logo,
+      },
+    });
+
+    return { success: "Supplier updated successfully" };
+  } catch (error: any) {
+    console.error("Error updating Supplier", error);
+    return {
+      error: `Failed to update Supplier. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const deleteSupplier = async (id: string) => {
+  if (!id) {
+    return { error: "Supplier ID is required" };
+  }
+
+  try {
+    await db.items.deleteMany({
+      where: {
+        supplierId: id,
+      },
+    });
+
+    await db.supplier.delete({
+      where: { id },
+    });
+
+    return { success: "Supplier deleted successfully" };
+  } catch (error: any) {
+    console.error("Error deleting Supplier", error);
+    return {
+      error: `Failed to delete Supplier. Please try again. ${error.message || ""}`,
     };
   }
 };
@@ -1840,5 +1948,92 @@ export const viewedNotificationOperations = async (id: string) => {
   } catch (error) {
     console.error("Error updating notifications", error);
     return { success: false, error: "Failed to update notifications" };
+  }
+};
+
+export const createItem = async (values: z.infer<typeof ItemValidators>) => {
+  const validatedField = ItemValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { name, unitPrice, sku, supplierId, isSmallItem } = validatedField.data;
+
+  try {
+    await db.items.create({
+      data: {
+        name,
+        unitPrice,
+        sku,
+        supplierId,
+        isSmallItem,
+      },
+    });
+
+    return { success: "Item created successfully" };
+  } catch (error: any) {
+    console.error("Error creating item", error);
+    return {
+      error: `Failed to create item. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const updateItem = async (
+  values: z.infer<typeof ItemValidators>,
+  id: string
+) => {
+  if (!id) {
+    return { error: "Item ID is required" };
+  }
+
+  const validatedField = ItemValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { name, unitPrice, sku, supplierId, isSmallItem } = validatedField.data;
+
+  try {
+    await db.items.update({
+      where: { id },
+      data: {
+        name,
+        unitPrice,
+        sku,
+        supplierId,
+        isSmallItem,
+      },
+    });
+
+    return { success: "Item updated successfully" };
+  } catch (error: any) {
+    console.error("Error updating item", error);
+    return {
+      error: `Failed to update item. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const deleteItem = async (id: string) => {
+  if (!id) {
+    return { error: "Item ID is required" };
+  }
+
+  try {
+    await db.items.delete({
+      where: { id },
+    });
+
+    return { success: "Item deleted successfully" };
+  } catch (error: any) {
+    console.error("Error deleting item", error);
+    return {
+      error: `Failed to delete item. Please try again. ${error.message || ""}`,
+    };
   }
 };

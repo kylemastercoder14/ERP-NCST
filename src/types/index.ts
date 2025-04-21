@@ -14,6 +14,8 @@ import {
   ExtraShift,
   PurchaseRequest,
   AccomplishmentReport,
+  PurchaseRequestItem,
+  Items,
 } from "@prisma/client";
 
 export interface EmployeeWithProps extends Employee {
@@ -34,11 +36,13 @@ export interface LeaveManagementWithProps extends LeaveManagement {
   ApprovedBy: UserAccount | null;
 }
 
-export interface PurchaseRequestWithProps extends PurchaseRequest {
-  Employee: Employee;
-  ReceivedBy: UserAccount | null;
+interface PurchaseRequestItemWithProps extends PurchaseRequestItem {
+  Item: Items | null;
 }
 
+export interface PurchaseRequestWithProps extends PurchaseRequest {
+  PurchaseRequestItem: PurchaseRequestItemWithProps[];
+}
 export interface AttendanceManagementWithProps extends Attendance {
   Employee: Employee;
 }

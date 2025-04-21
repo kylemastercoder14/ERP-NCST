@@ -8,6 +8,25 @@ export const SIDEBAR_HEAD_ACCOUNTING = [
         url: "/head/dashboard",
       },
       {
+        title: "Sales Management",
+        url: "#",
+        items: [
+          // show this in collapsible
+          {
+            title: "Ledger",
+            url: "/head/sales-management",
+          },
+          {
+            title: "Accounts Payable",
+            url: "/head/sales-management/accounts-payable",
+          },
+          {
+            title: "Accounts Receivable",
+            url: "/head/sales-management/accounts-receivable",
+          },
+        ],
+      },
+      {
         title: "Client Payment Management",
         url: "/head/client-payment-management",
       },
@@ -18,14 +37,6 @@ export const SIDEBAR_HEAD_ACCOUNTING = [
       {
         title: "Invoice Generation",
         url: "/head/invoice-generation",
-      },
-      {
-        title: "Payroll Management",
-        url: "/head/payroll-management",
-      },
-      {
-        title: "Expense Management",
-        url: "/head/expense-management",
       },
     ],
   },
@@ -238,6 +249,21 @@ export const SIDEBAR_HEAD_PROCUREMENT = [
       {
         title: "Dashboard",
         url: "/head/dashboard",
+      },
+      {
+        title: "Procurement Management",
+        url: "#",
+        items: [
+          // show this in collapsible
+          {
+            title: "Items List",
+            url: "/head/procurement-management/items-list",
+          },
+          {
+            title: "List of Purchase Requests",
+            url: "/head/procurement-management/purchase-request-records",
+          },
+        ],
       },
       {
         title: "Supplier Management",

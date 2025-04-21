@@ -4,34 +4,16 @@ import { ColumnDef } from "@tanstack/react-table";
 import { ChevronsUpDown } from "lucide-react";
 import { CellAction } from "./cell-action";
 
-export type PurchaseRequestColumn = {
+export type ItemColumn = {
   id: string;
-  itemName: string;
-  purchaseCode: string;
   name: string;
-  licenseNo: string;
-  quantity: number;
-  totalAmount: string;
-  department: string;
-  financeStatus: string;
+  unitPrice: string;
+  sku: string;
+  supplier: string;
   createdAt: string;
 };
 
-export const columns: ColumnDef<PurchaseRequestColumn>[] = [
-  {
-    accessorKey: "purchaseCode",
-    header: ({ column }) => {
-      return (
-        <span
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="cursor-pointer flex items-center"
-        >
-          Purchase #
-          <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
-        </span>
-      );
-    },
-  },
+export const columns: ColumnDef<ItemColumn>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => {
@@ -40,100 +22,73 @@ export const columns: ColumnDef<PurchaseRequestColumn>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="cursor-pointer flex items-center"
         >
-          Requested By
-          <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
-        </span>
-      );
-    },
-    cell: ({ row }) => {
-      return (
-        <div className="flex flex-col">
-          <span className="text-sm">{row.original.name}</span>
-          <span className="text-muted-foreground text-[12px]">
-            License No.: {row.original.licenseNo}
-          </span>
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "itemName",
-    header: ({ column }) => {
-      return (
-        <span
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="cursor-pointer flex items-center"
-        >
-          Item
+          Item Name
           <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
         </span>
       );
     },
   },
   {
-    accessorKey: "totalAmount",
+    accessorKey: "unitPrice",
     header: ({ column }) => {
       return (
         <span
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="cursor-pointer flex items-center"
         >
-          Total Amount
+          Unit Price
           <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
         </span>
       );
     },
   },
   {
-    accessorKey: "department",
+    accessorKey: "sku",
     header: ({ column }) => {
       return (
         <span
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="cursor-pointer flex items-center"
         >
-          Department
+          SKU
           <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
         </span>
       );
     },
   },
   {
-    accessorKey: "financeStatus",
+    accessorKey: "supplier",
     header: ({ column }) => {
       return (
         <span
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="cursor-pointer flex items-center"
         >
-          Finance Status
+          Supplier
           <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
         </span>
       );
     },
-    cell: ({ row }) => {
+  },
+  {
+    accessorKey: "createdAt",
+    header: ({ column }) => {
       return (
-        <div>
-          <div
-            className={`w-14 rounded-md px-2 flex items-center justify-center text-[11px] py-0.5 border
-      ${
-        row.original.financeStatus === "Approved"
-          ? "bg-green-600/20 border-green-600 text-green-800"
-          : row.original.financeStatus === "Rejected"
-            ? "bg-red-600/20 border-red-600 text-red-800"
-            : "bg-yellow-600/20 border-yellow-600 text-yellow-800"
-      }
-    `}
-          >
-            {row.original.financeStatus}
-          </div>
-        </div>
+        <span
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="cursor-pointer flex items-center"
+        >
+          Date Created
+          <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
+        </span>
       );
     },
   },
   {
     accessorKey: "actions",
     header: "",
-    cell: ({ row }) => <CellAction id={row.original.id} />,
+    cell: ({ row }) => (
+      <CellAction id={row.original.id} />
+    ),
   },
 ];
