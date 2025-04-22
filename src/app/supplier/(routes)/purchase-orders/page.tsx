@@ -1,18 +1,20 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import Heading from "@/components/ui/heading";
 import db from "@/lib/db";
 import { PurchaseRequestColumn } from "./_components/column";
 import { format } from "date-fns";
 import PurchaseRequestClient from "./_components/client";
-import { useUser } from "@/hooks/use-user";
+import { useSupplier } from "@/hooks/use-supplier";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Page = async () => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const { user } = await useUser();
+  const { userType } = await useSupplier();
   const data = await db.purchaseRequest.findMany({
+    where: {
+      financeStatus: "Approved",
+    },
     orderBy: {
       createdAt: "desc",
     },
@@ -31,7 +33,7 @@ const Page = async () => {
     },
   });
 
-  const department = user?.Employee?.Department.name;
+  const department = userType;
 
   const formattedData: PurchaseRequestColumn[] =
     data.map((request) => {
@@ -52,14 +54,19 @@ const Page = async () => {
           (acc, prItem) => acc + prItem.quantity,
           0
         ),
-        totalAmount: `₱${totalAmount.toFixed(2).toLocaleString()}`, // showing the total amount as unit price
+        totalAmount: `₱${totalAmount.toFixed(2).toLocaleString()}`,
         department: request.department,
         financeStatus: request.financeStatus,
+        supplierStatus: request.supplierStatus,
         purchaseCode: request.purchaseCode,
         departmentSession: department || "",
         createdAt: format(new Date(request.createdAt), "MMMM dd, yyyy"),
       };
     }) || [];
+
+  const getDataByStatus = (status: string) => {
+    return formattedData.filter((item) => item.supplierStatus === status);
+  };
 
   return (
     <div>
@@ -68,12 +75,32 @@ const Page = async () => {
           title="List of Purchase Request"
           description="Manage all the requested purchase here. Wait for the approval of your request."
         />
-        <Button size="sm">
-          <Link href={`/head/purchase-request/create`}>+ Request Purchase</Link>
-        </Button>
       </div>
       <Separator className="my-5" />
-      <PurchaseRequestClient data={formattedData} />
+      <Tabs defaultValue="pending">
+        <TabsList>
+          <TabsTrigger value="pending">Pending</TabsTrigger>
+          <TabsTrigger value="preparing">Preparing</TabsTrigger>
+          <TabsTrigger value="in-transit">In transit</TabsTrigger>
+          <TabsTrigger value="delivered">Delivered</TabsTrigger>
+          <TabsTrigger value="rejected">Rejected</TabsTrigger>
+        </TabsList>
+        <TabsContent value="pending">
+          <PurchaseRequestClient data={getDataByStatus("Pending")} />
+        </TabsContent>
+        <TabsContent value="preparing">
+          <PurchaseRequestClient data={getDataByStatus("Preparing")} />
+        </TabsContent>
+        <TabsContent value="in-transit">
+          <PurchaseRequestClient data={getDataByStatus("In transit")} />
+        </TabsContent>
+        <TabsContent value="delivered">
+          <PurchaseRequestClient data={getDataByStatus("Delivered")} />
+        </TabsContent>
+        <TabsContent value="rejected">
+          <PurchaseRequestClient data={getDataByStatus("Rejected")} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

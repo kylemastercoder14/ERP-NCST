@@ -45,6 +45,10 @@ export const SIDEBAR_HEAD_ACCOUNTING = [
     url: "#",
     items: [
       {
+        title: "Purchase Request",
+        url: "/head/purchase-request",
+      },
+      {
         title: "Reports Management",
         url: "/head/reports-management",
       },
@@ -251,19 +255,8 @@ export const SIDEBAR_HEAD_PROCUREMENT = [
         url: "/head/dashboard",
       },
       {
-        title: "Procurement Management",
-        url: "#",
-        items: [
-          // show this in collapsible
-          {
-            title: "Items List",
-            url: "/head/procurement-management/items-list",
-          },
-          {
-            title: "List of Purchase Requests",
-            url: "/head/procurement-management/purchase-request-records",
-          },
-        ],
+        title: "Items List",
+        url: "/head/items-list",
       },
       {
         title: "Supplier Management",
@@ -352,6 +345,23 @@ export const SIDEBAR_REPORTING_MANAGER = [
       {
         title: "Payroll Management",
         url: "/reporting-manager/payroll-management",
+      },
+    ],
+  },
+];
+
+export const SIDEBAR_SUPPLIER = [
+  {
+    title: "General",
+    url: "#",
+    items: [
+      {
+        title: "Dashboard",
+        url: "/supplier/dashboard",
+      },
+      {
+        title: "List of Purchase Orders",
+        url: "/supplier/purchase-orders",
       },
     ],
   },

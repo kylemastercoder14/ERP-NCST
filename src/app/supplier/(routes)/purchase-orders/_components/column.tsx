@@ -13,6 +13,7 @@ export type PurchaseRequestColumn = {
   quantity: number;
   totalAmount: string;
   department: string;
+  supplierStatus: string;
   financeStatus: string;
   departmentSession: string;
   createdAt: string;
@@ -100,6 +101,46 @@ export const columns: ColumnDef<PurchaseRequestColumn>[] = [
     },
   },
   {
+    accessorKey: "supplierStatus",
+    header: ({ column }) => {
+      return (
+        <span
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="cursor-pointer flex items-center"
+        >
+          Supplier Status
+          <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
+        </span>
+      );
+    },
+    cell: ({ row }) => {
+      const status = row.original.supplierStatus;
+
+      const statusStyles: { [key: string]: string } = {
+        Delivered: "bg-green-600/20 border-green-600 text-green-800",
+        Rejected: "bg-red-600/20 border-red-600 text-red-800",
+        Pending: "bg-yellow-400/20 border-yellow-400 text-yellow-700",
+        Preparing: "bg-blue-400/20 border-blue-400 text-blue-700",
+        "In transit": "bg-purple-400/20 border-purple-400 text-purple-700",
+        // fallback default style if status is unrecognized
+        default: "bg-gray-300/20 border-gray-300 text-gray-600",
+      };
+
+      const style = statusStyles[status] || statusStyles.default;
+
+      return (
+        <div>
+          <div
+            className={`w-16 rounded-md px-2 flex items-center justify-center text-[11px] py-0.5 border ${style}`}
+          >
+            {status}
+          </div>
+        </div>
+      );
+    },
+  },
+
+  {
     accessorKey: "financeStatus",
     header: ({ column }) => {
       return (
@@ -135,6 +176,13 @@ export const columns: ColumnDef<PurchaseRequestColumn>[] = [
   {
     accessorKey: "actions",
     header: "",
-    cell: ({ row }) => <CellAction id={row.original.id} financeStatus={row.original.financeStatus} departmentSession={row.original.departmentSession} />,
+    cell: ({ row }) => (
+      <CellAction
+        id={row.original.id}
+        financeStatus={row.original.financeStatus}
+        departmentSession={row.original.departmentSession}
+        supplierStatus={row.original.supplierStatus}
+      />
+    ),
   },
 ];

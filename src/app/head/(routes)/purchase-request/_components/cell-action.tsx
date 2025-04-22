@@ -9,20 +9,29 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, MoreHorizontal, Trash } from "lucide-react";
+import { Edit, FolderOpen, MoreHorizontal, Printer, Trash } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import AlertModal from "@/components/ui/alert-modal";
 import React from "react";
 import { deleteLeave } from "@/actions";
+import { Modal } from "../../../../../components/ui/modal";
+import PurchaseRequestDetails from "./purchase-request-details";
 
 interface CellActionProps {
   id: string;
+  financeStatus: string;
+  departmentSession: string;
 }
 
-export const CellAction: React.FC<CellActionProps> = ({ id }) => {
+export const CellAction: React.FC<CellActionProps> = ({
+  id,
+  financeStatus,
+  departmentSession,
+}) => {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
+  const [modalOpen, setModalOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
   const onDelete = async () => {
@@ -52,6 +61,15 @@ export const CellAction: React.FC<CellActionProps> = ({ id }) => {
         onClose={() => setOpen(false)}
         loading={loading}
       />
+      <Modal
+        isOpen={modalOpen}
+        className="max-w-4xl"
+        onClose={() => setModalOpen(false)}
+        title="You are about to change the status of this purchase request."
+        description="Please make sure to review the details before proceeding. This action cannot be undone."
+      >
+        <PurchaseRequestDetails id={id} />
+      </Modal>
       <DropdownMenu>
         <DropdownMenuTrigger className="no-print" asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
@@ -61,6 +79,20 @@ export const CellAction: React.FC<CellActionProps> = ({ id }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          {departmentSession === "Finance" && financeStatus === "Pending" && (
+            <DropdownMenuItem onClick={() => setModalOpen(true)}>
+              <FolderOpen className="w-4 h-4 mr-2" />
+              View Details
+            </DropdownMenuItem>
+          )}
+
+          {financeStatus === "Approved" && (
+            <DropdownMenuItem>
+              <Printer className="w-4 h-4 mr-2" />
+              Print Order Form
+            </DropdownMenuItem>
+          )}
+
           <DropdownMenuItem
             onClick={() => router.push(`/head/purchase-request/${id}`)}
           >

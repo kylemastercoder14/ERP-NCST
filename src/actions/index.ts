@@ -91,6 +91,62 @@ export const loginAccount = async (values: z.infer<typeof LoginValidators>) => {
   }
 };
 
+export const supplierLoginAccount = async (
+  values: z.infer<typeof LoginValidators>
+) => {
+  const validatedField = LoginValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { email, password } = validatedField.data;
+
+  try {
+    const user = await db.supplier.findFirst({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) {
+      return { error: "No user account found." };
+    }
+
+    if (user.password !== password) {
+      return { error: "Invalid password" };
+    }
+
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+    const alg = "HS256";
+
+    const jwt = await new jose.SignJWT({})
+      .setProtectedHeader({ alg })
+      .setExpirationTime("72h")
+      .setSubject(user.id.toString())
+      .sign(secret);
+
+    (
+      await // Set the cookie with the JWT
+      cookies()
+    ).set("Authorization", jwt, {
+      httpOnly: true, // Set to true for security
+      secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+      maxAge: 60 * 60 * 24 * 3, // Cookie expiration (3 days in seconds)
+      sameSite: "strict", // Adjust according to your needs
+      path: "/", // Adjust path as needed
+    });
+
+    return { token: jwt, user: user };
+  } catch (error: any) {
+    console.error("Error logging in user", error);
+    return {
+      error: `Failed to login. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
 export const logoutUser = async () => {
   (await cookies()).set("Authorization", "", { maxAge: 0, path: "/" });
 };
@@ -397,6 +453,31 @@ export const changeTrainingStatus = async (
     };
   }
 };
+
+export const changePurchaseRequestStatusSupplier = async (
+  id: string,
+  status: string
+) => {
+  if (!id) {
+    return { error: "Purchase request ID is required" };
+  }
+
+  try {
+    await db.purchaseRequest.update({
+      where: { id },
+      data: {
+        supplierStatus: status,
+      },
+    });
+
+    return { success: "Purchase request successfully changed to Preparing" };
+  } catch (error: any) {
+    console.error("Error changing purchase request status", error);
+    return {
+      error: `Failed to change purchase request status. Please try again. ${error.message || ""}`,
+    };
+  }
+}
 
 export const updateApplicant = async (
   id: string,
@@ -1625,6 +1706,68 @@ export const updatePurchaseRequest = async (
     console.error("Error updating purchase request", error);
     return {
       error: `Failed to update purchase request. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const getPurchaseRequestById = async (id: string) => {
+  if (!id) {
+    return { error: "Purchase request ID is required" };
+  }
+
+  try {
+    const purchaseRequest = await db.purchaseRequest.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        PurchaseRequestItem: {
+          include: {
+            Item: true,
+          },
+        },
+      },
+    });
+
+    return { purchaseRequest };
+  } catch (error: any) {
+    console.error("Error fetching purchase request", error);
+    return {
+      error: `Failed to fetch purchase request. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const updatePurchaseRequestStatus = async (
+  id: string,
+  status: string,
+  remarks: string
+) => {
+  if (!id) {
+    return { error: "Purchase request ID is required" };
+  }
+
+  try {
+    await db.purchaseRequest.update({
+      where: { id },
+      data: {
+        financeStatus: status,
+        financeRemark: remarks,
+      },
+    });
+
+    await db.purchaseRequestItem.updateMany({
+      where: { purchaseRequestId: id },
+      data: {
+        financeItemStatus: status,
+      },
+    });
+
+    return { success: "Purchase request status updated successfully" };
+  } catch (error: any) {
+    console.error("Error updating purchase request status", error);
+    return {
+      error: `Failed to update purchase request status. Please try again. ${error.message || ""}`,
     };
   }
 };
