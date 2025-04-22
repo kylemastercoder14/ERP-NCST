@@ -38,7 +38,7 @@ const Page = async () => {
 		  description="Manage all the items here."
 		/>
 		<Button size="sm">
-		  <Link href={`/head/procurement-management/items-list/create`}>+ Add new item</Link>
+		  <Link href={`/head/items-list/create`}>+ Add new item</Link>
 		</Button>
 	  </div>
 	  <Separator className="my-5" />

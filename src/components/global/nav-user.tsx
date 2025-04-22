@@ -48,7 +48,7 @@ export function NavUser({
     try {
       await logoutUser();
       toast.success("Logged out successfully");
-      router.push("/supplier/sign-in");
+      router.push("/sign-in");
     } catch (error) {
       console.error(error);
     }

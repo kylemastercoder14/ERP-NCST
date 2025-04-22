@@ -48,7 +48,7 @@ const AccountPayableForm = ({
         const res = await updateItem(values, initialData?.id as string);
         if (res.success) {
           toast.success(res.success);
-          router.push("/head/procurement-management/items-list");
+          router.push("/head/items-list");
         } else {
           toast.error(res.error);
         }
@@ -56,7 +56,7 @@ const AccountPayableForm = ({
         const res = await createItem(values);
         if (res.success) {
           toast.success(res.success);
-          router.push("/head/procurement-management/items-list");
+          router.push("/head/items-list");
         } else {
           toast.error(res.error);
         }
