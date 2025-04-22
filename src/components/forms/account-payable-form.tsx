@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import CustomFormField from "@/components/global/custom-formfield";
 import { FormFieldType } from "@/lib/constants";
 import { Supplier, Transaction } from "@prisma/client";
-import { createAttendance, updateAttendance } from "@/actions";
+import { createAccountPayable, updateAccountPayable } from "@/actions";
 import Heading from "@/components/ui/heading";
 
 const AccountPayableForm = ({
@@ -35,6 +35,8 @@ const AccountPayableForm = ({
       amount: initialData?.amount || 0,
       supplierId: initialData?.supplierId || "",
       description: initialData?.description || "",
+      accountType: initialData?.accountType || "ASSET",
+      name: initialData?.name || "",
     },
   });
 
@@ -43,18 +45,18 @@ const AccountPayableForm = ({
   const onSubmit = async (values: z.infer<typeof AccountPayableValidators>) => {
     try {
       if (initialData) {
-        const res = await updateAttendance(values, initialData?.id as string);
+        const res = await updateAccountPayable(values, initialData?.id as string);
         if (res.success) {
           toast.success(res.success);
-          router.push("/head/attendance-management");
+          router.push("/head/sales-management/accounts-payable");
         } else {
           toast.error(res.error);
         }
       } else {
-        const res = await createAttendance(values);
+        const res = await createAccountPayable(values);
         if (res.success) {
           toast.success(res.success);
-          router.push("/head/attendance-management");
+          router.push("/head/sales-management/accounts-payable");
         } else {
           toast.error(res.error);
         }
@@ -72,6 +74,28 @@ const AccountPayableForm = ({
           onSubmit={form.handleSubmit(onSubmit)}
           className="grid mt-5 gap-6"
         >
+          <CustomFormField
+            control={form.control}
+            fieldType={FormFieldType.INPUT}
+            isRequired={true}
+            name="name"
+            disabled={isSubmitting}
+            label="Name"
+            placeholder="Enter name"
+          />
+          <CustomFormField
+            control={form.control}
+            fieldType={FormFieldType.SELECT}
+            dynamicOptions={["ASSET", "LIABILITY", "EQUITY", "INCOME", "EXPENSE"].map((type) => ({
+              label: type,
+              value: type,
+            }))}
+            isRequired={true}
+            name="accountType"
+            disabled={isSubmitting}
+            label="Account Type"
+            placeholder="Select account type"
+          />
           <CustomFormField
             control={form.control}
             fieldType={FormFieldType.COMBOBOX}
@@ -95,7 +119,7 @@ const AccountPayableForm = ({
             label="Amount"
             placeholder="Enter amount"
           />
-		   <CustomFormField
+          <CustomFormField
             control={form.control}
             fieldType={FormFieldType.TEXTAREA}
             isRequired={true}

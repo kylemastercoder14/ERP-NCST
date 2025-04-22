@@ -20,6 +20,7 @@ import {
   AccomplishmentReportValidators,
   ItemValidators,
   SupplierManagementValidators,
+  AccountPayableValidators,
 } from "@/validators";
 import nodemailer from "nodemailer";
 import { CreateAccountHTML } from "@/components/email-templates/create-account";
@@ -477,7 +478,7 @@ export const changePurchaseRequestStatusSupplier = async (
       error: `Failed to change purchase request status. Please try again. ${error.message || ""}`,
     };
   }
-}
+};
 
 export const updateApplicant = async (
   id: string,
@@ -2177,6 +2178,80 @@ export const deleteItem = async (id: string) => {
     console.error("Error deleting item", error);
     return {
       error: `Failed to delete item. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const createAccountPayable = async (
+  values: z.infer<typeof AccountPayableValidators>
+) => {
+  const validatedField = AccountPayableValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { name, supplierId, accountType, amount, description } =
+    validatedField.data;
+
+  try {
+    await db.transaction.create({
+      data: {
+        name,
+        supplierId,
+        accountType,
+        amount,
+        type: "CREDIT",
+        description,
+      },
+    });
+
+    return { success: "Account payable created successfully" };
+  } catch (error: any) {
+    console.error("Error creating account payable", error);
+    return {
+      error: `Failed to create account payable. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const updateAccountPayable = async (
+  values: z.infer<typeof AccountPayableValidators>,
+  id: string
+) => {
+  if (!id) {
+    return { error: "Account payable ID is required" };
+  }
+
+  const validatedField = AccountPayableValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { name, supplierId, accountType, amount, description } =
+    validatedField.data;
+
+  try {
+    await db.transaction.update({
+      where: { id },
+      data: {
+        name,
+        supplierId,
+        accountType,
+        amount,
+        type: "CREDIT",
+        description,
+      },
+    });
+
+    return { success: "Account payable updated successfully" };
+  } catch (error: any) {
+    console.error("Error updating account payable", error);
+    return {
+      error: `Failed to update account payable. Please try again. ${error.message || ""}`,
     };
   }
 };

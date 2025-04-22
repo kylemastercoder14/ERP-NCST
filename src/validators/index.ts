@@ -246,10 +246,12 @@ export const ItemValidators = z.object({
 });
 
 export const AccountPayableValidators = z.object({
+  accountType: z.enum(["ASSET", "LIABILITY", "EQUITY", "INCOME", "EXPENSE"]),
   amount: z.coerce
     .number()
     .min(1, { message: "Amount is required" })
     .positive({ message: "Amount must be greater than 0" }),
   supplierId: z.string().min(1, { message: "Supplier is required" }),
+  name: z.string().min(1, { message: "Name is required" }),
   description: z.string().optional(),
 });
