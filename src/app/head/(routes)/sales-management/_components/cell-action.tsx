@@ -102,7 +102,7 @@ export const CellAction: React.FC<CellActionProps> = ({
           )}
 
           <DropdownMenuItem
-            onClick={() => router.push(`/head/sales-management/accounts-payable/${id}`)}
+            onClick={() => router.push(`/head/sales-management/${id}`)}
           >
             <Edit className="w-4 h-4 mr-2" />
             Edit

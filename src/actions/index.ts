@@ -21,6 +21,8 @@ import {
   ItemValidators,
   SupplierManagementValidators,
   AccountPayableValidators,
+  AccountReceivableValidators,
+  TransactionValidators,
 } from "@/validators";
 import nodemailer from "nodemailer";
 import { CreateAccountHTML } from "@/components/email-templates/create-account";
@@ -2252,6 +2254,178 @@ export const updateAccountPayable = async (
     console.error("Error updating account payable", error);
     return {
       error: `Failed to update account payable. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const createAccountReceivable = async (
+  values: z.infer<typeof AccountReceivableValidators>
+) => {
+  const validatedField = AccountReceivableValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { name, clientId, accountType, amount, description } =
+    validatedField.data;
+
+  try {
+    await db.transaction.create({
+      data: {
+        name,
+        clientId,
+        accountType,
+        amount,
+        type: "DEBIT",
+        description,
+      },
+    });
+
+    return { success: "Account receivable created successfully" };
+  } catch (error: any) {
+    console.error("Error creating account receivable", error);
+    return {
+      error: `Failed to create account receivable. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const updateAccountReceivable = async (
+  values: z.infer<typeof AccountReceivableValidators>,
+  id: string
+) => {
+  if (!id) {
+    return { error: "Account Receivable ID is required" };
+  }
+
+  const validatedField = AccountReceivableValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { name, clientId, accountType, amount, description } =
+    validatedField.data;
+
+  try {
+    await db.transaction.update({
+      where: { id },
+      data: {
+        name,
+        clientId,
+        accountType,
+        amount,
+        type: "DEBIT",
+        description,
+      },
+    });
+
+    return { success: "Account receivable updated successfully" };
+  } catch (error: any) {
+    console.error("Error updating account receivable", error);
+    return {
+      error: `Failed to update account receivable. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const markAsPaid = async (id: string) => {
+  if (!id) {
+    return { error: "Transaction ID is required" };
+  }
+
+  try {
+    await db.transaction.update({
+      where: { id },
+      data: {
+        status: "Paid",
+      },
+    });
+
+    return { success: "Transaction marked as paid successfully" };
+  } catch (error: any) {
+    console.error("Error marking transaction as paid", error);
+    return {
+      error: `Failed to mark transaction as paid. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const createTransaction = async (
+  values: z.infer<typeof TransactionValidators>
+) => {
+  const validatedField = TransactionValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { name, supplierId, clientId, type, accountType, amount, description } =
+    validatedField.data;
+
+  try {
+    await db.transaction.create({
+      data: {
+        name,
+        supplierId,
+        clientId,
+        accountType,
+        amount,
+        type,
+        description,
+      },
+    });
+
+    return { success: "Transaction created successfully" };
+  } catch (error: any) {
+    console.error("Error creating transaction", error);
+    return {
+      error: `Failed to create transaction. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const updateTransaction = async (
+  values: z.infer<typeof TransactionValidators>,
+  id: string
+) => {
+  if (!id) {
+    return { error: "Transaction ID is required" };
+  }
+
+  const validatedField = TransactionValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { name, supplierId, clientId, type, accountType, amount, description } =
+    validatedField.data;
+
+  try {
+    await db.transaction.update({
+      where: { id },
+      data: {
+        name,
+        supplierId,
+        clientId,
+        accountType,
+        amount,
+        type,
+        description,
+      },
+    });
+
+    return { success: "Transaction updated successfully" };
+  } catch (error: any) {
+    console.error("Error updating transaction", error);
+    return {
+      error: `Failed to update transaction. Please try again. ${error.message || ""}`,
     };
   }
 };

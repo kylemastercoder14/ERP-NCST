@@ -37,7 +37,7 @@ export const columns: ColumnDef<AccountPayableColumn>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="cursor-pointer flex items-center"
         >
-          Supplier
+          Client
           <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
         </span>
       );

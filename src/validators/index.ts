@@ -255,3 +255,27 @@ export const AccountPayableValidators = z.object({
   name: z.string().min(1, { message: "Name is required" }),
   description: z.string().optional(),
 });
+
+export const AccountReceivableValidators = z.object({
+  accountType: z.enum(["ASSET", "LIABILITY", "EQUITY", "INCOME", "EXPENSE"]),
+  amount: z.coerce
+    .number()
+    .min(1, { message: "Amount is required" })
+    .positive({ message: "Amount must be greater than 0" }),
+  clientId: z.string().min(1, { message: "Client is required" }),
+  name: z.string().min(1, { message: "Name is required" }),
+  description: z.string().optional(),
+});
+
+export const TransactionValidators = z.object({
+  accountType: z.enum(["ASSET", "LIABILITY", "EQUITY", "INCOME", "EXPENSE"]),
+  type: z.enum(["DEBIT", "CREDIT"]),
+  amount: z.coerce
+    .number()
+    .min(1, { message: "Amount is required" })
+    .positive({ message: "Amount must be greater than 0" }),
+  clientId: z.string().optional(),
+  supplierId: z.string().optional(),
+  name: z.string().min(1, { message: "Name is required" }),
+  description: z.string().optional(),
+});
