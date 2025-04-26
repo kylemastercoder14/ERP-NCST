@@ -25,7 +25,7 @@ import { toast } from "sonner";
 
 const PurchaseRequestDetails = ({ id }: { id: string }) => {
   const [purchaseRequest, setPurchaseRequest] =
-    React.useState<PurchaseRequestWithProps | null>(null);
+      React.useState<PurchaseRequestWithProps | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [loading2, setLoading2] = React.useState(false);
   const [status, setStatus] = React.useState("");

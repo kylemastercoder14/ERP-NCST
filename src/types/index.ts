@@ -38,7 +38,7 @@ export interface LeaveManagementWithProps extends LeaveManagement {
 }
 
 export interface ItemWithSupplierProps extends Items {
-  Supplier: Supplier | null;
+  Supplier?: Supplier | null;
 }
 
 export interface PurchaseRequestItemWithProps extends PurchaseRequestItem {
