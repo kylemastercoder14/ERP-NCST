@@ -4,9 +4,14 @@ import { useUser } from "@/hooks/use-user";
 import { useSupplier } from "@/hooks/use-supplier";
 import SliderInvoices from "./slider-client";
 
-const Page = async ({ params }: { params: { orderId: string } }) => {
+const Page = async (props: {
+	params: Promise<{
+	  orderId: string;
+	}>;
+  }) => {
   const { user } = await useUser();
   const { user: supplier } = await useSupplier();
+  const params = await props.params;
 
   const purchaseRequest = await db.purchaseRequest.findUnique({
     where: { id: params.orderId },
