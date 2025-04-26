@@ -35,6 +35,7 @@ const LeaveForm = ({
       report: initialData?.report || "",
       date: initialData?.date || new Date().toISOString(),
       images: initialData?.images || [],
+      remarks: initialData?.remarks || "",
     },
   });
 
@@ -102,6 +103,15 @@ const LeaveForm = ({
             description="Upload 1 to 3 images in .png, .jpg, .jpeg, .webp format
                                         with a resolution of at least 100*100 px and the file must
                                         not be bigger than 5 MB."
+          />
+          <CustomFormField
+            control={form.control}
+            fieldType={FormFieldType.TEXTAREA}
+            isRequired={false}
+            name="remarks"
+            disabled={isSubmitting}
+            label="Remarks"
+            placeholder="Enter remarks here..."
           />
           <div className="flex items-center justify-end">
             <Button onClick={() => router.back()} type="button" variant="ghost">

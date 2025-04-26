@@ -288,6 +288,49 @@ export const SIDEBAR_HEAD_PROCUREMENT = [
   },
 ];
 
+export const SIDEBAR_HEAD_INVENTORY = [
+  {
+    title: "General",
+    url: "#",
+    items: [
+      {
+        title: "Dashboard",
+        url: "/head/dashboard",
+      },
+      {
+        title: "Inventory Management",
+        url: "/head/inventory-management",
+      },
+      {
+        title: "Withdrawal Management",
+        url: "/head/withdrawal-management",
+      },
+      {
+        title: "List of Purchase Orders",
+        url: "/head/purchase-orders",
+      },
+    ],
+  },
+  {
+    title: "Others",
+    url: "#",
+    items: [
+      {
+        title: "Reports Management",
+        url: "/head/reports-management",
+      },
+      {
+        title: "Settings",
+        url: "/head/settings",
+      },
+      {
+        title: "Logs",
+        url: "/head/logs",
+      },
+    ],
+  },
+];
+
 export const SIDEBAR_EMPLOYEE = [
   {
     title: "General",

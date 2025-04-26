@@ -461,19 +461,63 @@ export const changePurchaseRequestStatusSupplier = async (
   id: string,
   status: string
 ) => {
+  const { user } = await useUser();
   if (!id) {
     return { error: "Purchase request ID is required" };
   }
 
   try {
-    await db.purchaseRequest.update({
-      where: { id },
-      data: {
-        supplierStatus: status,
-      },
-    });
+    if (status === "Received") {
+      const request = await db.purchaseRequest.update({
+        where: { id },
+        data: {
+          supplierStatus: status,
+          receivedBy: user?.employeeId,
+        },
+        include: {
+          PurchaseRequestItem: {
+            include: {
+              Item: true,
+            },
+          },
+        },
+      });
 
-    return { success: "Purchase request successfully changed to Preparing" };
+      for (const item of request.PurchaseRequestItem) {
+        const existingInventory = await db.inventory.findFirst({
+          where: { itemId: item.itemId },
+        });
+
+        if (existingInventory) {
+          // Item already in inventory — increment quantity
+          await db.inventory.update({
+            where: { id: existingInventory.id },
+            data: {
+              quantity: existingInventory.quantity + item.quantity,
+            },
+          });
+        } else {
+          // New item — create inventory record
+          await db.inventory.create({
+            data: {
+              itemId: item.itemId,
+              quantity: item.quantity,
+              supplierId: item.Item.supplierId,
+            },
+          });
+        }
+      }
+    } else {
+      // If not received, just update status
+      await db.purchaseRequest.update({
+        where: { id },
+        data: {
+          supplierStatus: status,
+        },
+      });
+    }
+
+    return { success: "Purchase request status updated successfully." };
   } catch (error: any) {
     console.error("Error changing purchase request status", error);
     return {
@@ -1692,6 +1736,7 @@ export const updatePurchaseRequest = async (
       where: { id: purchaseId },
       data: {
         department: values.department,
+        isEdited: true,
         PurchaseRequestItem: {
           create: values.items.map((item: any) => ({
             quantity: item.quantity,
@@ -1751,6 +1796,24 @@ export const updatePurchaseRequestStatus = async (
   }
 
   try {
+    const purchaseRequest = await db.purchaseRequest.findUnique({
+      where: { id },
+      include: {
+        PurchaseRequestItem: {
+          include: {
+            Item: {
+              include: { Supplier: true },
+            },
+          },
+        },
+      },
+    });
+
+    if (!purchaseRequest) {
+      return { error: "Purchase request not found" };
+    }
+
+    // Update status and remarks
     await db.purchaseRequest.update({
       where: { id },
       data: {
@@ -1765,6 +1828,49 @@ export const updatePurchaseRequestStatus = async (
         financeItemStatus: status,
       },
     });
+
+    if (status === "Approved") {
+      // Group items by supplier
+      const supplierMap: Record<
+        string,
+        {
+          supplierName: string;
+          supplierId: string;
+          totalAmount: number;
+          itemNames: string[];
+        }
+      > = {};
+
+      for (const item of purchaseRequest.PurchaseRequestItem) {
+        const supplier = item.Item.Supplier;
+        if (!supplierMap[supplier.id]) {
+          supplierMap[supplier.id] = {
+            supplierName: supplier.name,
+            supplierId: supplier.id,
+            totalAmount: 0,
+            itemNames: [],
+          };
+        }
+
+        supplierMap[supplier.id].totalAmount += item.totalAmount ?? 0;
+        supplierMap[supplier.id].itemNames.push(item.Item.name);
+      }
+
+      // Create a transaction per supplier
+      for (const supplierId in supplierMap) {
+        const supplier = supplierMap[supplierId];
+        await db.transaction.create({
+          data: {
+            accountType: "EXPENSE",
+            type: "CREDIT",
+            supplierId: supplier.supplierId,
+            name: `Purchase Request - ${supplier.supplierName}`,
+            amount: supplier.totalAmount,
+            description: `Items: ${supplier.itemNames.join(", ")}`,
+          },
+        });
+      }
+    }
 
     return { success: "Purchase request status updated successfully" };
   } catch (error: any) {
@@ -1998,7 +2104,7 @@ export const createAccomplishmentReport = async (
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
-  const { report, date, images } = validatedField.data;
+  const { report, date, images, remarks } = validatedField.data;
 
   try {
     await db.accomplishmentReport.create({
@@ -2006,6 +2112,7 @@ export const createAccomplishmentReport = async (
         report,
         date,
         images,
+        remarks,
         employeeId: user?.employeeId as string,
       },
     });
@@ -2034,7 +2141,7 @@ export const updateAccomplishmentReport = async (
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
-  const { report, date, images } = validatedField.data;
+  const { report, date, images, remarks } = validatedField.data;
 
   try {
     await db.accomplishmentReport.update({
@@ -2043,6 +2150,7 @@ export const updateAccomplishmentReport = async (
         report,
         date,
         images,
+        remarks,
       },
     });
 
@@ -2105,14 +2213,15 @@ export const createItem = async (values: z.infer<typeof ItemValidators>) => {
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
-  const { name, unitPrice, sku, supplierId, isSmallItem } = validatedField.data;
+  const { name, unitPrice, description, supplierId, isSmallItem } =
+    validatedField.data;
 
   try {
     await db.items.create({
       data: {
         name,
         unitPrice,
-        sku,
+        description,
         supplierId,
         isSmallItem,
       },
@@ -2142,7 +2251,8 @@ export const updateItem = async (
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
-  const { name, unitPrice, sku, supplierId, isSmallItem } = validatedField.data;
+  const { name, unitPrice, description, supplierId, isSmallItem } =
+    validatedField.data;
 
   try {
     await db.items.update({
@@ -2150,7 +2260,7 @@ export const updateItem = async (
       data: {
         name,
         unitPrice,
-        sku,
+        description,
         supplierId,
         isSmallItem,
       },
@@ -2426,6 +2536,28 @@ export const updateTransaction = async (
     console.error("Error updating transaction", error);
     return {
       error: `Failed to update transaction. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const addTreshold = async (id: string, treshold: number) => {
+  if (!id) {
+    return { error: "Item ID is required" };
+  }
+
+  try {
+    await db.inventory.update({
+      where: { id },
+      data: {
+        treshold,
+      },
+    });
+
+    return { success: "Reorder threshold set successfully" };
+  } catch (error: any) {
+    console.error("Error setting reorder threshold", error);
+    return {
+      error: `Failed to set reorder threshold. Please try again. ${error.message || ""}`,
     };
   }
 };

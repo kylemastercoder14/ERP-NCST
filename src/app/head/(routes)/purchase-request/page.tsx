@@ -57,6 +57,8 @@ const Page = async () => {
         financeStatus: request.financeStatus,
         purchaseCode: request.purchaseCode,
         departmentSession: department || "",
+        isEdited: request.isEdited,
+        remarks: request.financeRemark || "No remarks",
         createdAt: format(new Date(request.createdAt), "MMMM dd, yyyy"),
       };
     }) || [];

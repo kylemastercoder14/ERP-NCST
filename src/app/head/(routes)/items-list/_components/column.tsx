@@ -8,7 +8,7 @@ export type ItemColumn = {
   id: string;
   name: string;
   unitPrice: string;
-  sku: string;
+  description: string;
   supplier: string;
   createdAt: string;
 };
@@ -43,18 +43,26 @@ export const columns: ColumnDef<ItemColumn>[] = [
     },
   },
   {
-    accessorKey: "sku",
+    accessorKey: "description",
     header: ({ column }) => {
       return (
         <span
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="cursor-pointer flex items-center"
         >
-          SKU
+          Description
           <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
         </span>
       );
     },
+    cell: ({ row }) => (
+      <div
+        className="max-w-[150px] overflow-hidden text-ellipsis whitespace-nowrap"
+        title={row.original.description}
+      >
+        {row.original.description}
+      </div>
+    ),
   },
   {
     accessorKey: "supplier",
@@ -87,8 +95,6 @@ export const columns: ColumnDef<ItemColumn>[] = [
   {
     accessorKey: "actions",
     header: "",
-    cell: ({ row }) => (
-      <CellAction id={row.original.id} />
-    ),
+    cell: ({ row }) => <CellAction id={row.original.id} />,
   },
 ];

@@ -41,6 +41,7 @@ const Page = async () => {
         id: item.id,
         title: item.report,
         images: item.images,
+        remarks: item.remarks || "No remarks",
         date: format(new Date(item.date), "MMMM dd, yyyy"),
       };
     }) || [];

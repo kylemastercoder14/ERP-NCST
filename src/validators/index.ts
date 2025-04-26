@@ -232,6 +232,7 @@ export const AccomplishmentReportValidators = z.object({
   report: z.string().min(1, { message: "Title is required" }),
   date: z.string().min(1, { message: "Date is required" }),
   images: z.array(z.string()).optional(),
+  remarks: z.string().optional(),
 });
 
 export const ItemValidators = z.object({
@@ -241,7 +242,7 @@ export const ItemValidators = z.object({
     .positive({ message: "Unit price must be greater than 0" }),
   name: z.string().min(1, { message: "Name is required" }),
   supplierId: z.string().min(1, { message: "Supplier is required" }),
-  sku: z.string().optional(),
+  description: z.string().optional(),
   isSmallItem: z.boolean().default(true),
 });
 

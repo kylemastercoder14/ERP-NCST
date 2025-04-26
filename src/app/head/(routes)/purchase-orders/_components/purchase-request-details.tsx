@@ -23,13 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
-const PurchaseRequestDetails = ({
-  id,
-  departmentSession,
-}: {
-  id: string;
-  departmentSession: string;
-}) => {
+const PurchaseRequestDetails = ({ id }: { id: string }) => {
   const [purchaseRequest, setPurchaseRequest] =
     React.useState<PurchaseRequestWithProps | null>(null);
   const [loading, setLoading] = React.useState(false);
@@ -131,47 +125,44 @@ const PurchaseRequestDetails = ({
           )}
         </TableBody>
       </Table>
-      {departmentSession === "Finance" && (
-        <form onSubmit={onSubmit} className="space-y-4">
+      <form onSubmit={onSubmit} className="space-y-4">
+        <div className="space-y-1">
+          <Label>
+            Status <span className="text-red-600">*</span>
+          </Label>
+          <Select
+            disabled={loading2}
+            onValueChange={setStatus}
+            defaultValue={status}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select a status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Approved">Approve</SelectItem>
+              <SelectItem value="Rejected">Reject</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        {status === "Rejected" && (
           <div className="space-y-1">
             <Label>
-              Status <span className="text-red-600">*</span>
+              Remarks <span className="text-red-600">*</span>
             </Label>
-            <Select
+            <Textarea
               disabled={loading2}
-              onValueChange={setStatus}
-              defaultValue={status}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Approved">Approve</SelectItem>
-                <SelectItem value="Rejected">Reject</SelectItem>
-                <SelectItem value="Returned">Return</SelectItem>
-              </SelectContent>
-            </Select>
+              placeholder="Enter remarks here..."
+              rows={4}
+              className="resize-none"
+              value={remarks}
+              onChange={(e) => setRemarks(e.target.value)}
+            />
           </div>
-          {(status === "Rejected" || status === "Returned") && (
-            <div className="space-y-1">
-              <Label>
-                Remarks <span className="text-red-600">*</span>
-              </Label>
-              <Textarea
-                disabled={loading2}
-                placeholder="Enter remarks here..."
-                rows={4}
-                className="resize-none"
-                value={remarks}
-                onChange={(e) => setRemarks(e.target.value)}
-              />
-            </div>
-          )}
-          <Button disabled={loading2} type="submit">
-            Save Changes
-          </Button>
-        </form>
-      )}
+        )}
+        <Button disabled={loading2} type="submit">
+          Save Changes
+        </Button>
+      </form>
     </>
   );
 };

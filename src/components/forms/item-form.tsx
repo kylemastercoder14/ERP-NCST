@@ -34,7 +34,7 @@ const AccountPayableForm = ({
     defaultValues: {
       unitPrice: initialData?.unitPrice || 0,
       name: initialData?.name || "",
-      sku: initialData?.sku || "",
+      description: initialData?.description || "",
       supplierId: initialData?.supplierId || "",
       isSmallItem: initialData?.isSmallItem || true,
     },
@@ -95,12 +95,12 @@ const AccountPayableForm = ({
           />
           <CustomFormField
             control={form.control}
-            fieldType={FormFieldType.INPUT}
+            fieldType={FormFieldType.TEXTAREA}
             isRequired={false}
-            name="sku"
+            name="description"
             disabled={isSubmitting}
-            label="SKU"
-            placeholder="Enter sku (if any)"
+            label="Description"
+            placeholder="Enter description (if any)"
           />
           <CustomFormField
             control={form.control}

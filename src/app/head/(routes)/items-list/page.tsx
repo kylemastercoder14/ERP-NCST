@@ -23,7 +23,7 @@ const Page = async () => {
 	  return {
 		id: item.id,
 		name: item.name,
-		sku: item.sku || "No SKU provided",
+		description: item.description || "No description provided",
 		unitPrice: `₱${item.unitPrice.toFixed(2)}`,
 		supplier: item.Supplier.name,
 		createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),

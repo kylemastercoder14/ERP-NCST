@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation";
 import AlertModal from "@/components/ui/alert-modal";
 import React from "react";
 import { deleteLeave } from "@/actions";
-import { Modal } from "../../../../../components/ui/modal";
+import { Modal } from "@/components/ui/modal";
 import PurchaseRequestDetails from "./purchase-request-details";
 
 interface CellActionProps {
@@ -68,7 +68,7 @@ export const CellAction: React.FC<CellActionProps> = ({
         title="You are about to change the status of this purchase request."
         description="Please make sure to review the details before proceeding. This action cannot be undone."
       >
-        <PurchaseRequestDetails id={id} />
+        <PurchaseRequestDetails departmentSession={departmentSession} id={id} />
       </Modal>
       <DropdownMenu>
         <DropdownMenuTrigger className="no-print" asChild>
@@ -79,17 +79,16 @@ export const CellAction: React.FC<CellActionProps> = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          {departmentSession === "Finance" && financeStatus === "Pending" && (
-            <DropdownMenuItem onClick={() => setModalOpen(true)}>
-              <FolderOpen className="w-4 h-4 mr-2" />
-              View Details
-            </DropdownMenuItem>
-          )}
 
-          {financeStatus === "Approved" && (
+          {financeStatus === "Approved" ? (
             <DropdownMenuItem>
               <Printer className="w-4 h-4 mr-2" />
               Print Order Form
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuItem onClick={() => setModalOpen(true)}>
+              <FolderOpen className="w-4 h-4 mr-2" />
+              View Details
             </DropdownMenuItem>
           )}
 

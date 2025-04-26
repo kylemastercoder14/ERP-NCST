@@ -9,6 +9,7 @@ import {
   SIDEBAR_HEAD_PROCUREMENT,
   SIDEBAR_REPORTING_MANAGER,
   SIDEBAR_REPORTING_MANAGER_PROCUREMENT,
+  SIDEBAR_HEAD_INVENTORY,
   SIDEBAR_SUPPLIER,
 } from "@/lib/constants";
 
@@ -33,6 +34,8 @@ export const getSidebarItems = (department?: string, position?: string) => {
     return SIDEBAR_HEAD_HR;
   } else if (department === "Supplier" && position === "Staff") {
     return SIDEBAR_SUPPLIER;
+  } else if (department === "Inventory" && position === "Head Department") {
+    return SIDEBAR_HEAD_INVENTORY;
   } else if (department === "Finance" && position === "Head Department") {
     return SIDEBAR_HEAD_ACCOUNTING;
   } else if (

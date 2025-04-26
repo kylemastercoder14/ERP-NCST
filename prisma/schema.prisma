@@ -32,7 +32,6 @@ model UserAccount {
 
   Logs            Logs[]
   LeaveManagement LeaveManagement[]
-  PurchaseRequest PurchaseRequest[]
 
   @@index([employeeId])
 }
@@ -122,8 +121,11 @@ model Employee {
   Attendance            Attendance[]
   ExtraShift            ExtraShift[]
   PaySlip               PaySlip[]
-  PurchaseRequest       PurchaseRequest[]
   AccomplishmentReport  AccomplishmentReport[]
+  Withdrawal            Withdrawal[]
+
+  requestedPRs PurchaseRequest[] @relation("RequestedBy")
+  receivedPRs  PurchaseRequest[] @relation("ReceivedBy")
 
   @@index([jobTitleId])
   @@index([departmentId])
@@ -294,7 +296,7 @@ model Items {
   id          String   @id @default(cuid())
   name        String
   unitPrice   Float
-  sku         String?
+  description String?
   supplierId  String
   Supplier    Supplier @relation(fields: [supplierId], references: [id])
   isSmallItem Boolean  @default(true)
@@ -303,17 +305,19 @@ model Items {
   updatedAt DateTime @updatedAt
 
   PurchaseRequestItem PurchaseRequestItem[]
+  WithdrawalItem      WithdrawalItem[]
   Inventory           Inventory[]
 
   @@index([supplierId])
 }
 
 model PurchaseRequest {
-  id           String @id @default(cuid())
+  id           String  @id @default(cuid())
   purchaseCode String
   department   String
+  isEdited     Boolean @default(false)
 
-  financeStatus String  @default("Pending") // Pending, Approved, Rejected
+  financeStatus String  @default("Pending") // Pending, Approved, Rejected, Returned
   financeRemark String?
 
   supplierStatus String  @default("Pending") // Pending, Preparing, In transit, Delivered, Rejected
@@ -325,16 +329,53 @@ model PurchaseRequest {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  employeeId String
-  Employee   Employee @relation(fields: [employeeId], references: [id])
+  // Employee who requested
+  employeeId  String
+  requestedBy Employee @relation(name: "RequestedBy", fields: [employeeId], references: [id])
 
-  receivedBy String?
-  ReceivedBy UserAccount? @relation(fields: [receivedBy], references: [id])
+  // Employee who received
+  receivedBy       String?
+  receivedEmployee Employee? @relation(name: "ReceivedBy", fields: [receivedBy], references: [id])
 
   PurchaseRequestItem PurchaseRequestItem[]
 
   @@index([employeeId])
   @@index([receivedBy])
+}
+
+model Withdrawal {
+  id             String @id @default(cuid())
+  withdrawalCode String
+  department     String
+
+  status String @default("Pending") // Pending, Approved, Rejected
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  employeeId String
+  Employee   Employee @relation(fields: [employeeId], references: [id])
+
+  WithdrawalItem WithdrawalItem[]
+
+  @@index([employeeId])
+}
+
+model WithdrawalItem {
+  id       String @id @default(cuid())
+  quantity Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  itemId String
+  Item   Items  @relation(fields: [itemId], references: [id])
+
+  withdrawalId String
+  Withdrawal   Withdrawal @relation(fields: [withdrawalId], references: [id])
+
+  @@index([withdrawalId])
+  @@index([itemId])
 }
 
 model PurchaseRequestItem {
@@ -359,15 +400,14 @@ model PurchaseRequestItem {
 }
 
 model Inventory {
-  id           String   @id @default(cuid())
-  itemId       String
-  Item         Items    @relation(fields: [itemId], references: [id])
-  quantity     Int
-  unitPrice    Float
-  totalPrice   Float
-  supplierId   String
-  Supplier     Supplier @relation(fields: [supplierId], references: [id])
-  dateReceived DateTime
+  id         String   @id @default(cuid())
+  itemId     String
+  Item       Items    @relation(fields: [itemId], references: [id])
+  quantity   Int
+  supplierId String
+  Supplier   Supplier @relation(fields: [supplierId], references: [id])
+  status     String   @default("In stock") // In stock, Running out of stock, Out of stock
+  treshold   Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -381,6 +421,7 @@ model AccomplishmentReport {
   report    String
   images    String[]
   date      String
+  remarks   String?
   isViewed  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -442,7 +483,7 @@ model Transaction {
   name        String
   amount      Float
   type        TransactionType // enum: DEBIT or CREDIT
-  accountType AccountType    // enum: ASSET, LIABILITY, EQUITY, INCOME, EXPENSE
+  accountType AccountType // enum: ASSET, LIABILITY, EQUITY, INCOME, EXPENSE
   supplierId  String?
   Supplier    Supplier?       @relation(fields: [supplierId], references: [id])
   clientId    String?
