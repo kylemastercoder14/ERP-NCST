@@ -19,15 +19,11 @@ const Page = async () => {
       createdAt: "desc",
     },
     include: {
-      Employee: true,
+      receivedEmployee: true,
+      requestedBy: true,
       PurchaseRequestItem: {
         include: {
           Item: true,
-        },
-      },
-      ReceivedBy: {
-        include: {
-          Employee: true,
         },
       },
     },
@@ -47,8 +43,8 @@ const Page = async () => {
 
       return {
         id: request.id,
-        licenseNo: request.Employee.licenseNo,
-        name: `${request.Employee.firstName} ${request.Employee.middleName || ""} ${request.Employee.lastName}`.trim(),
+        licenseNo: request.requestedBy.licenseNo,
+        name: `${request.requestedBy.firstName} ${request.requestedBy.middleName || ""} ${request.requestedBy.lastName}`.trim(),
         itemName: itemNames,
         quantity: request.PurchaseRequestItem.reduce(
           (acc, prItem) => acc + prItem.quantity,
