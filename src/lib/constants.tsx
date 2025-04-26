@@ -309,6 +309,10 @@ export const SIDEBAR_HEAD_INVENTORY = [
         title: "List of Purchase Orders",
         url: "/head/purchase-orders",
       },
+      {
+        title: "Purchase Request",
+        url: "/head/purchase-request",
+      },
     ],
   },
   {
