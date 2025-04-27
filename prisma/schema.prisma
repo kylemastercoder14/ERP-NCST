@@ -479,19 +479,22 @@ enum TransactionType {
 }
 
 model Transaction {
-  id          String          @id @default(cuid())
-  name        String
-  amount      Float
-  type        TransactionType // enum: DEBIT or CREDIT
-  accountType AccountType // enum: ASSET, LIABILITY, EQUITY, INCOME, EXPENSE
-  supplierId  String?
-  Supplier    Supplier?       @relation(fields: [supplierId], references: [id])
-  clientId    String?
-  Client      Client?         @relation(fields: [clientId], references: [id])
-  description String?
-  status      String          @default("Unpaid")
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  id             String          @id @default(cuid())
+  name           String
+  amount         Float
+  type           TransactionType // enum: DEBIT or CREDIT
+  accountType    AccountType // enum: ASSET, LIABILITY, EQUITY, INCOME, EXPENSE
+  subAccountType String
+  journalEntryId String          @unique
+  attachment     String?
+  supplierId     String?
+  Supplier       Supplier?       @relation(fields: [supplierId], references: [id])
+  clientId       String?
+  Client         Client?         @relation(fields: [clientId], references: [id])
+  description    String?
+  status         String          @default("Unpaid")
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 
   @@index([supplierId])
   @@index([clientId])

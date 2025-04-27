@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import CustomFormField from "@/components/global/custom-formfield";
-import { FormFieldType } from "@/lib/constants";
+import { FormFieldType, subAccountOptions } from "@/lib/constants";
 import { Client, Supplier, Transaction } from "@prisma/client";
 import { createTransaction, updateTransaction } from "@/actions";
 import Heading from "@/components/ui/heading";
@@ -41,6 +41,8 @@ const AccountTransactionForm = ({
       name: initialData?.name || "",
       type: initialData?.type || "CREDIT",
       clientId: initialData?.clientId || "",
+      attachment: initialData?.attachment || "",
+      subAccountType: initialData?.subAccountType || "CASH",
     },
   });
 
@@ -49,10 +51,7 @@ const AccountTransactionForm = ({
   const onSubmit = async (values: z.infer<typeof TransactionValidators>) => {
     try {
       if (initialData) {
-        const res = await updateTransaction(
-          values,
-          initialData?.id as string
-        );
+        const res = await updateTransaction(values, initialData?.id as string);
         if (res.success) {
           toast.success(res.success);
           router.push("/head/sales-management");
@@ -122,6 +121,17 @@ const AccountTransactionForm = ({
             label="Account Type"
             placeholder="Select account type"
           />
+          <CustomFormField
+            control={form.control}
+            fieldType={FormFieldType.COMBOBOX}
+            dynamicOptions={subAccountOptions[form.watch("accountType")] || []}
+            isRequired={true}
+            name="subAccountType"
+            disabled={isSubmitting}
+            label="Sub Account Type"
+            placeholder="Select sub account type"
+          />
+
           {form.watch("type") === "CREDIT" ? (
             <CustomFormField
               control={form.control}
@@ -169,6 +179,15 @@ const AccountTransactionForm = ({
             disabled={isSubmitting}
             label="Description"
             placeholder="Enter description"
+          />
+          <CustomFormField
+            control={form.control}
+            fieldType={FormFieldType.DROP_ZONE}
+            isRequired={false}
+            name="attachment"
+            disabled={isSubmitting}
+            label="Attachment"
+            description="Upload any relevant files or documents related to this transaction such as invoice, receipt, or contract. You can upload single files only."
           />
           <div className="flex items-center justify-end">
             <Button onClick={() => router.back()} type="button" variant="ghost">

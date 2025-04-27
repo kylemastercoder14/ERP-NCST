@@ -255,6 +255,10 @@ export const AccountPayableValidators = z.object({
   supplierId: z.string().min(1, { message: "Supplier is required" }),
   name: z.string().min(1, { message: "Name is required" }),
   description: z.string().optional(),
+  attachment: z.string().optional(),
+  subAccountType: z
+    .string()
+    .min(1, { message: "Sub account type is required" }),
 });
 
 export const AccountReceivableValidators = z.object({
@@ -266,6 +270,10 @@ export const AccountReceivableValidators = z.object({
   clientId: z.string().min(1, { message: "Client is required" }),
   name: z.string().min(1, { message: "Name is required" }),
   description: z.string().optional(),
+  attachment: z.string().optional(),
+  subAccountType: z
+    .string()
+    .min(1, { message: "Sub account type is required" }),
 });
 
 export const TransactionValidators = z.object({
@@ -279,4 +287,8 @@ export const TransactionValidators = z.object({
   supplierId: z.string().optional(),
   name: z.string().min(1, { message: "Name is required" }),
   description: z.string().optional(),
+  attachment: z.string().optional(),
+  subAccountType: z
+    .string()
+    .min(1, { message: "Sub account type is required" }),
 });

@@ -147,6 +147,13 @@ export function DataTable<TData, TValue>({
             options={MONTHS.map((month) => ({ label: month, value: month }))}
           />
         )}
+        {table.getColumn("transactionDate") && (
+          <FacetedFilter
+            column={table.getColumn("transactionDate")}
+            title="Filter Transaction Date"
+            options={MONTHS.map((month) => ({ label: month, value: month }))}
+          />
+        )}
         {table.getColumn("availability") && (
           <FacetedFilter
             column={table.getColumn("availability")}

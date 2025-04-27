@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import CustomFormField from "@/components/global/custom-formfield";
-import { FormFieldType } from "@/lib/constants";
+import { FormFieldType, subAccountOptions } from "@/lib/constants";
 import { Supplier, Transaction } from "@prisma/client";
 import { createAccountPayable, updateAccountPayable } from "@/actions";
 import Heading from "@/components/ui/heading";
@@ -37,6 +37,8 @@ const AccountPayableForm = ({
       description: initialData?.description || "",
       accountType: initialData?.accountType || "ASSET",
       name: initialData?.name || "",
+      subAccountType: initialData?.subAccountType || "CASH",
+      attachment: initialData?.attachment || "",
     },
   });
 
@@ -45,7 +47,10 @@ const AccountPayableForm = ({
   const onSubmit = async (values: z.infer<typeof AccountPayableValidators>) => {
     try {
       if (initialData) {
-        const res = await updateAccountPayable(values, initialData?.id as string);
+        const res = await updateAccountPayable(
+          values,
+          initialData?.id as string
+        );
         if (res.success) {
           toast.success(res.success);
           router.push("/head/sales-management/accounts-payable");
@@ -86,7 +91,13 @@ const AccountPayableForm = ({
           <CustomFormField
             control={form.control}
             fieldType={FormFieldType.SELECT}
-            dynamicOptions={["ASSET", "LIABILITY", "EQUITY", "INCOME", "EXPENSE"].map((type) => ({
+            dynamicOptions={[
+              "ASSET",
+              "LIABILITY",
+              "EQUITY",
+              "INCOME",
+              "EXPENSE",
+            ].map((type) => ({
               label: type,
               value: type,
             }))}
@@ -95,6 +106,16 @@ const AccountPayableForm = ({
             disabled={isSubmitting}
             label="Account Type"
             placeholder="Select account type"
+          />
+          <CustomFormField
+            control={form.control}
+            fieldType={FormFieldType.COMBOBOX}
+            dynamicOptions={subAccountOptions[form.watch("accountType")] || []}
+            isRequired={true}
+            name="subAccountType"
+            disabled={isSubmitting}
+            label="Sub Account Type"
+            placeholder="Select sub account type"
           />
           <CustomFormField
             control={form.control}
@@ -127,6 +148,15 @@ const AccountPayableForm = ({
             disabled={isSubmitting}
             label="Description"
             placeholder="Enter description"
+          />
+          <CustomFormField
+            control={form.control}
+            fieldType={FormFieldType.DROP_ZONE}
+            isRequired={false}
+            name="attachment"
+            disabled={isSubmitting}
+            label="Attachment"
+            description="Upload any relevant files or documents related to this transaction such as invoice, receipt, or contract. You can upload single files only."
           />
           <div className="flex items-center justify-end">
             <Button onClick={() => router.back()} type="button" variant="ghost">

@@ -1859,6 +1859,22 @@ export const updatePurchaseRequestStatus = async (
       // Create a transaction per supplier
       for (const supplierId in supplierMap) {
         const supplier = supplierMap[supplierId];
+
+        // Get the latest journal entry number
+        const latestTransaction = await db.transaction.findFirst({
+          orderBy: { createdAt: "desc" },
+          select: { journalEntryId: true },
+        });
+
+        let nextJournalEntryNumber = "JE000001";
+        if (latestTransaction?.journalEntryId) {
+          const currentNumber = parseInt(
+            latestTransaction.journalEntryId.replace("JE", "")
+          );
+          const nextNumber = currentNumber + 1;
+          nextJournalEntryNumber = `JE${nextNumber.toString().padStart(6, "0")}`;
+        }
+
         await db.transaction.create({
           data: {
             accountType: "EXPENSE",
@@ -1867,6 +1883,8 @@ export const updatePurchaseRequestStatus = async (
             name: `Purchase Request - ${supplier.supplierName}`,
             amount: supplier.totalAmount,
             description: `Items: ${supplier.itemNames.join(", ")}`,
+            journalEntryId: nextJournalEntryNumber,
+            subAccountType: "SUPPLIES_EXPENSE",
           },
         });
       }
@@ -2304,10 +2322,31 @@ export const createAccountPayable = async (
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
-  const { name, supplierId, accountType, amount, description } =
-    validatedField.data;
+  const {
+    name,
+    supplierId,
+    accountType,
+    amount,
+    description,
+    subAccountType,
+    attachment,
+  } = validatedField.data;
 
   try {
+    const latestTransaction = await db.transaction.findFirst({
+      orderBy: { createdAt: "desc" },
+      select: { journalEntryId: true },
+    });
+
+    let nextJournalEntryNumber = "JE000001";
+    if (latestTransaction?.journalEntryId) {
+      const currentNumber = parseInt(
+        latestTransaction.journalEntryId.replace("JE", "")
+      );
+      const nextNumber = currentNumber + 1;
+      nextJournalEntryNumber = `JE${nextNumber.toString().padStart(6, "0")}`;
+    }
+
     await db.transaction.create({
       data: {
         name,
@@ -2316,6 +2355,9 @@ export const createAccountPayable = async (
         amount,
         type: "CREDIT",
         description,
+        journalEntryId: nextJournalEntryNumber,
+        subAccountType,
+        attachment,
       },
     });
 
@@ -2343,10 +2385,40 @@ export const updateAccountPayable = async (
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
-  const { name, supplierId, accountType, amount, description } =
-    validatedField.data;
+  const {
+    name,
+    supplierId,
+    accountType,
+    amount,
+    description,
+    subAccountType,
+    attachment,
+  } = validatedField.data;
 
   try {
+    const existingTransaction = await db.transaction.findUnique({
+      where: { id },
+      select: { journalEntryId: true },
+    });
+
+    let journalEntryNumber = existingTransaction?.journalEntryId;
+    if (!journalEntryNumber) {
+      const latestTransaction = await db.transaction.findFirst({
+        orderBy: { createdAt: "desc" },
+        select: { journalEntryId: true },
+      });
+
+      let nextJournalEntryNumber = "JE000001";
+      if (latestTransaction?.journalEntryId) {
+        const currentNumber = parseInt(
+          latestTransaction.journalEntryId.replace("JE", "")
+        );
+        const nextNumber = currentNumber + 1;
+        nextJournalEntryNumber = `JE${nextNumber.toString().padStart(6, "0")}`;
+      }
+      journalEntryNumber = nextJournalEntryNumber;
+    }
+
     await db.transaction.update({
       where: { id },
       data: {
@@ -2356,6 +2428,9 @@ export const updateAccountPayable = async (
         amount,
         type: "CREDIT",
         description,
+        journalEntryId: journalEntryNumber,
+        subAccountType,
+        attachment,
       },
     });
 
@@ -2378,10 +2453,31 @@ export const createAccountReceivable = async (
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
-  const { name, clientId, accountType, amount, description } =
-    validatedField.data;
+  const {
+    name,
+    clientId,
+    accountType,
+    amount,
+    description,
+    subAccountType,
+    attachment,
+  } = validatedField.data;
 
   try {
+    const latestTransaction = await db.transaction.findFirst({
+      orderBy: { createdAt: "desc" },
+      select: { journalEntryId: true },
+    });
+
+    let nextJournalEntryNumber = "JE000001";
+    if (latestTransaction?.journalEntryId) {
+      const currentNumber = parseInt(
+        latestTransaction.journalEntryId.replace("JE", "")
+      );
+      const nextNumber = currentNumber + 1;
+      nextJournalEntryNumber = `JE${nextNumber.toString().padStart(6, "0")}`;
+    }
+
     await db.transaction.create({
       data: {
         name,
@@ -2390,6 +2486,9 @@ export const createAccountReceivable = async (
         amount,
         type: "DEBIT",
         description,
+        journalEntryId: nextJournalEntryNumber,
+        subAccountType,
+        attachment,
       },
     });
 
@@ -2417,10 +2516,40 @@ export const updateAccountReceivable = async (
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
-  const { name, clientId, accountType, amount, description } =
-    validatedField.data;
+  const {
+    name,
+    clientId,
+    accountType,
+    amount,
+    description,
+    subAccountType,
+    attachment,
+  } = validatedField.data;
 
   try {
+    const existingTransaction = await db.transaction.findUnique({
+      where: { id },
+      select: { journalEntryId: true },
+    });
+
+    let journalEntryNumber = existingTransaction?.journalEntryId;
+    if (!journalEntryNumber) {
+      const latestTransaction = await db.transaction.findFirst({
+        orderBy: { createdAt: "desc" },
+        select: { journalEntryId: true },
+      });
+
+      let nextJournalEntryNumber = "JE000001";
+      if (latestTransaction?.journalEntryId) {
+        const currentNumber = parseInt(
+          latestTransaction.journalEntryId.replace("JE", "")
+        );
+        const nextNumber = currentNumber + 1;
+        nextJournalEntryNumber = `JE${nextNumber.toString().padStart(6, "0")}`;
+      }
+      journalEntryNumber = nextJournalEntryNumber;
+    }
+
     await db.transaction.update({
       where: { id },
       data: {
@@ -2430,6 +2559,9 @@ export const updateAccountReceivable = async (
         amount,
         type: "DEBIT",
         description,
+        journalEntryId: journalEntryNumber,
+        attachment,
+        subAccountType,
       },
     });
 
@@ -2474,27 +2606,64 @@ export const createTransaction = async (
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
-  const { name, supplierId, clientId, type, accountType, amount, description } =
-    validatedField.data;
+  const {
+    name,
+    supplierId,
+    clientId,
+    type,
+    accountType,
+    amount,
+    description,
+    subAccountType,
+    attachment,
+  } = validatedField.data;
 
   try {
-    await db.transaction.create({
-      data: {
-        name,
-        supplierId,
-        clientId,
-        accountType,
-        amount,
-        type,
-        description,
-      },
+    const result = await db.$transaction(async (tx) => {
+      // Find the latest inside the transaction
+      const latestTransaction = await tx.transaction.findFirst({
+        orderBy: { createdAt: "desc" },
+        select: { journalEntryId: true },
+      });
+
+      let newJournalEntryNumber = "JE000001"; // default if none exist
+
+      if (latestTransaction?.journalEntryId) {
+        const latestNumber = parseInt(
+          latestTransaction.journalEntryId.replace("JE", "")
+        );
+        const incrementedNumber = latestNumber + 1;
+        newJournalEntryNumber = `JE${incrementedNumber
+          .toString()
+          .padStart(6, "0")}`;
+      }
+
+      // Create inside the same transaction
+      const newTransaction = await tx.transaction.create({
+        data: {
+          name,
+          supplierId,
+          clientId,
+          accountType,
+          amount,
+          type,
+          description,
+          subAccountType,
+          attachment,
+          journalEntryId: newJournalEntryNumber,
+        },
+      });
+
+      return newTransaction;
     });
 
-    return { success: "Transaction created successfully" };
+    return { success: "Transaction created successfully", data: result };
   } catch (error: any) {
     console.error("Error creating transaction", error);
     return {
-      error: `Failed to create transaction. Please try again. ${error.message || ""}`,
+      error: `Failed to create transaction. Please try again. ${
+        error.message || ""
+      }`,
     };
   }
 };
@@ -2514,28 +2683,72 @@ export const updateTransaction = async (
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
-  const { name, supplierId, clientId, type, accountType, amount, description } =
-    validatedField.data;
+  const {
+    name,
+    supplierId,
+    clientId,
+    type,
+    accountType,
+    amount,
+    description,
+    subAccountType,
+    attachment,
+  } = validatedField.data;
 
   try {
-    await db.transaction.update({
-      where: { id },
-      data: {
-        name,
-        supplierId,
-        clientId,
-        accountType,
-        amount,
-        type,
-        description,
-      },
+    await db.$transaction(async (tx) => {
+      const existingTransaction = await tx.transaction.findUnique({
+        where: { id },
+        select: { journalEntryId: true },
+      });
+
+      let journalEntryNumber = existingTransaction?.journalEntryId;
+
+      // If missing, generate a new journal entry number
+      if (!journalEntryNumber) {
+        const latestTransaction = await tx.transaction.findFirst({
+          orderBy: { createdAt: "desc" },
+          select: { journalEntryId: true },
+        });
+
+        let newJournalEntryNumber = "JE000001"; // default if none exists
+        if (latestTransaction?.journalEntryId) {
+          const latestNumber = parseInt(
+            latestTransaction.journalEntryId.replace("JE", "")
+          );
+          const incrementedNumber = latestNumber + 1;
+          newJournalEntryNumber = `JE${incrementedNumber
+            .toString()
+            .padStart(6, "0")}`;
+        }
+
+        journalEntryNumber = newJournalEntryNumber;
+      }
+
+      await tx.transaction.update({
+        where: { id },
+        data: {
+          name,
+          supplierId,
+          clientId,
+          accountType,
+          amount,
+          type,
+          description,
+          subAccountType,
+          attachment,
+          journalEntryId: journalEntryNumber,
+        },
+      });
     });
 
     return { success: "Transaction updated successfully" };
   } catch (error: any) {
     console.error("Error updating transaction", error);
     return {
-      error: `Failed to update transaction. Please try again. ${error.message || ""}`,
+      error: `Failed to update transaction. Please try again. ${
+        error.message || ""
+      }`,
     };
   }
 };

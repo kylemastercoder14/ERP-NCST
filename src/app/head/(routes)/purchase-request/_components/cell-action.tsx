@@ -94,6 +94,7 @@ export const CellAction: React.FC<CellActionProps> = ({
 
           <DropdownMenuItem
             onClick={() => router.push(`/head/purchase-request/${id}`)}
+            disabled={departmentSession === "Finance"}
           >
             <Edit className="w-4 h-4 mr-2" />
             Edit

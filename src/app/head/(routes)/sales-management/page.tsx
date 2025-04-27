@@ -7,6 +7,7 @@ import db from "@/lib/db";
 import { LedgerColumn } from "./_components/column";
 import { format } from "date-fns";
 import LedgerClient from "./_components/client";
+import ExportToExcel from "./_components/export-to-excel";
 
 const Page = async () => {
   const data = await db.transaction.findMany({
@@ -39,8 +40,11 @@ const Page = async () => {
             ? `₱${request.amount.toLocaleString()}`
             : "0",
         balance: `₱${runningBalance.toLocaleString()}`,
-		status: request.status,
-        createdAt: format(new Date(request.createdAt), "MMMM dd, yyyy"),
+        status: request.status,
+        accountType: request.accountType,
+        subAccountType: request.subAccountType,
+        journalEntry: request.journalEntryId,
+        transactionDate: format(new Date(request.createdAt), "MMMM dd, yyyy"),
       };
     }) || [];
 
@@ -51,9 +55,14 @@ const Page = async () => {
           title="Financial Ledger"
           description="View and manage all financial transactions recorded for clients and suppliers."
         />
-        <Button size="sm">
-          <Link href={`/head/sales-management/create`}>+ Record new transaction</Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <ExportToExcel data={formattedData} />
+          <Button size="sm">
+            <Link href={`/head/sales-management/create`}>
+              + Record new transaction
+            </Link>
+          </Button>
+        </div>
       </div>
       <Separator className="my-5" />
       <LedgerClient data={formattedData} />
