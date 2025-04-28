@@ -230,7 +230,7 @@ export const createAccount = async (
 
 export const sendInitialInterviewEmployee = async (
   values: z.infer<typeof SendEmailEmployeeValidators>,
-  employeeId: string
+  email: string
 ) => {
   const validatedField = SendEmailEmployeeValidators.safeParse(values);
 
@@ -240,12 +240,6 @@ export const sendInitialInterviewEmployee = async (
   }
 
   const { date, time, location } = validatedField.data;
-
-  const res = await db.userAccount.findFirst({
-    where: {
-      employeeId,
-    },
-  });
 
   // Format date normally
   const formattedDate = new Date(date).toLocaleDateString("en-US", {
@@ -263,7 +257,7 @@ export const sendInitialInterviewEmployee = async (
   });
 
   const htmlContent = await InitialInterviewDetailsHTML({
-    email: res?.email || "",
+    email: email,
     date: formattedDate,
     time: formattedTime,
     location,
@@ -279,9 +273,9 @@ export const sendInitialInterviewEmployee = async (
 
   const message = {
     from: "bats3curity.9395@gmail.com",
-    to: res?.email || "",
+    to: email,
     subject: "Initial Interview Invitation - BAT Security Services INC.",
-    text: `Hello ${res?.email || ""},
+    text: `Hello ${email},
 
 Congratulations! You are invited for an Initial Interview at BAT Security Services INC.
 
@@ -3224,13 +3218,16 @@ export const updateJobPost = async (
   }
 };
 
-export const submitApplication = async (data: {
-  firstName: string;
-  lastName: string;
-  email: string;
-  branch: string;
-  resume: string;
-}, jobPostId: string) => {
+export const submitApplication = async (
+  data: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    branch: string;
+    resume: string;
+  },
+  jobPostId: string
+) => {
   try {
     await db.applicantList.create({
       data: {

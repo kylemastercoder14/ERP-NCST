@@ -13,8 +13,8 @@ const Page = async () => {
       BaseSalary: {
         some: {
           amount: { gt: 0 },
-        }
-      }
+        },
+      },
     },
     orderBy: {
       createdAt: "desc",
@@ -30,31 +30,15 @@ const Page = async () => {
 
   const formattedData: PayslipGenerationColumn[] =
     data.map((item) => {
-      const baseSalary = item.BaseSalary[0]?.amount || 0;
-
-      const sss = baseSalary * 0.05;
-      const philhealth = baseSalary * 0.035;
-      const pagibig = baseSalary * 0.03;
-      const tin = baseSalary * 0.1;
-      const totalDeductions = sss + philhealth + pagibig + tin;
-
       return {
         id: item.id,
-        licenseNo: item.licenseNo,
+        licenseNo: item.licenseNo || "N/A",
         name: `${item.firstName} ${item.middleName || ""} ${item.lastName}`.trim(),
         type:
           item.BaseSalary.find((id) => id.employeeId === item.id)?.type ||
           "N/A",
-        amount: item.BaseSalary.find((id) => id.employeeId === item.id)
-          ? `₱${item.BaseSalary.find((id) => id.employeeId === item.id)!
-              .amount.toFixed(2)
-              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}` // Add commas after formatting
-          : "N/A",
         department: item.Department.name,
         position: item.JobTitle.name,
-        deductions: `₱${totalDeductions
-          .toFixed(2)
-          .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, // Add commas after formatting
         payrollDate: item.PaySlip[0]?.date
           ? `${item.PaySlip[0]?.date}, 2025`
           : "N/A",

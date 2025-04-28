@@ -15,10 +15,10 @@ import { FormFieldType } from "@/lib/constants";
 import { sendInitialInterviewEmployee } from "@/actions";
 
 const SendEmailForm = ({
-  employeeId,
+  email,
   onClose,
 }: {
-  employeeId: string;
+  email: string;
   onClose: () => void;
 }) => {
   const router = useRouter();
@@ -36,7 +36,7 @@ const SendEmailForm = ({
 
   const onSubmit = async (values: z.infer<typeof SendEmailEmployeeValidators>) => {
 	try {
-	  const res = await sendInitialInterviewEmployee(values, employeeId as string);
+	  const res = await sendInitialInterviewEmployee(values, email as string);
 	  if (res.success) {
 		toast.success(res.success);
 		router.refresh();

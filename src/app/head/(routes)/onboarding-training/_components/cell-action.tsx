@@ -184,13 +184,6 @@ export const CellAction: React.FC<CellActionProps> = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          {departmentSession === "Human Resource" &&
-            trainingStatus === "Initial Interview" && (
-              <DropdownMenuItem onClick={() => setEmailModalOpen(true)}>
-                <SendIcon className="w-4 h-4 mr-2" />
-                Send Email
-              </DropdownMenuItem>
-            )}
           {trainingStatus === "Initial Interview" && (
             <DropdownMenuItem onClick={() => setOrientationOpen(true)}>
               <BookA className="w-4 h-4 mr-2" />

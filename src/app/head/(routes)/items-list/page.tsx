@@ -10,40 +10,37 @@ import ItemClient from "./_components/client";
 
 const Page = async () => {
   const data = await db.items.findMany({
-	orderBy: {
-	  createdAt: "desc",
-	},
-	include: {
-		Supplier: true
-	}
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      Supplier: true,
+    },
   });
 
   const formattedData: ItemColumn[] =
-	data.map((item) => {
-	  return {
-		id: item.id,
-		name: item.name,
-		description: item.description || "No description provided",
-		unitPrice: `₱${item.unitPrice.toFixed(2)}`,
-		supplier: item.Supplier.name,
-		createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),
-	  };
-	}) || [];
+    data.map((item) => {
+      return {
+        id: item.id,
+        name: item.name,
+        description: item.description || "No description provided",
+        unitPrice: `₱${item.unitPrice.toFixed(2)}`,
+        supplier: item.Supplier.name,
+        createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),
+      };
+    }) || [];
 
   return (
-	<div>
-	  <div className="flex items-center justify-between">
-		<Heading
-		  title="Items List"
-		  description="Manage all the items here."
-		/>
-		<Button size="sm">
-		  <Link href={`/head/items-list/create`}>+ Add new item</Link>
-		</Button>
-	  </div>
-	  <Separator className="my-5" />
-	  <ItemClient data={formattedData} />
-	</div>
+    <div>
+      <div className="flex items-center justify-between">
+        <Heading title="Items List" description="Manage all the items here." />
+        <Button size="sm">
+          <Link href={`/head/items-list/create`}>+ Add new item</Link>
+        </Button>
+      </div>
+      <Separator className="my-5" />
+      <ItemClient data={formattedData} />
+    </div>
   );
 };
 
