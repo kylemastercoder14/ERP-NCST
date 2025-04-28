@@ -1,67 +1,49 @@
-import { Mail, Search, User } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import React from "react";
-import { Button } from "@/components/ui/button";
+import Link from 'next/link';
 
-const Navigation = () => {
+const Header = () => {
   return (
-    <div className="relative">
-      <nav className="fixed z-50 h-[80px] px-40 py-3 inset-x-0 w-full bg-[#d88f28]">
-        <div className="flex text-white items-center justify-between">
-          <div className="flex text-sm items-center gap-7">
-            <Link href="#blog" className="hover:underline">
-              BLOG
-            </Link>
-            <Link href="#contact" className="hover:underline">
-              CONTACT
-            </Link>
-            <Link href="#hotline" className="hover:underline">
-              HOTLINE & ONLINE SUPPORT
-            </Link>
-            <Link href="#success-support" className="hover:underline">
-              SUCCESS SUPPORT
-            </Link>
-          </div>
-          <div className="flex items-center gap-5">
-            <Link href="#contact">
-              <Mail className="size-5" />
-            </Link>
-            <Link href="/sign-in">
-              <User className="size-5" />
-            </Link>
-            <Link href="#search">
-              <Search className="size-5" />
-            </Link>
-          </div>
+    <header className="bg-primary text-white py-5 shadow-md">
+      <div className="container mx-auto px-4 flex justify-between items-center">
+        <div className="text-2xl font-bold">
+          BAT <span className="text-secondary">Security</span>
         </div>
-      </nav>
-      <div className="fixed z-50 left-28 top-12 w-[90%] px-10 py-3 bg-white">
-        <div className="flex text-black items-center justify-between">
-          <div className="flex text-base items-center gap-7">
-            <Link href="#solutions" className="hover:underline">
-              SOLUTIONS
-            </Link>
-            <Link href="#news-announcements" className="hover:underline">
-              NEWS & ANNOUNCEMENTS
-            </Link>
-            <Link href="#about" className="hover:underline">
-              ABOUT BAT
-            </Link>
-            <Link href="#policies" className="hover:underline">
-              POLICIES
-            </Link>
-          </div>
-          <div className="flex items-center gap-3">
-            <Button asChild>
-              <Link href="/new-applicant">Apply Now &rarr;</Link>
-            </Button>
-            <Image src="/assets/logo.png" alt="Logo" width={50} height={50} />
-          </div>
-        </div>
+        <nav>
+          <ul className="flex space-x-8">
+            <li>
+              <Link href="#home" className="font-medium hover:text-secondary transition-colors">
+                Home
+              </Link>
+            </li>
+            <li>
+              <Link href="#about" className="font-medium hover:text-secondary transition-colors">
+                About
+              </Link>
+            </li>
+            <li>
+              <Link href="#services" className="font-medium hover:text-secondary transition-colors">
+                Services
+              </Link>
+            </li>
+            <li>
+              <Link href="#jobPosts" className="font-medium hover:text-secondary transition-colors">
+                Job Posts
+              </Link>
+            </li>
+            <li>
+              <Link href="#accreditation" className="font-medium hover:text-secondary transition-colors">
+                Accreditation
+              </Link>
+            </li>
+            <li>
+              <Link href="#contact" className="font-medium hover:text-secondary transition-colors">
+                Contact
+              </Link>
+            </li>
+          </ul>
+        </nav>
       </div>
-    </div>
+    </header>
   );
 };
 
-export default Navigation;
+export default Header;

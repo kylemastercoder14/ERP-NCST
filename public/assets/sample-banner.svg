@@ -1,0 +1,50 @@
+<svg viewBox="0 0 500 800" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="500" height="800" fill="#000000" rx="10" ry="10"/>
+  <rect x="10" y="10" width="480" height="780" fill="#111111" rx="8" ry="8" stroke="#ffd700" stroke-width="3"/>
+
+  <!-- Logo Area -->
+  <circle cx="250" cy="150" r="120" fill="#ffd700"/>
+  <circle cx="250" cy="150" r="110" fill="#000000"/>
+  <circle cx="250" cy="150" r="95" fill="#ffd700"/>
+  <!-- Logo Text Simulation -->
+  <text x="250" y="85" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="#000000" text-anchor="middle">SECURITY SERVICES INC.</text>
+  <text x="250" y="230" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#000000" text-anchor="middle">2017</text>
+  <!-- Logo Symbol Simulation -->
+  <path d="M225,120 L250,90 L275,120 L285,160 L250,195 L215,160 Z" fill="#ffffff" stroke="#000000" stroke-width="2"/>
+  <path d="M225,120 L250,150 L275,120" fill="none" stroke="#000000" stroke-width="4"/>
+
+  <!-- Header -->
+  <text x="250" y="300" font-family="Arial Black, Arial, sans-serif" font-size="36" font-weight="bold" fill="#ffd700" text-anchor="middle">NOW HIRING</text>
+  <text x="250" y="345" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#ffffff" text-anchor="middle">SECURITY PROFESSIONALS</text>
+  <line x1="100" y1="370" x2="400" y2="370" stroke="#ffd700" stroke-width="3"/>
+
+  <!-- Main Content -->
+  <rect x="50" y="400" width="400" height="60" fill="#ffd700" rx="5" ry="5"/>
+  <text x="250" y="440" font-family="Arial Black, Arial, sans-serif" font-size="28" font-weight="bold" fill="#000000" text-anchor="middle">5 POSITIONS AVAILABLE</text>
+
+  <!-- Qualifications -->
+  <text x="250" y="500" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="#ffd700" text-anchor="middle">QUALIFIED CANDIDATES MUST HAVE:</text>
+
+  <circle cx="75" cy="540" r="8" fill="#ffd700"/>
+  <text x="95" y="545" font-family="Arial, sans-serif" font-size="18" fill="#ffffff" text-anchor="start">Valid Security License</text>
+
+  <circle cx="75" cy="580" r="8" fill="#ffd700"/>
+  <text x="95" y="585" font-family="Arial, sans-serif" font-size="18" fill="#ffffff" text-anchor="start">Minimum 2+ Years Experience</text>
+
+  <circle cx="75" cy="620" r="8" fill="#ffd700"/>
+  <text x="95" y="625" font-family="Arial, sans-serif" font-size="18" fill="#ffffff" text-anchor="start">Clean Background Check</text>
+
+  <circle cx="75" cy="660" r="8" fill="#ffd700"/>
+  <text x="95" y="665" font-family="Arial, sans-serif" font-size="18" fill="#ffffff" text-anchor="start">First Aid/CPR Certification</text>
+
+  <circle cx="75" cy="700" r="8" fill="#ffd700"/>
+  <text x="95" y="705" font-family="Arial, sans-serif" font-size="18" fill="#ffffff" text-anchor="start">Excellent Communication Skills</text>
+
+  <!-- Bottom Section -->
+  <rect x="50" y="730" width="400" height="50" fill="#ffd700" rx="5" ry="5"/>
+  <text x="250" y="762" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#000000" text-anchor="middle">APPLY TODAY</text>
+
+  <!-- Additional Details -->
+  <text x="250" y="795" font-family="Arial, sans-serif" font-size="12" fill="#ffd700" text-anchor="middle">COMPETITIVE PAY • BENEFITS • TRAINING PROVIDED • CAREER ADVANCEMENT</text>
+</svg>

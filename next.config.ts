@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    domains: ["erp-ncst.s3.us-east-1.amazonaws.com"],
+    domains: ["erp-ncst.s3.us-east-1.amazonaws.com", "images.unsplash.com"],
   },
 };
 

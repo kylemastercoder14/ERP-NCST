@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { BookA, BookOpenCheck, Megaphone, MoreHorizontal } from "lucide-react";
+import {
+  BookA,
+  BookOpenCheck,
+  Megaphone,
+  MoreHorizontal,
+  SendIcon,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import AlertModal from "@/components/ui/alert-modal";
@@ -24,19 +31,24 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import SendEmailForm from "@/components/forms/send-email-form";
+import ChangeApplicantStatusForm from '@/components/forms/change-status-applicant-form';
 
 interface CellActionProps {
   id: string;
   name: string;
   trainingStatus: string;
+  departmentSession: string;
 }
 
 export const CellAction: React.FC<CellActionProps> = ({
   id,
   name,
   trainingStatus,
+  departmentSession,
 }) => {
   const router = useRouter();
+  const [emailModalOpen, setEmailModalOpen] = React.useState(false);
   const [orientationOpen, setOrientationOpen] = React.useState(false);
   const [trainingOpen, setTrainingOpen] = React.useState(false);
   const [deploymentOpen, setDeploymentOpen] = React.useState(false);
@@ -56,21 +68,6 @@ export const CellAction: React.FC<CellActionProps> = ({
     };
     fetchClients();
   }, []);
-
-  const onOrientation = async () => {
-    setLoading(true);
-    try {
-      await changeTrainingStatus(id, "Orientation");
-      toast.success("Successfully changed to Orientation/Seminar.");
-      router.refresh();
-    } catch (error) {
-      console.log(error);
-      toast.error("Something went wrong.");
-    } finally {
-      setLoading(false);
-      setOrientationOpen(false);
-    }
-  };
 
   const onTraining = async () => {
     setLoading(true);
@@ -115,18 +112,32 @@ export const CellAction: React.FC<CellActionProps> = ({
       setLoading(false);
       setFinalOpen(false);
     }
-  }
+  };
 
   return (
     <>
-      <AlertModal
-        onConfirm={onOrientation}
-        title={`Change ${name} to Orientation/Seminar?`}
-        description="Are you sure you want to change this employee to Orientation/Seminar? This action cannot be undone."
+      <Modal
+        isOpen={emailModalOpen}
+        onClose={() => setEmailModalOpen(false)}
+        title="Send Email"
+        description="Send additional information to the employee."
+      >
+        <SendEmailForm
+          employeeId={id}
+          onClose={() => setEmailModalOpen(false)}
+        />
+      </Modal>
+      <Modal
         isOpen={orientationOpen}
         onClose={() => setOrientationOpen(false)}
-        loading={loading}
-      />
+        title="Change the applicant status"
+        description="Change the applicant status to Passed or Failed"
+      >
+        <ChangeApplicantStatusForm
+          employeeId={id}
+          onClose={() => setOrientationOpen(false)}
+        />
+      </Modal>
       <AlertModal
         onConfirm={onTraining}
         isOpen={trainingOpen}
@@ -145,7 +156,7 @@ export const CellAction: React.FC<CellActionProps> = ({
         title="Assign Employee"
         description="Assign employee to their respective client"
       >
-        <form onSubmit={onFinal} className='space-y-4'>
+        <form onSubmit={onFinal} className="space-y-4">
           <div className="space-y-1">
             <Label>Client</Label>
             <Select defaultValue={clientId} onValueChange={setClientId}>
@@ -161,7 +172,7 @@ export const CellAction: React.FC<CellActionProps> = ({
               </SelectContent>
             </Select>
           </div>
-          <Button className='w-full'>Save Changes</Button>
+          <Button className="w-full">Save Changes</Button>
         </form>
       </Modal>
       <DropdownMenu>
@@ -173,10 +184,17 @@ export const CellAction: React.FC<CellActionProps> = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          {departmentSession === "Human Resource" &&
+            trainingStatus === "Initial Interview" && (
+              <DropdownMenuItem onClick={() => setEmailModalOpen(true)}>
+                <SendIcon className="w-4 h-4 mr-2" />
+                Send Email
+              </DropdownMenuItem>
+            )}
           {trainingStatus === "Initial Interview" && (
             <DropdownMenuItem onClick={() => setOrientationOpen(true)}>
               <BookA className="w-4 h-4 mr-2" />
-              Change To Orientation/Seminar
+              Change Status
             </DropdownMenuItem>
           )}
           {trainingStatus === "Orientation" && (

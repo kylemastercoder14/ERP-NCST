@@ -28,6 +28,7 @@ export interface EmployeeWithProps extends Employee {
   CharacterReferences: CharacterReferences[];
   JobTitle: JobTitle;
   Department: Department;
+  UserAccount?: UserAccount | null;
 }
 
 export interface UserWithProps extends UserAccount {

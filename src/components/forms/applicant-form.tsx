@@ -37,6 +37,7 @@ const ApplicantForm = ({
     defaultValues: {
       positionDesired: initialData?.JobTitle.id || "",
       department: initialData?.Department.id || "",
+      email: initialData?.UserAccount?.email || "",
       licenseNo: initialData?.licenseNo || "",
       expiryDate: initialData?.expiryDate || "",
       firstName: initialData?.firstName || "",
@@ -346,11 +347,20 @@ const ApplicantForm = ({
                 placeholder="Select branch"
               />
             </div>
-            <div className="grid lg:grid-cols-2 grid-cols-1 gap-4">
+            <div className="grid lg:grid-cols-3 grid-cols-1 gap-4">
               <CustomFormField
                 control={form.control}
                 fieldType={FormFieldType.INPUT}
                 isRequired={true}
+                name="email"
+                disabled={!!initialData?.UserAccount?.email?.trim() || isSubmitting}
+                label="Email Address"
+                placeholder="Enter email address"
+              />
+              <CustomFormField
+                control={form.control}
+                fieldType={FormFieldType.INPUT}
+                isRequired={false}
                 name="licenseNo"
                 disabled={isSubmitting}
                 label="License No."
@@ -359,7 +369,7 @@ const ApplicantForm = ({
               <CustomFormField
                 control={form.control}
                 fieldType={FormFieldType.DATE_PICKER}
-                isRequired={true}
+                isRequired={false}
                 name="expiryDate"
                 disabled={isSubmitting}
                 label="Expiry Date"

@@ -19,6 +19,38 @@ model Admin {
   updatedAt DateTime @updatedAt
 }
 
+model ApplicantList {
+  id        String @id @default(cuid())
+  email     String @unique
+  firstName String
+  lastName  String
+  resume    String
+  status    String @default("Pending") // Pending, Interviewed, Hired, Rejected
+  branch    String @default("Cavite")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  JobPosting   JobPosting? @relation(fields: [jobPostingId], references: [id])
+  jobPostingId String?
+
+  @@index([jobPostingId])
+}
+
+model JobPosting {
+  id             String @id @default(cuid())
+  title          String
+  description    String
+  attachment     String
+  status         String @default("Open")
+  finacialStatus String @default("Pending") // Pending, Approved, Rejected
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  applicantList ApplicantList[]
+}
+
 model UserAccount {
   id       String @id @default(cuid())
   email    String @unique
@@ -58,8 +90,8 @@ model Department {
 
 model Employee {
   id                String   @id @default(cuid())
-  licenseNo         String
-  expiryDate        String
+  licenseNo         String?
+  expiryDate        String?
   firstName         String
   middleName        String?
   lastName          String

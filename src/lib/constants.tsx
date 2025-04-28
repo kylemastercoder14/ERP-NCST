@@ -45,6 +45,14 @@ export const SIDEBAR_HEAD_ACCOUNTING = [
     url: "#",
     items: [
       {
+        title: "Job Posting",
+        url: "/head/job-posting",
+      },
+      {
+        title: "Withdrawal Management",
+        url: "/head/withdrawal-management",
+      },
+      {
         title: "Purchase Request",
         url: "/head/purchase-request",
       },
@@ -96,6 +104,10 @@ export const SIDEBAR_HEAD_OPERATION = [
     url: "#",
     items: [
       {
+        title: "Withdrawal Management",
+        url: "/head/withdrawal-management",
+      },
+      {
         title: "Purchase Request",
         url: "/head/purchase-request",
       },
@@ -123,6 +135,10 @@ export const SIDEBAR_HEAD_HR = [
       {
         title: "Dashboard",
         url: "/head/dashboard",
+      },
+      {
+        title: "Applicants List",
+        url: "/head/applicants-list",
       },
       {
         title: "Employee Management",
@@ -168,12 +184,24 @@ export const SIDEBAR_HEAD_HR = [
         title: "Leave Management",
         url: "/head/leave-management",
       },
+      {
+        title: "Onboarding & Training",
+        url: "/head/onboarding-training",
+      },
     ],
   },
   {
     title: "Others", // dont mind this
     url: "#",
     items: [
+      {
+        title: "Job Posting",
+        url: "/head/job-posting",
+      },
+      {
+        title: "Withdrawal Management",
+        url: "/head/withdrawal-management",
+      },
       {
         title: "Purchase Request",
         url: "/head/purchase-request",
@@ -229,6 +257,14 @@ export const SIDEBAR_HEAD_CRM = [
     title: "Others",
     url: "#",
     items: [
+      {
+        title: "Withdrawal Management",
+        url: "/head/withdrawal-management",
+      },
+      {
+        title: "Purchase Request",
+        url: "/head/purchase-request",
+      },
       {
         title: "Reports Management",
         url: "/head/reports-management",

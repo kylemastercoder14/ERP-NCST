@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { DM_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
+import '@/lib/font-awesome'
+import '@fortawesome/fontawesome-svg-core/styles.css'
 
 const font = DM_Sans({
   subsets: ["latin"],

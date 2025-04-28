@@ -23,6 +23,9 @@ import {
   AccountPayableValidators,
   AccountReceivableValidators,
   TransactionValidators,
+  SendEmailEmployeeValidators,
+  SendApplicantStatusValidators,
+  JobPostValidators,
 } from "@/validators";
 import nodemailer from "nodemailer";
 import { CreateAccountHTML } from "@/components/email-templates/create-account";
@@ -30,7 +33,13 @@ import { cookies } from "next/headers";
 import * as jose from "jose";
 import { useUser } from "@/hooks/use-user";
 import { RejectLeaveHTML } from "@/components/email-templates/reject-leave";
-import { generatePurchaseCode, generateWithdrawalCode } from "@/lib/utils";
+import {
+  generatePurchaseCode,
+  generateRandomPassword,
+  generateWithdrawalCode,
+} from "@/lib/utils";
+import { InitialInterviewDetailsHTML } from "@/components/email-templates/initial-interview";
+import { InitialInterviewStatusHTML } from "@/components/email-templates/status-applicant";
 
 export const loginAccount = async (values: z.infer<typeof LoginValidators>) => {
   const validatedField = LoginValidators.safeParse(values);
@@ -219,6 +228,156 @@ export const createAccount = async (
   }
 };
 
+export const sendInitialInterviewEmployee = async (
+  values: z.infer<typeof SendEmailEmployeeValidators>,
+  employeeId: string
+) => {
+  const validatedField = SendEmailEmployeeValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { date, time, location } = validatedField.data;
+
+  const res = await db.userAccount.findFirst({
+    where: {
+      employeeId,
+    },
+  });
+
+  // Format date normally
+  const formattedDate = new Date(date).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+
+  // Format time manually
+  const rawTime = new Date(time); // if time is a Date
+  const formattedTime = rawTime.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  const htmlContent = await InitialInterviewDetailsHTML({
+    email: res?.email || "",
+    date: formattedDate,
+    time: formattedTime,
+    location,
+  });
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: "bats3curity.9395@gmail.com",
+      pass: "wfffyihhttplludl",
+    },
+  });
+
+  const message = {
+    from: "bats3curity.9395@gmail.com",
+    to: res?.email || "",
+    subject: "Initial Interview Invitation - BAT Security Services INC.",
+    text: `Hello ${res?.email || ""},
+
+Congratulations! You are invited for an Initial Interview at BAT Security Services INC.
+
+Date: ${formattedDate}
+Time: ${formattedTime}
+Location: ${location}
+
+Please arrive 10-15 minutes before your scheduled time and bring a valid ID and supporting documents.
+
+Thank you and we look forward to meeting you!`,
+    html: htmlContent,
+  };
+
+  try {
+    await transporter.sendMail(message);
+
+    return { success: "Email has been sent." };
+  } catch (error) {
+    console.error("Error sending notification", error);
+    return { message: "An error occurred. Please try again." };
+  }
+};
+
+export const sendInitialInterviewEmployeeStatus = async (
+  values: z.infer<typeof SendApplicantStatusValidators>,
+  employeeId: string
+) => {
+  const validatedField = SendApplicantStatusValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { status, remarks } = validatedField.data;
+
+  const res = await db.userAccount.findFirst({
+    where: {
+      employeeId,
+    },
+  });
+
+  if (status === "Passed") {
+    // Change training status or handle passed applicant
+    await changeTrainingStatus(employeeId, "Orientation");
+  } else {
+    // Handle failed applicant (delete records, etc.)
+    await deleteApplicant(employeeId);
+    await db.userAccount.delete({
+      where: {
+        email: res?.email || "",
+      },
+    });
+  }
+
+  // Customize the HTML content based on status and remarks
+  const htmlContent = await InitialInterviewStatusHTML({
+    email: res?.email || "",
+    status,
+    remarks,
+  });
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: "bats3curity.9395@gmail.com",
+      pass: "wfffyihhttplludl",
+    },
+  });
+
+  const message = {
+    from: "bats3curity.9395@gmail.com",
+    to: res?.email || "",
+    subject: "Initial Interview Status - BAT Security Services INC.",
+    text: `Hello ${res?.email || ""},
+
+We would like to inform you about the status of your initial interview with BAT Security Services INC.
+
+Status: ${status}
+
+${status === "Failed" ? `Remarks: ${remarks}` : ""}
+
+Thank you for your time and we wish you the best in your future endeavors.`,
+    html: htmlContent,
+  };
+
+  try {
+    await transporter.sendMail(message);
+
+    return { success: "Email has been sent." };
+  } catch (error) {
+    console.error("Error sending notification", error);
+    return { message: "An error occurred. Please try again." };
+  }
+};
+
 export const sendAccountToEmail = async (
   email: string,
   password: string,
@@ -269,6 +428,7 @@ export const createApplicant = async (
   const {
     positionDesired,
     department,
+    email,
     licenseNo,
     expiryDate,
     firstName,
@@ -325,7 +485,7 @@ export const createApplicant = async (
 
     const trainingStatus = isNewEmployee ? "Initial Interview" : "";
 
-    await db.employee.create({
+    const res = await db.employee.create({
       data: {
         jobTitleId: positionDesired,
         departmentId: department,
@@ -408,6 +568,14 @@ export const createApplicant = async (
               })) || [],
           },
         },
+      },
+    });
+
+    await db.userAccount.create({
+      data: {
+        email,
+        employeeId: res.id,
+        password: generateRandomPassword(12),
       },
     });
 
@@ -2984,6 +3152,102 @@ export const getItemById = async (id: string) => {
     console.error("Error fetching item", error);
     return {
       error: `Failed to fetch item. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const createJobPost = async (
+  values: z.infer<typeof JobPostValidators>
+) => {
+  const validatedField = JobPostValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { title, description, attachment } = validatedField.data;
+
+  try {
+    await db.jobPosting.create({
+      data: {
+        title,
+        description,
+        attachment,
+      },
+    });
+
+    return { success: "Job post created successfully" };
+  } catch (error: any) {
+    console.error("Error creating job post", error);
+    return {
+      error: `Failed to create job post. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const updateJobPost = async (
+  values: z.infer<typeof JobPostValidators>,
+  id: string
+) => {
+  if (!id) {
+    return { error: "Job post ID is required" };
+  }
+
+  const validatedField = JobPostValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { title, description, attachment, financialStatus } =
+    validatedField.data;
+
+  try {
+    await db.jobPosting.update({
+      where: { id },
+      data: {
+        title,
+        description,
+        attachment,
+        finacialStatus: financialStatus,
+      },
+    });
+
+    return { success: "Job post updated successfully" };
+  } catch (error: any) {
+    console.error("Error updating job post", error);
+    return {
+      error: `Failed to update job post. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const submitApplication = async (data: {
+  firstName: string;
+  lastName: string;
+  email: string;
+  branch: string;
+  resume: string;
+}, jobPostId: string) => {
+  try {
+    await db.applicantList.create({
+      data: {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        branch: data.branch,
+        resume: data.resume,
+        jobPostingId: jobPostId,
+      },
+    });
+
+    return { success: "Application submitted successfully" };
+  } catch (error: any) {
+    console.error("Error submitting application", error);
+    return {
+      error: `Failed to submit application. Please try again. ${error.message || ""}`,
     };
   }
 };

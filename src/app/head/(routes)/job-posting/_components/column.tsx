@@ -3,23 +3,39 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { ChevronsUpDown } from "lucide-react";
 import { CellAction } from "./cell-action";
+import { Badge } from "@/components/ui/badge";
 
-export type ApplicantColumn = {
+export type PurchaseRequestColumn = {
   id: string;
-  licenseNo: string;
+  itemName: string;
+  purchaseCode: string;
   name: string;
-  phoneNumber: string;
-  address: string;
-  trainingStatus: string;
-  gender: string;
-  civilStatus: string;
-  positionDesired: string;
+  licenseNo: string;
+  quantity: number;
+  totalAmount: string;
+  department: string;
+  financeStatus: string;
   departmentSession: string;
+  isEdited: boolean;
+  remarks: string;
   createdAt: string;
-  updatedAt: string;
 };
 
-export const columns: ColumnDef<ApplicantColumn>[] = [
+export const columns: ColumnDef<PurchaseRequestColumn>[] = [
+  {
+    accessorKey: "purchaseCode",
+    header: ({ column }) => {
+      return (
+        <span
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="cursor-pointer flex items-center"
+        >
+          Purchase #
+          <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
+        </span>
+      );
+    },
+  },
   {
     accessorKey: "name",
     header: ({ column }) => {
@@ -28,7 +44,7 @@ export const columns: ColumnDef<ApplicantColumn>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="cursor-pointer flex items-center"
         >
-          Employee
+          Requested By
           <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
         </span>
       );
@@ -45,38 +61,63 @@ export const columns: ColumnDef<ApplicantColumn>[] = [
     },
   },
   {
-    accessorKey: "contact",
+    accessorKey: "itemName",
     header: ({ column }) => {
       return (
         <span
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="cursor-pointer flex items-center"
         >
-          Contact Information
+          Item
           <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
         </span>
       );
     },
     cell: ({ row }) => {
       return (
-        <div className="flex flex-col">
-          <span className="text-sm">{row.original.phoneNumber}</span>
-          <span className="text-muted-foreground text-[12px]">
-            {row.original.address}
-          </span>
+        <div className="flex items-center gap-2">
+          <span className="text-sm">{row.original.itemName} {row.original.isEdited && <Badge variant="secondary">Edited</Badge>}</span>
         </div>
       );
     },
   },
   {
-    accessorKey: "applicationDate",
+    accessorKey: "totalAmount",
     header: ({ column }) => {
       return (
         <span
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="cursor-pointer flex items-center"
         >
-          Application Date
+          Total Amount
+          <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "department",
+    header: ({ column }) => {
+      return (
+        <span
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="cursor-pointer flex items-center"
+        >
+          Department
+          <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "financeStatus",
+    header: ({ column }) => {
+      return (
+        <span
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="cursor-pointer flex items-center"
+        >
+          Finance Status
           <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
         </span>
       );
@@ -84,69 +125,41 @@ export const columns: ColumnDef<ApplicantColumn>[] = [
     cell: ({ row }) => {
       return (
         <div>
-          <div className="bg-green-600/20 border border-green-600 text-green-800 w-12 rounded-md px-2 flex items-center justify-center text-[11px] py-0.5">
-            Active
+          <div
+            className={`w-14 rounded-md px-2 flex items-center justify-center text-[11px] py-0.5 border
+            ${
+              row.original.financeStatus === "Approved"
+                ? "bg-green-600/20 border-green-600 text-green-800"
+                : row.original.financeStatus === "Rejected"
+                  ? "bg-red-600/20 border-red-600 text-red-800"
+                  : row.original.financeStatus === "Returned"
+                    ? "bg-blue-600/20 border-blue-600 text-blue-800"
+                    : "bg-yellow-600/20 border-yellow-600 text-yellow-800"
+            }
+          `}
+          >
+            {row.original.financeStatus}
           </div>
-          <span className="text-muted-foreground mt-1 text-[12px]">
-            {row.original.createdAt}
-          </span>
         </div>
       );
     },
   },
   {
-    accessorKey: "gender",
+    accessorKey: "remarks",
     header: ({ column }) => {
       return (
         <span
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="cursor-pointer flex items-center"
         >
-          Gender
+          Remarks
           <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
         </span>
       );
     },
-  },
-  {
-    accessorKey: "civilStatus",
-    header: ({ column }) => {
+    cell: ({ row }) => {
       return (
-        <span
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="cursor-pointer flex items-center"
-        >
-          Civil Status
-          <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
-        </span>
-      );
-    },
-  },
-  {
-    accessorKey: "positionDesired",
-    header: ({ column }) => {
-      return (
-        <span
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="cursor-pointer flex items-center"
-        >
-          Position Desired
-          <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
-        </span>
-      );
-    },
-  },
-  {
-    accessorKey: "updatedAt",
-    header: ({ column }) => {
-      return (
-        <span
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="cursor-pointer flex items-center"
-        >
-          Last Status Update
-          <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
-        </span>
+        <span className="max-w-[150px] overflow-hidden text-ellipsis whitespace-nowrap" title={row.original.remarks}>{row.original.remarks}</span>
       );
     },
   },
@@ -156,8 +169,7 @@ export const columns: ColumnDef<ApplicantColumn>[] = [
     cell: ({ row }) => (
       <CellAction
         id={row.original.id}
-        name={row.original.name}
-        trainingStatus={row.original.trainingStatus}
+        financeStatus={row.original.financeStatus}
         departmentSession={row.original.departmentSession}
       />
     ),

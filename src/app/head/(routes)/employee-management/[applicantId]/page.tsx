@@ -19,6 +19,7 @@ const Page = async (props: {
       Children: true,
       JobTitle: true,
       Department: true,
+      UserAccount: true,
     },
   });
 

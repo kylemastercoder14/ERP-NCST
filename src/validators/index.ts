@@ -31,8 +31,9 @@ export const ApplicantValidators = z.object({
     .string()
     .min(1, { message: "Position desired is required" }),
   department: z.string().min(1, { message: "Department is required" }),
-  licenseNo: z.string().min(1, { message: "License number is required" }),
-  expiryDate: z.string().min(1, { message: "License validity is required" }),
+  email: z.string().min(1, { message: "Email is required" }),
+  licenseNo: z.string().optional(),
+  expiryDate: z.string().optional(),
   firstName: z.string().min(1, { message: "First name is required" }),
   middleName: z.string().optional(),
   lastName: z.string().min(1, { message: "Last name is required" }),
@@ -132,6 +133,20 @@ export const AccountValidators = z.object({
   password: z.string().min(1, { message: "Password is required" }),
 });
 
+export const SendEmailEmployeeValidators = z.object({
+  date: z.string().min(1, { message: "Date is required" }),
+  time: z.date({
+    required_error: "Time is required",
+    invalid_type_error: "Invalid time format",
+  }),
+  location: z.string().min(1, { message: "Location is required" }),
+});
+
+export const SendApplicantStatusValidators = z.object({
+  status: z.string().min(1, { message: "Date is required" }),
+  remarks: z.string().optional(),
+});
+
 export const PurchaseRequestValidators = z.object({
   department: z.string().nonempty("Department is required"),
   items: z.array(
@@ -227,6 +242,13 @@ export const ClientManagementValidators = z.object({
   address: z.string().optional(),
   contactNo: z.string().optional(),
   logo: z.string().optional(),
+});
+
+export const JobPostValidators = z.object({
+  title: z.string().min(1, { message: "Title is required" }),
+  attachment: z.string().min(1, { message: "Attachment is required" }),
+  description: z.string().min(1, { message: "Description is required" }),
+  financialStatus: z.string().optional(),
 });
 
 export const SupplierManagementValidators = z.object({
