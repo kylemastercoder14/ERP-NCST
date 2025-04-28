@@ -21,6 +21,21 @@ body {
   }
 }
 
+.with-list ul {
+  list-style-type: disc;
+  padding-left: 1.5rem; /* Add left padding */
+}
+
+.with-list ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem; /* Add left padding */
+}
+
+.with-list li {
+  margin-bottom: 0.25rem; /* Space between list items */
+}
+
+
 @layer base {
   :root {
     --background: 0 0% 100%;

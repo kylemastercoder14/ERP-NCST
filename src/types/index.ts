@@ -17,6 +17,8 @@ import {
   PurchaseRequestItem,
   Items,
   Supplier,
+  Withdrawal,
+  WithdrawalItem,
 } from "@prisma/client";
 
 export interface EmployeeWithProps extends Employee {
@@ -45,9 +47,19 @@ export interface PurchaseRequestItemWithProps extends PurchaseRequestItem {
   Item: ItemWithSupplierProps | null;
 }
 
+export interface WithdrawalItemWithProps extends WithdrawalItem {
+  Item: ItemWithSupplierProps | null;
+}
+
 export interface PurchaseRequestWithProps extends PurchaseRequest {
   PurchaseRequestItem: PurchaseRequestItemWithProps[];
 }
+
+export interface WithdrawalWithProps extends Withdrawal {
+  WithdrawalItem: WithdrawalItemWithProps[];
+  Employee?: Employee | null;
+}
+
 export interface AttendanceManagementWithProps extends Attendance {
   Employee: Employee;
 }

@@ -143,6 +143,16 @@ export const PurchaseRequestValidators = z.object({
   ),
 });
 
+export const WithdrawalValidators = z.object({
+  department: z.string().nonempty("Department is required"),
+  items: z.array(
+    z.object({
+      itemId: z.string().nonempty("Item is required"),
+      quantity: z.coerce.number().min(1, "Quantity must be at least 1"),
+    })
+  ),
+});
+
 export const LeaveManagementValidators = z
   .object({
     leaveType: z.string().min(1, { message: "Leave type is required" }),
@@ -244,6 +254,7 @@ export const ItemValidators = z.object({
   supplierId: z.string().min(1, { message: "Supplier is required" }),
   description: z.string().optional(),
   isSmallItem: z.boolean().default(true),
+  specification: z.string().optional(),
 });
 
 export const AccountPayableValidators = z.object({

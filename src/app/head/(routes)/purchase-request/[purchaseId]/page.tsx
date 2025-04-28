@@ -27,7 +27,7 @@ const Page = async (props: {
 
   let items;
 
-  if (department === "Procurement") {
+  if (department === "Procurement" || department === "Inventory") {
     items = await db.items.findMany({
       orderBy: {
         name: "asc",

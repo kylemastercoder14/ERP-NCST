@@ -9,12 +9,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, MoreHorizontal, Trash } from "lucide-react";
+import { Edit, FolderOpen, MoreHorizontal, Trash } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import AlertModal from "@/components/ui/alert-modal";
 import React from "react";
 import { deleteItem } from "@/actions";
+import { Modal } from "@/components/ui/modal";
+import ViewItemDetails from "./view-details";
 
 interface CellActionProps {
   id: string;
@@ -23,6 +25,7 @@ interface CellActionProps {
 export const CellAction: React.FC<CellActionProps> = ({ id }) => {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
+  const [viewModal, setViewModal] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
   const onDelete = async () => {
@@ -52,6 +55,14 @@ export const CellAction: React.FC<CellActionProps> = ({ id }) => {
         onClose={() => setOpen(false)}
         loading={loading}
       />
+      <Modal
+        className="max-w-4xl h-[70vh] overflow-y-auto"
+        title="View Item Details"
+        isOpen={viewModal}
+        onClose={() => setViewModal(false)}
+      >
+        <ViewItemDetails id={id} />
+      </Modal>
       <DropdownMenu>
         <DropdownMenuTrigger className="no-print" asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
@@ -61,6 +72,10 @@ export const CellAction: React.FC<CellActionProps> = ({ id }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuItem onClick={() => setViewModal(true)}>
+            <FolderOpen className="w-4 h-4 mr-2" />
+            View Details
+          </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => router.push(`/head/items-list/${id}`)}
           >

@@ -64,6 +64,7 @@ import {
 import SignatureInput from "@/components/ui/signature-input";
 import { TimePicker } from "@/components/ui/time-picker";
 import MultipleImageUpload from "../ui/multiple-images-upload";
+import RichTextEditor from './richtext-editor';
 
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {}
@@ -207,6 +208,24 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
                 {...field}
                 className="shad-input"
                 autoFocus={autoFocus}
+              />
+            </div>
+          </FormControl>
+
+          {description && <FormDescription>{description}</FormDescription>}
+        </>
+      );
+
+      case FormFieldType.RICHTEXT:
+      return (
+        <>
+          <FormControl>
+            <div className="shad-input-outer">
+              <RichTextEditor
+                placeholder={placeholder}
+                disabled={disabled}
+                onChange={field.onChange}
+                value={field.value}
               />
             </div>
           </FormControl>

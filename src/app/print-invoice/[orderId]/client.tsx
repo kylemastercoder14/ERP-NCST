@@ -25,12 +25,11 @@ const PrintInvoiceClient = ({ data }: { data: PrintInvoiceClientProps }) => {
     const id = data.id;
 
     // Extract numeric part if ID is a string, otherwise use the ID directly
-    const numericId = typeof id === 'string'
-      ? id.match(/\d+/g)?.join('') || id
-      : id;
+    const numericId =
+      typeof id === "string" ? id.match(/\d+/g)?.join("") || id : id;
 
     // Pad with zeros to ensure at least 5 digits
-    const paddedId = String(numericId).padStart(5, '0');
+    const paddedId = String(numericId).padStart(5, "0");
 
     return `INV-${year}-${paddedId}`;
   };
@@ -39,11 +38,12 @@ const PrintInvoiceClient = ({ data }: { data: PrintInvoiceClientProps }) => {
 
   const handlePrint = () => {
     // Create a new window for printing
-    const printWindow = window.open('', '_blank');
+    const printWindow = window.open("", "_blank");
     if (!printWindow) return;
 
     // Get the current invoice content
-    const invoiceContent = document.getElementById('invoice-content')?.innerHTML;
+    const invoiceContent =
+      document.getElementById("invoice-content")?.innerHTML;
 
     // Write to the new window and print
     printWindow.document.write(`
@@ -76,6 +76,9 @@ const PrintInvoiceClient = ({ data }: { data: PrintInvoiceClientProps }) => {
 
   return (
     <div className="px-4 md:px-10 lg:px-20 py-6 relative">
+      <div className="absolute top-4 left-4 bg-red-300 text-black px-4 py-2 rounded-md font-bold shadow-lg print:hidden">
+        PREVIEW ONLY
+      </div>
       <div className="absolute top-4 right-4">
         <button
           onClick={handlePrint}
@@ -119,30 +122,44 @@ const PrintInvoiceClient = ({ data }: { data: PrintInvoiceClientProps }) => {
                   <td className="font-medium p-3 border border-gray-300 bg-gray-50">
                     Invoice #
                   </td>
-                  <td className="p-3 border border-gray-300">{invoiceNumber}</td>
+                  <td className="p-3 border border-gray-300">
+                    {invoiceNumber}
+                  </td>
                 </tr>
                 <tr>
-                  <td className="font-medium p-3 border border-gray-300 bg-gray-50">Invoice Date</td>
-                  <td className="p-3 border border-gray-300">{new Date().toLocaleDateString()}</td>
+                  <td className="font-medium p-3 border border-gray-300 bg-gray-50">
+                    Invoice Date
+                  </td>
+                  <td className="p-3 border border-gray-300">
+                    {new Date().toLocaleDateString()}
+                  </td>
                 </tr>
                 <tr>
-                  <td className="font-medium p-3 border border-gray-300 bg-gray-50">Name of Rep.</td>
-                  <td className="p-3 border border-gray-300">{supplierInfo?.Item?.Supplier?.name || "N/A"}</td>
+                  <td className="font-medium p-3 border border-gray-300 bg-gray-50">
+                    Name of Rep.
+                  </td>
+                  <td className="p-3 border border-gray-300">
+                    {supplierInfo?.Item?.Supplier?.name || "N/A"}
+                  </td>
                 </tr>
                 <tr>
-                  <td className="font-medium p-3 border border-gray-300 bg-gray-50">Contact Phone</td>
-                  <td className="p-3 border border-gray-300">{supplierInfo?.Item?.Supplier?.contactNo || "N/A"}</td>
+                  <td className="font-medium p-3 border border-gray-300 bg-gray-50">
+                    Contact Phone
+                  </td>
+                  <td className="p-3 border border-gray-300">
+                    {supplierInfo?.Item?.Supplier?.contactNo || "N/A"}
+                  </td>
                 </tr>
               </tbody>
             </table>
 
             <p className="mt-6 text-xl font-semibold text-right">
               Amount Due: ₱
-              {data.PurchaseRequestItem.reduce((sum, item) =>
-                item.Item
-                  ? sum + item.quantity * item.Item.unitPrice
-                  : sum
-              , 0).toFixed(2)}
+              {data.PurchaseRequestItem.reduce(
+                (sum, item) =>
+                  item.Item ? sum + item.quantity * item.Item.unitPrice : sum,
+                0
+              ).toFixed(2)}
             </p>
           </div>
         </div>
@@ -151,9 +168,13 @@ const PrintInvoiceClient = ({ data }: { data: PrintInvoiceClientProps }) => {
           <thead className="bg-gray-100">
             <tr>
               <th className="p-3 border border-gray-300 text-left">No.</th>
-              <th className="p-3 border border-gray-300 text-left">Item Name</th>
+              <th className="p-3 border border-gray-300 text-left">
+                Item Name
+              </th>
               <th className="p-3 border border-gray-300 text-left">Quantity</th>
-              <th className="p-3 border border-gray-300 text-left">Unit Price</th>
+              <th className="p-3 border border-gray-300 text-left">
+                Unit Price
+              </th>
               <th className="p-3 border border-gray-300 text-left">Subtotal</th>
             </tr>
           </thead>
@@ -161,7 +182,9 @@ const PrintInvoiceClient = ({ data }: { data: PrintInvoiceClientProps }) => {
             {data.PurchaseRequestItem.map((item, index) => (
               <tr key={item.id} className={index % 2 === 1 ? "bg-gray-50" : ""}>
                 <td className="p-3 border border-gray-300">{index + 1}</td>
-                <td className="p-3 border border-gray-300">{item.Item?.name || "N/A"}</td>
+                <td className="p-3 border border-gray-300">
+                  {item.Item?.name || "N/A"}
+                </td>
                 <td className="p-3 border border-gray-300">{item.quantity}</td>
                 <td className="p-3 border border-gray-300">
                   ₱{item.Item ? item.Item.unitPrice.toFixed(2) : "0.00"}
@@ -175,14 +198,16 @@ const PrintInvoiceClient = ({ data }: { data: PrintInvoiceClientProps }) => {
               </tr>
             ))}
             <tr className="font-semibold bg-gray-100">
-              <td colSpan={4} className="p-3 border border-gray-300 text-right">Total</td>
+              <td colSpan={4} className="p-3 border border-gray-300 text-right">
+                Total
+              </td>
               <td className="p-3 border border-gray-300">
                 ₱
-                {data.PurchaseRequestItem.reduce((sum, item) =>
-                  item.Item
-                    ? sum + item.quantity * item.Item.unitPrice
-                    : sum
-                , 0).toFixed(2)}
+                {data.PurchaseRequestItem.reduce(
+                  (sum, item) =>
+                    item.Item ? sum + item.quantity * item.Item.unitPrice : sum,
+                  0
+                ).toFixed(2)}
               </td>
             </tr>
           </tbody>

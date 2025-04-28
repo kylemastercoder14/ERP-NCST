@@ -36,7 +36,8 @@ const AccountPayableForm = ({
       name: initialData?.name || "",
       description: initialData?.description || "",
       supplierId: initialData?.supplierId || "",
-      isSmallItem: initialData?.isSmallItem || true,
+      isSmallItem: initialData?.isSmallItem,
+      specification: initialData?.specification || "",
     },
   });
 
@@ -102,6 +103,17 @@ const AccountPayableForm = ({
             label="Description"
             placeholder="Enter description (if any)"
           />
+          {!form.watch("isSmallItem") && (
+            <CustomFormField
+              control={form.control}
+              fieldType={FormFieldType.RICHTEXT}
+              isRequired={false}
+              name="specification"
+              disabled={isSubmitting}
+              label="Specification"
+              placeholder="Enter detailed specification (if any)"
+            />
+          )}
           <CustomFormField
             control={form.control}
             fieldType={FormFieldType.COMBOBOX}

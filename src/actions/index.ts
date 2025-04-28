@@ -30,7 +30,7 @@ import { cookies } from "next/headers";
 import * as jose from "jose";
 import { useUser } from "@/hooks/use-user";
 import { RejectLeaveHTML } from "@/components/email-templates/reject-leave";
-import { generatePurchaseCode } from "@/lib/utils";
+import { generatePurchaseCode, generateWithdrawalCode } from "@/lib/utils";
 
 export const loginAccount = async (values: z.infer<typeof LoginValidators>) => {
   const validatedField = LoginValidators.safeParse(values);
@@ -1758,6 +1758,90 @@ export const updatePurchaseRequest = async (
   }
 };
 
+export const createWithdrawalRequest = async (values: any) => {
+  const { user } = await useUser();
+
+  try {
+    const employee = await db.employee.findUnique({
+      where: {
+        id: user?.employeeId,
+      },
+      include: {
+        Department: true,
+      },
+    });
+
+    if (!employee) {
+      return { error: "Employee not found" };
+    }
+
+    const withdrawal = await db.withdrawal.create({
+      data: {
+        department: values.department || employee.Department.name,
+        employeeId: user?.employeeId as string,
+        withdrawalCode: generateWithdrawalCode(),
+        WithdrawalItem: {
+          create: values.items.map((item: { itemId: any; quantity: any }) => {
+            return {
+              itemId: item.itemId,
+              quantity: item.quantity,
+            };
+          }),
+        },
+      },
+    });
+
+    return {
+      success: "Withdrawal created successfully",
+      data: withdrawal,
+    };
+  } catch (error: any) {
+    console.error("Error creating withdrawal", error);
+    return {
+      error: `Failed to create withdrawal. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const updateWithdrawalRequest = async (
+  values: any,
+  withdrawalId: string
+) => {
+  if (!withdrawalId) {
+    return { error: "Withdrawal ID is required" };
+  }
+
+  try {
+    await db.withdrawalItem.deleteMany({
+      where: {
+        withdrawalId,
+      },
+    });
+
+    await db.withdrawal.update({
+      where: { id: withdrawalId },
+      data: {
+        department: values.department,
+        WithdrawalItem: {
+          create: values.items.map((item: any) => ({
+            quantity: item.quantity,
+            Item: {
+              connect: { id: item.itemId },
+            },
+          })),
+        },
+      },
+    });
+
+    return { success: "Withdrawal updated successfully" };
+  } catch (error: any) {
+    console.error("Error updating withdrawal", error);
+    return {
+      error: `Failed to update withdrawal. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
 export const getPurchaseRequestById = async (id: string) => {
   if (!id) {
     return { error: "Purchase request ID is required" };
@@ -1782,6 +1866,34 @@ export const getPurchaseRequestById = async (id: string) => {
     console.error("Error fetching purchase request", error);
     return {
       error: `Failed to fetch purchase request. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const getWithdrawalById = async (id: string) => {
+  if (!id) {
+    return { error: "Withdrawal ID is required" };
+  }
+
+  try {
+    const withdrawal = await db.withdrawal.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        WithdrawalItem: {
+          include: {
+            Item: true,
+          },
+        },
+      },
+    });
+
+    return { withdrawal };
+  } catch (error: any) {
+    console.error("Error fetching withdrawal item", error);
+    return {
+      error: `Failed to fetch withdrawal item. Please try again. ${error.message || ""}`,
     };
   }
 };
@@ -1895,6 +2007,71 @@ export const updatePurchaseRequestStatus = async (
     console.error("Error updating purchase request status", error);
     return {
       error: `Failed to update purchase request status. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const updateWithdrawalStatus = async (
+  id: string,
+  status: string,
+  remarks: string
+) => {
+  if (!id) {
+    return { error: "Withdrawal ID is required" };
+  }
+
+  try {
+    const withdrawal = await db.withdrawal.findUnique({
+      where: { id },
+      include: {
+        WithdrawalItem: {
+          include: {
+            Item: true,
+          },
+        },
+      },
+    });
+
+    if (!withdrawal) {
+      return { error: "Withdrawal not found" };
+    }
+
+    // Update status and remarks
+    await db.withdrawal.update({
+      where: { id },
+      data: {
+        status,
+        remarks,
+      },
+    });
+
+    if (status === "Approved") {
+      // Process each withdrawal item individually
+      for (const item of withdrawal.WithdrawalItem) {
+        // Find the inventory record for this item
+        const inventory = await db.inventory.findFirst({
+          where: { itemId: item.itemId },
+        });
+
+        if (inventory) {
+          // Update the inventory quantity
+          await db.inventory.update({
+            where: { id: inventory.id },
+            data: {
+              quantity: {
+                decrement: item.quantity,
+              },
+            },
+          });
+        }
+      }
+    }
+
+    return { success: "Withdrawal status updated successfully" };
+  } catch (error: any) {
+    console.error("Error updating withdrawal status", error);
+    return {
+      error: `Failed to update withdrawal status. Please try again. ${error.message || ""}`,
     };
   }
 };
@@ -2231,8 +2408,14 @@ export const createItem = async (values: z.infer<typeof ItemValidators>) => {
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
-  const { name, unitPrice, description, supplierId, isSmallItem } =
-    validatedField.data;
+  const {
+    name,
+    unitPrice,
+    description,
+    supplierId,
+    isSmallItem,
+    specification,
+  } = validatedField.data;
 
   try {
     await db.items.create({
@@ -2242,6 +2425,7 @@ export const createItem = async (values: z.infer<typeof ItemValidators>) => {
         description,
         supplierId,
         isSmallItem,
+        specification,
       },
     });
 
@@ -2269,8 +2453,14 @@ export const updateItem = async (
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
-  const { name, unitPrice, description, supplierId, isSmallItem } =
-    validatedField.data;
+  const {
+    name,
+    unitPrice,
+    description,
+    supplierId,
+    isSmallItem,
+    specification,
+  } = validatedField.data;
 
   try {
     await db.items.update({
@@ -2281,6 +2471,7 @@ export const updateItem = async (
         description,
         supplierId,
         isSmallItem,
+        specification,
       },
     });
 
@@ -2771,6 +2962,28 @@ export const addTreshold = async (id: string, treshold: number) => {
     console.error("Error setting reorder threshold", error);
     return {
       error: `Failed to set reorder threshold. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const getItemById = async (id: string) => {
+  if (!id) {
+    return { error: "Item ID is required" };
+  }
+
+  try {
+    const item = await db.items.findUnique({
+      where: { id },
+      include: {
+        Supplier: true,
+      },
+    });
+
+    return { item };
+  } catch (error: any) {
+    console.error("Error fetching item", error);
+    return {
+      error: `Failed to fetch item. Please try again. ${error.message || ""}`,
     };
   }
 };

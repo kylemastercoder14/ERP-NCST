@@ -16,18 +16,18 @@ import AlertModal from "@/components/ui/alert-modal";
 import React from "react";
 import { deleteLeave } from "@/actions";
 import { Modal } from "@/components/ui/modal";
-import PurchaseRequestDetails from "./purchase-request-details";
+import WithdrawalDetails from "./withdrawal-details";
 
 interface CellActionProps {
   id: string;
-  financeStatus: string;
   departmentSession: string;
+  inventoryStatus: string;
 }
 
 export const CellAction: React.FC<CellActionProps> = ({
   id,
-  financeStatus,
   departmentSession,
+  inventoryStatus,
 }) => {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
@@ -65,10 +65,14 @@ export const CellAction: React.FC<CellActionProps> = ({
         isOpen={modalOpen}
         className="max-w-4xl"
         onClose={() => setModalOpen(false)}
-        title="You are about to change the status of this purchase request."
+        title="You are about to change the status of this withdrawal request."
         description="Please make sure to review the details before proceeding. This action cannot be undone."
       >
-        <PurchaseRequestDetails departmentSession={departmentSession} id={id} />
+        <WithdrawalDetails
+          departmentSession={departmentSession}
+          id={id}
+          initialStatus={inventoryStatus}
+        />
       </Modal>
       <DropdownMenu>
         <DropdownMenuTrigger className="no-print" asChild>
@@ -80,21 +84,22 @@ export const CellAction: React.FC<CellActionProps> = ({
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
-          {financeStatus === "Approved" ? (
-            <DropdownMenuItem onClick={() => router.push(`/print-order-form/${id}`)}>
+          <DropdownMenuItem onClick={() => setModalOpen(true)}>
+            <FolderOpen className="w-4 h-4 mr-2" />
+            View Details
+          </DropdownMenuItem>
+
+          {inventoryStatus === "Approved" && (
+            <DropdownMenuItem
+              onClick={() => router.push(`/print-withdrawal-slip/${id}`)}
+            >
               <Printer className="w-4 h-4 mr-2" />
-              Print Order Form
-            </DropdownMenuItem>
-          ) : (
-            <DropdownMenuItem onClick={() => setModalOpen(true)}>
-              <FolderOpen className="w-4 h-4 mr-2" />
-              View Details
+              Print Withdrawal Slip
             </DropdownMenuItem>
           )}
 
           <DropdownMenuItem
-            onClick={() => router.push(`/head/purchase-request/${id}`)}
-            disabled={departmentSession === "Finance"}
+            onClick={() => router.push(`/head/withdrawal-management/${id}`)}
           >
             <Edit className="w-4 h-4 mr-2" />
             Edit

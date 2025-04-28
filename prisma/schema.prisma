@@ -293,13 +293,14 @@ model PaySlip {
 }
 
 model Items {
-  id          String   @id @default(cuid())
-  name        String
-  unitPrice   Float
-  description String?
-  supplierId  String
-  Supplier    Supplier @relation(fields: [supplierId], references: [id])
-  isSmallItem Boolean  @default(true)
+  id            String   @id @default(cuid())
+  name          String
+  unitPrice     Float
+  description   String?
+  specification String?
+  supplierId    String
+  Supplier      Supplier @relation(fields: [supplierId], references: [id])
+  isSmallItem   Boolean  @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -348,7 +349,8 @@ model Withdrawal {
   withdrawalCode String
   department     String
 
-  status String @default("Pending") // Pending, Approved, Rejected
+  status  String  @default("Pending")
+  remarks String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

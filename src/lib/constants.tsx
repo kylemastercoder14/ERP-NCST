@@ -266,6 +266,10 @@ export const SIDEBAR_HEAD_PROCUREMENT = [
         title: "Purchase Request",
         url: "/head/purchase-request",
       },
+      {
+        title: "Withdrawal Management",
+        url: "/head/withdrawal-management",
+      },
     ],
   },
   {
@@ -296,6 +300,10 @@ export const SIDEBAR_HEAD_INVENTORY = [
       {
         title: "Dashboard",
         url: "/head/dashboard",
+      },
+      {
+        title: "Items List",
+        url: "/head/items-list",
       },
       {
         title: "Inventory Management",
@@ -468,6 +476,7 @@ export enum FormFieldType {
   HONEY_POT = "honeyPot",
   SIGNATURE = "signature",
   COMBOBOX = "combobox",
+  RICHTEXT = "richText",
 }
 
 export const OPT_LENGTH = 6;
