@@ -117,17 +117,6 @@ export const CellAction: React.FC<CellActionProps> = ({
   return (
     <>
       <Modal
-        isOpen={emailModalOpen}
-        onClose={() => setEmailModalOpen(false)}
-        title="Send Email"
-        description="Send additional information to the employee."
-      >
-        <SendEmailForm
-          employeeId={id}
-          onClose={() => setEmailModalOpen(false)}
-        />
-      </Modal>
-      <Modal
         isOpen={orientationOpen}
         onClose={() => setOrientationOpen(false)}
         title="Change the applicant status"
