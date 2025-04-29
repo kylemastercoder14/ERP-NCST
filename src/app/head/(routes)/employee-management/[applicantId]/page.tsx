@@ -1,6 +1,6 @@
 import React from "react";
 import db from "@/lib/db";
-import ApplicantForm from '@/components/forms/applicant-form';
+import ApplicantForm from "@/components/forms/applicant-form";
 
 const Page = async (props: {
   params: Promise<{
@@ -37,9 +37,24 @@ const Page = async (props: {
     },
   });
 
+  const transformedApplicant = applicant
+    ? {
+        ...applicant,
+        UserAccount:
+          Array.isArray(applicant.UserAccount) &&
+          applicant.UserAccount.length > 0
+            ? applicant.UserAccount[0]
+            : null,
+      }
+    : null;
+
   return (
     <div>
-      <ApplicantForm jobTitles={jobTitles} departments={departments} initialData={applicant} />
+      <ApplicantForm
+        jobTitles={jobTitles}
+        departments={departments}
+        initialData={transformedApplicant}
+      />
     </div>
   );
 };
