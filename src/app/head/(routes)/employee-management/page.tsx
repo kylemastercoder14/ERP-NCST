@@ -30,7 +30,7 @@ const Page = async () => {
     data.map((item) => {
       return {
         id: item.id,
-        licenseNo: item.licenseNo,
+        licenseNo: item.licenseNo || "N/A",
         name: `${item.firstName} ${item.middleName} ${item.lastName}`,
         phoneNumber: item.celNo,
         address: item.presentAddress,
