@@ -1,6 +1,5 @@
-import { Accreditation } from '@/types';
 
-const accreditations: Accreditation[] = [
+const accreditations = [
   {
     title: 'SEC Registration',
     details: ['CS201712621']
