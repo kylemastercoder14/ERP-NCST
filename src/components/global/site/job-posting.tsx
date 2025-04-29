@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { submitApplication } from "@/actions";
-import { uploadFile } from "../../../lib/upload";
+import { uploadFile } from "@/lib/upload";
 
 // Form validation schema
 const applyFormSchema = z.object({
@@ -37,9 +37,7 @@ const applyFormSchema = z.object({
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
   branch: z.string().min(1, "Branch is required"),
-  resume: z
-    .instanceof(FileList)
-    .refine((files) => files.length > 0, "Resume is required"),
+  resume: z.any().refine((files) => files.length > 0, "Resume is required"),
 });
 
 type ApplyFormValues = z.infer<typeof applyFormSchema>;
