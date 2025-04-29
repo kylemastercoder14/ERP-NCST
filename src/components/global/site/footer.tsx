@@ -39,17 +39,8 @@ const Footer = () => {
           <div className="flex-1">
             <h3 className="text-secondary text-xl font-semibold mb-4">Connect With Us</h3>
             <div className="flex space-x-4">
-              <a href="#" className="text-white hover:text-secondary transition-colors text-xl">
+              <a href="https://www.facebook.com/people/BAT-Security-Services-Inc/61564092172953/" target='_blank' className="text-white hover:text-secondary transition-colors text-xl">
                 <FontAwesomeIcon icon={["fab", "facebook-f" as IconName]} />
-              </a>
-              <a href="#" className="text-white hover:text-secondary transition-colors text-xl">
-                <FontAwesomeIcon icon={["fab", "twitter" as IconName]} />
-              </a>
-              <a href="#" className="text-white hover:text-secondary transition-colors text-xl">
-                <FontAwesomeIcon icon={["fab", "linkedin-in" as IconName]} />
-              </a>
-              <a href="#" className="text-white hover:text-secondary transition-colors text-xl">
-                <FontAwesomeIcon icon={["fab", "instagram" as IconName]} />
               </a>
             </div>
           </div>
