@@ -20,7 +20,7 @@ const Page = async () => {
     data.map((item) => {
       return {
         id: item.id,
-        licenseNo: item.Employee.licenseNo,
+        licenseNo: item.Employee.licenseNo || "N/A",
         name: `${item.Employee.firstName} ${item.Employee.middleName || ""} ${item.Employee.lastName}`.trim(),
         type: item.type,
         timeIn: format(new Date(item.timeStart), "hh:mm a"),
