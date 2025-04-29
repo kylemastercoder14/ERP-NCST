@@ -36,7 +36,7 @@ const Page = async () => {
 
       return {
         id: request.id,
-        licenseNo: request.Employee.licenseNo,
+        licenseNo: request.Employee.licenseNo || "N/A",
         name: `${request.Employee.firstName} ${request.Employee.middleName || ""} ${request.Employee.lastName}`.trim(),
         itemName: itemNames,
         quantity: request.WithdrawalItem.reduce(
