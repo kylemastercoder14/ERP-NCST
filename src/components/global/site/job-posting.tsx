@@ -233,7 +233,7 @@ const ApplyNowForm = ({
             />
           </div>
           {errors.resume && (
-            <p className="mt-1 text-sm text-red-600">{errors.resume.message}</p>
+            <p className="mt-1 text-sm text-red-600">{String(errors.resume.message)}</p>
           )}
         </div>
 
