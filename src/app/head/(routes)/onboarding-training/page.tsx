@@ -40,7 +40,7 @@ const Page = async () => {
           positionDesired: item.JobTitle.name,
           gender: item.sex,
           civilStatus: item.civilStatus,
-          departmentSession,
+          departmentSession: departmentSession || "",
           createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),
           updatedAt: format(
             new Date(item.updatedAt),
@@ -75,7 +75,6 @@ const Page = async () => {
               <TabsTrigger value="customer-service-training">
                 Customer Service Training
               </TabsTrigger>
-              <TabsTrigger value="deployment">Deployment</TabsTrigger>
             </>
           )}
         </TabsList>
@@ -101,9 +100,6 @@ const Page = async () => {
             </TabsContent>
             <TabsContent value="customer-service-training">
               <ApplicantClient data={formatData("Customer Service Training")} />
-            </TabsContent>
-            <TabsContent value="deployment">
-              <ApplicantClient data={formatData("Deployment")} />
             </TabsContent>
           </>
         )}

@@ -2,97 +2,60 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { ChevronsUpDown } from "lucide-react";
-import { CellAction } from "./cell-action";
 import AttachmentModal from "@/components/modals/attachment-modal";
 
-export type LeaveManagementColumn = {
+export type ApplicantColumn = {
   id: string;
-  leaveType: string;
-  startDate: string;
-  endDate: string;
-  status: string;
-  approvedBy: string;
-  reason: string;
-  attachment: string;
+  licenseNo: string;
+  name: string;
+  report: string;
+  departmentSession: string;
+  images: string[];
+  remarks: string;
   createdAt: string;
 };
 
-export const columns: ColumnDef<LeaveManagementColumn>[] = [
+export const columns: ColumnDef<ApplicantColumn>[] = [
   {
-    accessorKey: "leaveType",
+    accessorKey: "name",
     header: ({ column }) => {
       return (
         <span
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="cursor-pointer flex items-center"
         >
-          Leave Type
-          <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
-        </span>
-      );
-    },
-  },
-  {
-    accessorKey: "status",
-    header: ({ column }) => {
-      return (
-        <span
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="cursor-pointer flex items-center"
-        >
-          Leave Date
+          Employee
           <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
         </span>
       );
     },
     cell: ({ row }) => {
       return (
-        <div>
-          <div
-            className={`w-14 rounded-md px-2 flex items-center justify-center text-[11px] py-0.5 border
-      ${
-        row.original.status === "Approved"
-          ? "bg-green-600/20 border-green-600 text-green-800"
-          : row.original.status === "Rejected"
-            ? "bg-red-600/20 border-red-600 text-red-800"
-            : "bg-yellow-600/20 border-yellow-600 text-yellow-800"
-      }
-    `}
-          >
-            {row.original.status}
-          </div>
-          <span className="text-muted-foreground mt-1 text-[12px]">
-            {row.original.startDate} - {row.original.endDate}
+        <div className="flex flex-col">
+          <span className="text-sm">{row.original.name}</span>
+          <span className="text-muted-foreground text-[12px]">
+            License No.: {row.original.licenseNo}
           </span>
         </div>
       );
     },
   },
   {
-    accessorKey: "reason",
+    accessorKey: "report",
     header: ({ column }) => {
       return (
         <span
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="cursor-pointer flex items-center"
         >
-          Reason
+          Report
           <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
         </span>
       );
     },
-    cell: ({ row }) => {
-      return (
-        <div>
-          <span className="text-muted-foreground w-40 truncate">
-            {row.original.reason}
-          </span>
-        </div>
-      );
-    },
   },
   {
-    accessorKey: "attachment",
+    accessorKey: "images",
     header: ({ column }) => {
       return (
         <span
@@ -105,29 +68,36 @@ export const columns: ColumnDef<LeaveManagementColumn>[] = [
       );
     },
     cell: ({ row }) => {
-      const attachmentUrl = row.original.attachment;
-      return <AttachmentModal attachments={attachmentUrl} />;
+      const images = row.original.images?.slice(0, 2);
+      return <AttachmentModal attachments={images} />;
     },
   },
   {
-    accessorKey: "approvedBy",
+    accessorKey: "remarks",
     header: ({ column }) => {
       return (
         <span
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="cursor-pointer flex items-center"
         >
-          Approved/Rejected By
+          Remarks
           <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
         </span>
       );
     },
   },
   {
-    accessorKey: "actions",
-    header: "",
-    cell: ({ row }) => (
-      <CellAction id={row.original.id} />
-    ),
+    accessorKey: "createdAt",
+    header: ({ column }) => {
+      return (
+        <span
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="cursor-pointer flex items-center"
+        >
+          Date
+          <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
+        </span>
+      );
+    },
   },
 ];

@@ -86,10 +86,6 @@ export const SIDEBAR_HEAD_OPERATION = [
         url: "/head/deployment-scheduling",
       },
       {
-        title: "Assignment Tracking",
-        url: "/head/assignment-tracking",
-      },
-      {
         title: "Shift Monitoring",
         url: "/head/shift-monitoring",
       },
