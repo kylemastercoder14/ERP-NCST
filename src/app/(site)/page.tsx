@@ -8,6 +8,8 @@ import Services from "@/components/global/site/services";
 import Header from "@/components/global/site/navigation";
 import JobPost from "@/components/global/site/job-posting";
 import db from "@/lib/db";
+import '@/lib/font-awesome'
+import '@fortawesome/fontawesome-svg-core/styles.css'
 
 export default async function Home() {
   const jobPosts = await db.jobPosting.findMany({
