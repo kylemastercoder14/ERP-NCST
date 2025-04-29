@@ -169,7 +169,6 @@ export const columns: ColumnDef<PurchaseRequestColumn>[] = [
     cell: ({ row }) => (
       <CellAction
         id={row.original.id}
-        financeStatus={row.original.financeStatus}
         departmentSession={row.original.departmentSession}
       />
     ),
