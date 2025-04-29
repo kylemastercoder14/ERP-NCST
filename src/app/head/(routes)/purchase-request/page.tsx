@@ -41,7 +41,7 @@ const Page = async () => {
 
       return {
         id: request.id,
-        licenseNo: request.requestedBy.licenseNo,
+        licenseNo: request.requestedBy.licenseNo || "N/A",
         name: `${request.requestedBy.firstName} ${request.requestedBy.middleName || ""} ${request.requestedBy.lastName}`.trim(),
         itemName: itemNames,
         quantity: request.PurchaseRequestItem.reduce(
