@@ -2,13 +2,12 @@ import db from "@/lib/db";
 import { useClient } from "@/hooks/use-client";
 import TicketForm from "@/components/forms/ticket-form";
 
-interface PageProps {
-  params: {
+const Page = async (props: {
+  params: Promise<{
     ticketId: string;
-  };
-}
-
-const Page = async ({ params }: PageProps) => {
+  }>;
+}) => {
+  const params = await props.params;
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { user } = await useClient();
   const ticket = await db.ticket.findUnique({

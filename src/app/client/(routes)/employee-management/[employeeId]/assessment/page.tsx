@@ -3,13 +3,12 @@ import db from "@/lib/db";
 import { getEmployeeEvaluations } from "@/actions";
 import { EvaluationList } from "@/components/global/evaluation-list";
 
-interface PageProps {
-  params: {
+const Page = async (props: {
+  params: Promise<{
     employeeId: string;
-  };
-}
-
-const Page = async ({ params }: PageProps) => {
+  }>;
+}) => {
+  const params = await props.params;
   const employee = await db.employee.findUnique({
     where: {
       id: params.employeeId,

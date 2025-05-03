@@ -2,13 +2,12 @@ import { notFound } from "next/navigation";
 import db from "@/lib/db";
 import { EmployeeAssessment } from "@/components/global/employee-assessment";
 
-interface PageProps {
-  params: {
+const Page = async (props: {
+  params: Promise<{
     employeeId: string;
-  };
-}
-
-const Page = async ({ params }: PageProps) => {
+  }>;
+}) => {
+  const params = await props.params;
   const employee = await db.employee.findUnique({
     where: {
       id: params.employeeId,
