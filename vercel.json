@@ -6,8 +6,5 @@
       "schedule": "0 0 1 1 *",
       "timezone": "UTC"
     }
-  ],
-  "features": {
-    "cron": false
-  }
+  ]
 }
