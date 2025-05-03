@@ -156,8 +156,9 @@ model Employee {
   AccomplishmentReport  AccomplishmentReport[]
   Withdrawal            Withdrawal[]
 
-  requestedPRs PurchaseRequest[] @relation("RequestedBy")
-  receivedPRs  PurchaseRequest[] @relation("ReceivedBy")
+  requestedPRs         PurchaseRequest[]      @relation("RequestedBy")
+  receivedPRs          PurchaseRequest[]      @relation("ReceivedBy")
+  EmployeeLeaveBalance EmployeeLeaveBalance[]
 
   @@index([jobTitleId])
   @@index([departmentId])
@@ -235,6 +236,9 @@ model LeaveManagement {
   status             String   @default("Pending")
   attachment         String?
   reasonForRejection String?
+  isPaid             Boolean  @default(true)
+  daysUsed           Int
+  year               Int
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
@@ -246,6 +250,19 @@ model LeaveManagement {
 
   @@index([employeeId])
   @@index([approvedById])
+}
+
+model EmployeeLeaveBalance {
+  id             String   @id @default(cuid())
+  year           Int
+  paidLeaveUsed  Int      @default(0)
+  paidLeaveTotal Int      @default(5)
+  lastResetDate  DateTime @default(now())
+
+  employeeId String
+  Employee   Employee @relation(fields: [employeeId], references: [id])
+
+  @@unique([employeeId, year])
 }
 
 model BaseSalary {

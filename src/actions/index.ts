@@ -1037,171 +1037,6 @@ export const deleteDepartment = async (id: string) => {
   }
 };
 
-export const createLeave = async (
-  values: z.infer<typeof LeaveManagementValidators>
-) => {
-  const { userId } = await useUser();
-  const validatedField = LeaveManagementValidators.safeParse(values);
-
-  if (!validatedField.success) {
-    const errors = validatedField.error.errors.map((err) => err.message);
-    return { error: `Validation Error: ${errors.join(", ")}` };
-  }
-
-  const { leaveType, startDate, endDate, leaveReason, attachment } =
-    validatedField.data;
-
-  try {
-    const user = await db.userAccount.findUnique({
-      where: { id: userId },
-      select: { employeeId: true },
-    });
-
-    await db.leaveManagement.create({
-      data: {
-        employeeId: user?.employeeId as string,
-        leaveType,
-        startDate,
-        endDate,
-        leaveReason,
-        attachment,
-      },
-    });
-
-    return { success: "Leave requested successfully" };
-  } catch (error: any) {
-    console.error("Error requesting leave", error);
-    return {
-      error: `Failed to request leave. Please try again. ${error.message || ""}`,
-    };
-  }
-};
-
-export const updateLeave = async (
-  values: z.infer<typeof LeaveManagementValidators>,
-  id: string
-) => {
-  if (!id) {
-    return { error: "Leave ID is required" };
-  }
-
-  const validatedField = LeaveManagementValidators.safeParse(values);
-
-  if (!validatedField.success) {
-    const errors = validatedField.error.errors.map((err) => err.message);
-    return { error: `Validation Error: ${errors.join(", ")}` };
-  }
-
-  const { leaveType, startDate, endDate, leaveReason, attachment } =
-    validatedField.data;
-
-  try {
-    await db.leaveManagement.update({
-      where: { id },
-      data: {
-        leaveType,
-        startDate,
-        endDate,
-        leaveReason,
-        attachment,
-      },
-    });
-
-    return { success: "Leave updated successfully" };
-  } catch (error: any) {
-    console.error("Error updating leave", error);
-    return {
-      error: `Failed to update leave. Please try again. ${error.message || ""}`,
-    };
-  }
-};
-
-export const deleteLeave = async (id: string) => {
-  if (!id) {
-    return { error: "Leave ID is required" };
-  }
-
-  try {
-    await db.leaveManagement.delete({
-      where: { id },
-    });
-
-    return { success: "Leave deleted successfully" };
-  } catch (error: any) {
-    console.error("Error deleting leave", error);
-    return {
-      error: `Failed to delete leave. Please try again. ${error.message || ""}`,
-    };
-  }
-};
-
-export const approveLeave = async (id: string) => {
-  const { userId } = await useUser();
-  try {
-    await db.leaveManagement.update({
-      where: { id },
-      data: {
-        status: "Approved",
-        approvedById: userId,
-        reasonForRejection: null,
-      },
-    });
-
-    return { success: "Leave approved successfully" };
-  } catch (error: any) {
-    console.error("Error approving leave", error);
-    return {
-      error: `Failed to approve leave. Please try again. ${error.message || ""}`,
-    };
-  }
-};
-
-export const rejectLeave = async (
-  values: z.infer<typeof RejectLeaveValidators>,
-  id: string
-) => {
-  const { userId } = await useUser();
-  const validatedField = RejectLeaveValidators.safeParse(values);
-
-  if (!validatedField.success) {
-    const errors = validatedField.error.errors.map((err) => err.message);
-    return { error: `Validation Error: ${errors.join(", ")}` };
-  }
-
-  const { reasonForRejection } = validatedField.data;
-
-  try {
-    const res = await db.leaveManagement.update({
-      where: { id },
-      data: {
-        status: "Rejected",
-        reasonForRejection,
-        approvedById: userId,
-      },
-      include: {
-        Employee: { include: { UserAccount: true } },
-      },
-    });
-
-    const name =
-      res.Employee.firstName +
-      " " +
-      res.Employee.middleName +
-      " " +
-      res.Employee.lastName;
-    const email = res.Employee.UserAccount[0].email;
-
-    await sendReasonForRejection(name, email, reasonForRejection);
-
-    return { success: "Leave rejected successfully" };
-  } catch (error: any) {
-    console.error("Error rejecting leave", error);
-    return {
-      error: `Failed to reject leave. Please try again. ${error.message || ""}`,
-    };
-  }
-};
-
 export const approvePurchaseRequest = async (
   id: string,
   status: string,
@@ -3246,5 +3081,380 @@ export const submitApplication = async (
     return {
       error: `Failed to submit application. Please try again. ${error.message || ""}`,
     };
+  }
+};
+
+export const createLeave = async (
+  values: z.infer<typeof LeaveManagementValidators>
+) => {
+  const { userId } = await useUser();
+  const validatedField = LeaveManagementValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const {
+    leaveType,
+    startDate,
+    endDate,
+    leaveReason,
+    attachment,
+    isPaid,
+    daysUsed,
+    year,
+  } = validatedField.data;
+
+  try {
+    // Get employee ID from user
+    const user = await db.userAccount.findUnique({
+      where: { id: userId },
+      select: { employeeId: true },
+    });
+
+    if (!user?.employeeId) {
+      return { error: "Employee not found" };
+    }
+
+    // Create the leave request
+    const leave = await db.leaveManagement.create({
+      data: {
+        employeeId: user.employeeId,
+        leaveType,
+        startDate,
+        endDate,
+        leaveReason,
+        attachment,
+        isPaid,
+        daysUsed,
+        year,
+        status: "Pending", // Default status
+      },
+    });
+
+    // If leave is approved immediately (you might want to move this to an approval action)
+    if (leave.status === "Approved" && isPaid) {
+      await db.employeeLeaveBalance.upsert({
+        where: {
+          employeeId_year: {
+            employeeId: user.employeeId,
+            year,
+          },
+        },
+        create: {
+          employeeId: user.employeeId,
+          year,
+          paidLeaveUsed: daysUsed,
+          paidLeaveTotal: 5,
+        },
+        update: {
+          paidLeaveUsed: {
+            increment: daysUsed,
+          },
+        },
+      });
+    }
+
+    return {
+      success: "Leave requested successfully",
+      data: leave,
+    };
+  } catch (error: any) {
+    console.error("Error requesting leave", error);
+    return {
+      error: `Failed to request leave. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const updateLeave = async (
+  values: z.infer<typeof LeaveManagementValidators>,
+  id: string
+) => {
+  if (!id) {
+    return { error: "Leave ID is required" };
+  }
+
+  const validatedField = LeaveManagementValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const {
+    leaveType,
+    startDate,
+    endDate,
+    leaveReason,
+    attachment,
+    isPaid,
+    daysUsed,
+    year,
+  } = validatedField.data;
+
+  try {
+    // First get the existing leave to check for changes
+    const existingLeave = await db.leaveManagement.findUnique({
+      where: { id },
+      select: {
+        employeeId: true,
+        status: true,
+        isPaid: true,
+        daysUsed: true,
+        year: true,
+      },
+    });
+
+    if (!existingLeave) {
+      return { error: "Leave not found" };
+    }
+
+    // Update the leave request
+    const updatedLeave = await db.leaveManagement.update({
+      where: { id },
+      data: {
+        leaveType,
+        startDate,
+        endDate,
+        leaveReason,
+        attachment,
+        isPaid,
+        daysUsed,
+        year,
+      },
+    });
+
+    // Handle leave balance adjustments if status changed to Approved
+    if (updatedLeave.status === "Approved" && isPaid) {
+      // If this was previously not approved or was unpaid, we need to add to balance
+      if (existingLeave.status !== "Approved" || !existingLeave.isPaid) {
+        await db.employeeLeaveBalance.upsert({
+          where: {
+            employeeId_year: {
+              employeeId: existingLeave.employeeId,
+              year,
+            },
+          },
+          create: {
+            employeeId: existingLeave.employeeId,
+            year,
+            paidLeaveUsed: daysUsed,
+            paidLeaveTotal: 5,
+          },
+          update: {
+            paidLeaveUsed: {
+              increment: daysUsed,
+            },
+          },
+        });
+      }
+      // If daysUsed changed and it was previously approved/paid
+      else if (existingLeave.daysUsed !== daysUsed) {
+        const difference = daysUsed - existingLeave.daysUsed;
+        await db.employeeLeaveBalance.update({
+          where: {
+            employeeId_year: {
+              employeeId: existingLeave.employeeId,
+              year,
+            },
+          },
+          data: {
+            paidLeaveUsed: {
+              increment: difference,
+            },
+          },
+        });
+      }
+    }
+
+    return {
+      success: "Leave updated successfully",
+      data: updatedLeave,
+    };
+  } catch (error: any) {
+    console.error("Error updating leave", error);
+    return {
+      error: `Failed to update leave. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const deleteLeave = async (id: string) => {
+  if (!id) {
+    return { error: "Leave ID is required" };
+  }
+
+  try {
+    await db.leaveManagement.delete({
+      where: { id },
+    });
+
+    return { success: "Leave deleted successfully" };
+  } catch (error: any) {
+    console.error("Error deleting leave", error);
+    return {
+      error: `Failed to delete leave. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const approveLeave = async (leaveId: string) => {
+  const { user } = await useUser();
+  try {
+    // First get the leave details
+    const leave = await db.leaveManagement.findUnique({
+      where: { id: leaveId },
+      select: {
+        employeeId: true,
+        isPaid: true,
+        daysUsed: true,
+        year: true,
+        status: true,
+      },
+    });
+
+    if (!leave) {
+      return { error: "Leave not found" };
+    }
+
+    // Update leave status to Approved
+    const updatedLeave = await db.leaveManagement.update({
+      where: { id: leaveId },
+      data: {
+        status: "Approved",
+        approvedById: user?.employeeId,
+      },
+    });
+
+    // If paid leave, update the balance
+    if (leave.isPaid) {
+      await db.employeeLeaveBalance.upsert({
+        where: {
+          employeeId_year: {
+            employeeId: leave.employeeId,
+            year: leave.year,
+          },
+        },
+        create: {
+          employeeId: leave.employeeId,
+          year: leave.year,
+          paidLeaveUsed: leave.daysUsed,
+          paidLeaveTotal: 5,
+        },
+        update: {
+          paidLeaveUsed: {
+            increment: leave.daysUsed,
+          },
+        },
+      });
+    }
+
+    return {
+      success: "Leave approved successfully",
+      data: updatedLeave,
+    };
+  } catch (error: any) {
+    console.error("Error approving leave", error);
+    return {
+      error: `Failed to approve leave. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const rejectLeave = async (
+  values: z.infer<typeof RejectLeaveValidators>,
+  id: string
+) => {
+  const { userId } = await useUser();
+  const validatedField = RejectLeaveValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { reasonForRejection } = validatedField.data;
+
+  try {
+    const res = await db.leaveManagement.update({
+      where: { id },
+      data: {
+        status: "Rejected",
+        reasonForRejection,
+        approvedById: userId,
+      },
+      include: {
+        Employee: { include: { UserAccount: true } },
+      },
+    });
+
+    const name =
+      res.Employee.firstName +
+      " " +
+      res.Employee.middleName +
+      " " +
+      res.Employee.lastName;
+    const email = res.Employee.UserAccount[0].email;
+
+    await sendReasonForRejection(name, email, reasonForRejection);
+
+    return { success: "Leave rejected successfully" };
+  } catch (error: any) {
+    console.error("Error rejecting leave", error);
+    return {
+      error: `Failed to reject leave. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const getEmployeeLeaveBalance = async (
+  employeeId: string,
+  year: number
+) => {
+  let balance = await db.employeeLeaveBalance.findUnique({
+    where: {
+      employeeId_year: {
+        employeeId,
+        year,
+      },
+    },
+  });
+
+  if (!balance) {
+    balance = await db.employeeLeaveBalance.create({
+      data: {
+        year,
+        employeeId,
+        paidLeaveTotal: 5,
+        paidLeaveUsed: 0,
+      },
+    });
+  }
+
+  return balance;
+};
+
+export const updateLeaveBalance = async (
+  employeeId: string,
+  year: number,
+  daysUsed: number,
+  isPaid: boolean
+) => {
+  if (isPaid) {
+    await db.employeeLeaveBalance.update({
+      where: {
+        employeeId_year: {
+          employeeId,
+          year,
+        },
+      },
+      data: {
+        paidLeaveUsed: {
+          increment: daysUsed,
+        },
+      },
+    });
   }
 };

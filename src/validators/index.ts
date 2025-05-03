@@ -175,6 +175,9 @@ export const LeaveManagementValidators = z
     endDate: z.string().min(1, { message: "End date is required" }),
     leaveReason: z.string().min(1, { message: "Leave reason is required" }),
     attachment: z.string().optional(),
+    isPaid: z.boolean().default(true),
+    daysUsed: z.number().min(1, { message: "Days used must be at least 1" }),
+    year: z.number().min(2000, { message: "Invalid year" }),
   })
   .refine(
     (data) => {
@@ -186,6 +189,17 @@ export const LeaveManagementValidators = z
     {
       message: "Attachment is required for sick leave.",
       path: ["attachment"],
+    }
+  )
+  .refine(
+    (data) => {
+      const start = new Date(data.startDate);
+      const end = new Date(data.endDate);
+      return end >= start;
+    },
+    {
+      message: "End date must be after start date",
+      path: ["endDate"],
     }
   );
 
