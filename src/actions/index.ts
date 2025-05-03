@@ -3117,6 +3117,14 @@ export const createLeave = async (
       return { error: "Employee not found" };
     }
 
+    // Check balance if this is a paid leave request
+    if (isPaid) {
+      const balance = await getEmployeeLeaveBalance(user.employeeId, year);
+      if (daysUsed > balance.paidLeaveTotal - balance.paidLeaveUsed) {
+        return { error: "Not enough paid leave days available" };
+      }
+    }
+
     // Create the leave request
     const leave = await db.leaveManagement.create({
       data: {
@@ -3129,32 +3137,9 @@ export const createLeave = async (
         isPaid,
         daysUsed,
         year,
-        status: "Pending", // Default status
+        status: "Pending",
       },
     });
-
-    // If leave is approved immediately (you might want to move this to an approval action)
-    if (leave.status === "Approved" && isPaid) {
-      await db.employeeLeaveBalance.upsert({
-        where: {
-          employeeId_year: {
-            employeeId: user.employeeId,
-            year,
-          },
-        },
-        create: {
-          employeeId: user.employeeId,
-          year,
-          paidLeaveUsed: daysUsed,
-          paidLeaveTotal: 5,
-        },
-        update: {
-          paidLeaveUsed: {
-            increment: daysUsed,
-          },
-        },
-      });
-    }
 
     return {
       success: "Leave requested successfully",

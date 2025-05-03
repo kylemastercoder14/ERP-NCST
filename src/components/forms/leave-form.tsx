@@ -50,6 +50,7 @@ const LeaveForm = ({
   const { isSubmitting } = form.formState;
 
   React.useEffect(() => {
+    // In your LeaveForm component, modify the calculateLeave function:
     const calculateLeave = async () => {
       const startDate = form.watch("startDate");
       const endDate = form.watch("endDate");
@@ -59,6 +60,7 @@ const LeaveForm = ({
         try {
           const start = new Date(startDate);
           const end = new Date(endDate);
+          const year = start.getFullYear();
 
           // Validate dates
           if (end < start) {
@@ -69,25 +71,26 @@ const LeaveForm = ({
             return;
           }
 
-          const year = start.getFullYear();
           const timeDiff = end.getTime() - start.getTime();
           const daysRequested = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
 
+          // Get current balance
           const balance = await getEmployeeLeaveBalance(employeeId, year);
           const remainingPaidLeave =
             balance.paidLeaveTotal - balance.paidLeaveUsed;
 
           setAvailablePaidLeave(remainingPaidLeave);
 
-          const isPaid = daysRequested <= remainingPaidLeave;
-          form.setValue("isPaid", isPaid);
+          // Determine if leave can be paid
+          const canBePaid = daysRequested <= remainingPaidLeave;
+          form.setValue("isPaid", canBePaid);
           form.setValue("daysUsed", daysRequested);
           form.setValue("year", year);
 
-          if (!isPaid) {
+          if (!canBePaid) {
             toast.warning(
               `You only have ${remainingPaidLeave} paid leave days remaining.
-              This leave will be marked as unpaid.`
+          This leave will be marked as unpaid.`
             );
           }
         } catch (error) {
