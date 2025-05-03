@@ -1,17 +1,11 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextResponse } from "next/server";
 import db from "@/lib/db";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  if (req.method !== "POST") {
-    return res.status(405).end();
-  }
-
+export async function POST(req: Request) {
   // Verify the cron secret
-  if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
-    return res.status(401).end();
+  const authHeader = req.headers.get("authorization");
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const currentYear = new Date().getFullYear();
@@ -22,11 +16,14 @@ export default async function handler(
       data: { paidLeaveUsed: 0, lastResetDate: new Date() },
     });
 
-    return res.status(200).json({
+    return NextResponse.json({
       message: `Reset ${result.count} employee leave balances`,
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: "Failed to reset balances" });
+    return NextResponse.json(
+      { error: "Failed to reset balances" },
+      { status: 500 }
+    );
   }
 }
