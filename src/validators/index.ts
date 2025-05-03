@@ -339,3 +339,30 @@ export const TransactionValidators = z.object({
     .string()
     .min(1, { message: "Sub account type is required" }),
 });
+
+export const ticketPriorities = ["low", "medium", "high", "critical"] as const;
+export const ticketTypes = [
+  "technical",
+  "billing",
+  "general",
+  "employee",
+  "other",
+] as const;
+export const ticketStatuses = [
+  "open",
+  "in-progress",
+  "resolved",
+  "closed",
+] as const;
+
+export const TicketValidators = z.object({
+  title: z.string().min(5, "Title must be at least 5 characters").max(100),
+  description: z
+    .string()
+    .min(10, "Description must be at least 10 characters")
+    .max(1000),
+  type: z.enum(ticketTypes),
+  priority: z.enum(ticketPriorities),
+  employeeId: z.string().optional(),
+  attachments: z.array(z.string()).optional(),
+});

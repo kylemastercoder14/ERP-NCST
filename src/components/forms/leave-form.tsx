@@ -7,6 +7,8 @@ import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { LeaveManagementValidators } from "@/validators";
 import { toast } from "sonner";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
@@ -48,56 +50,57 @@ const LeaveForm = ({
   });
 
   const { isSubmitting } = form.formState;
+  const isPaidLeave = form.watch("isPaid");
 
   React.useEffect(() => {
-    // In your LeaveForm component, modify the calculateLeave function:
     const calculateLeave = async () => {
       const startDate = form.watch("startDate");
       const endDate = form.watch("endDate");
 
-      if (startDate && endDate) {
-        setIsCalculating(true);
-        try {
-          const start = new Date(startDate);
-          const end = new Date(endDate);
-          const year = start.getFullYear();
+      if (!employeeId || !startDate || !endDate) return;
 
-          // Validate dates
-          if (end < start) {
-            form.setError("endDate", {
-              type: "manual",
-              message: "End date must be after start date",
-            });
-            return;
-          }
+      setIsCalculating(true);
 
-          const timeDiff = end.getTime() - start.getTime();
-          const daysRequested = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+      try {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const year = start.getFullYear();
 
-          // Get current balance
-          const balance = await getEmployeeLeaveBalance(employeeId, year);
-          const remainingPaidLeave =
-            balance.paidLeaveTotal - balance.paidLeaveUsed;
+        if (end < start) {
+          form.setError("endDate", {
+            type: "manual",
+            message: "End date must be after start date",
+          });
+          return;
+        }
 
-          setAvailablePaidLeave(remainingPaidLeave);
+        const timeDiff = end.getTime() - start.getTime();
+        const daysRequested = Math.ceil(timeDiff / (1000 * 3600 * 24));
 
-          // Determine if leave can be paid
+        const balance = await getEmployeeLeaveBalance(employeeId, year);
+        const remainingPaidLeave =
+          balance.paidLeaveTotal - balance.paidLeaveUsed;
+
+        setAvailablePaidLeave(remainingPaidLeave);
+        form.setValue("daysUsed", daysRequested);
+        form.setValue("year", year);
+
+        // Only auto-set isPaid if it hasn't been manually changed
+        if (!form.formState.touchedFields.isPaid) {
           const canBePaid = daysRequested <= remainingPaidLeave;
           form.setValue("isPaid", canBePaid);
-          form.setValue("daysUsed", daysRequested);
-          form.setValue("year", year);
 
           if (!canBePaid) {
             toast.warning(
-              `You only have ${remainingPaidLeave} paid leave days remaining.
-          This leave will be marked as unpaid.`
+              `Only ${remainingPaidLeave} paid leave days left. This leave will be unpaid.`
             );
           }
-        } catch (error) {
-          console.error("Error calculating leave:", error);
-        } finally {
-          setIsCalculating(false);
         }
+      } catch (error) {
+        console.error("Error calculating leave:", error);
+        toast.error("Failed to calculate leave days.");
+      } finally {
+        setIsCalculating(false);
       }
     };
 
@@ -154,13 +157,34 @@ const LeaveForm = ({
           {!isCalculating && (
             <div className="text-sm text-muted-foreground">
               Available paid leave: {availablePaidLeave} days (out of 5)
-              {form.watch("isPaid") === false && (
-                <span className="text-orange-500 ml-2">
-                  (This leave will be unpaid)
-                </span>
-              )}
             </div>
           )}
+
+          {/* Paid/Unpaid Radio Group */}
+          <div className="space-y-2">
+            <Label>Leave Payment Type</Label>
+            <RadioGroup
+              defaultValue={form.getValues("isPaid") ? "paid" : "unpaid"}
+              onValueChange={(value) => {
+                form.setValue("isPaid", value === "paid");
+              }}
+              className="flex gap-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="paid" id="paid" />
+                <Label htmlFor="paid">Paid Leave</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="unpaid" id="unpaid" />
+                <Label htmlFor="unpaid">Unpaid Leave</Label>
+              </div>
+            </RadioGroup>
+            {!isPaidLeave && (
+              <p className="text-sm text-orange-500">
+                This leave will not deduct from your paid leave balance.
+              </p>
+            )}
+          </div>
 
           <CustomFormField
             control={form.control}
@@ -177,6 +201,24 @@ const LeaveForm = ({
           />
 
           <div className="grid lg:grid-cols-2 grid-cols-1 gap-4">
+            <CustomFormField
+              control={form.control}
+              fieldType={FormFieldType.INPUT}
+              isRequired={true}
+              name="daysUsed"
+              disabled={true} // Disabled as it's auto-calculated
+              label="Days used"
+              placeholder="Enter days used"
+            />
+            <CustomFormField
+              control={form.control}
+              fieldType={FormFieldType.INPUT}
+              isRequired={true}
+              name="year"
+              disabled={true} // Disabled as it's auto-calculated
+              label="Year"
+              placeholder="Enter year"
+            />
             <CustomFormField
               control={form.control}
               fieldType={FormFieldType.DATE_PICKER}
@@ -216,7 +258,7 @@ const LeaveForm = ({
             label="Attachment"
           />
 
-          <div className="flex items-center justify-end">
+          <div className="flex items-center justify-end gap-4">
             <Button onClick={() => router.back()} type="button" variant="ghost">
               Cancel
             </Button>

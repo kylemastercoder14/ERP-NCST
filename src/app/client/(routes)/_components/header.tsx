@@ -35,12 +35,12 @@ const Header = () => {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink href="/supplier/dashboard">Dashboard</BreadcrumbLink>
+            <BreadcrumbLink href="/client/dashboard">Dashboard</BreadcrumbLink>
           </BreadcrumbItem>
 
           {segments.map((segment, index) => {
             const isLast = index === segments.length - 1;
-            const url = `/supplier/${segments.slice(0, index + 1).join("/")}`;
+            const url = `/client/${segments.slice(0, index + 1).join("/")}`;
             const formattedSegment =
               segment
                 .replace(/-/g, " ") // Replace hyphens with spaces

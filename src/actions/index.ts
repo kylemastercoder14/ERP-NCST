@@ -26,6 +26,7 @@ import {
   SendEmailEmployeeValidators,
   SendApplicantStatusValidators,
   JobPostValidators,
+  TicketValidators,
 } from "@/validators";
 import nodemailer from "nodemailer";
 import { CreateAccountHTML } from "@/components/email-templates/create-account";
@@ -40,6 +41,7 @@ import {
 } from "@/lib/utils";
 import { InitialInterviewDetailsHTML } from "@/components/email-templates/initial-interview";
 import { InitialInterviewStatusHTML } from "@/components/email-templates/status-applicant";
+import { useClient } from "../hooks/use-client";
 
 export const loginAccount = async (values: z.infer<typeof LoginValidators>) => {
   const validatedField = LoginValidators.safeParse(values);
@@ -117,6 +119,62 @@ export const supplierLoginAccount = async (
 
   try {
     const user = await db.supplier.findFirst({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) {
+      return { error: "No user account found." };
+    }
+
+    if (user.password !== password) {
+      return { error: "Invalid password" };
+    }
+
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+    const alg = "HS256";
+
+    const jwt = await new jose.SignJWT({})
+      .setProtectedHeader({ alg })
+      .setExpirationTime("72h")
+      .setSubject(user.id.toString())
+      .sign(secret);
+
+    (
+      await // Set the cookie with the JWT
+      cookies()
+    ).set("Authorization", jwt, {
+      httpOnly: true, // Set to true for security
+      secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+      maxAge: 60 * 60 * 24 * 3, // Cookie expiration (3 days in seconds)
+      sameSite: "strict", // Adjust according to your needs
+      path: "/", // Adjust path as needed
+    });
+
+    return { token: jwt, user: user };
+  } catch (error: any) {
+    console.error("Error logging in user", error);
+    return {
+      error: `Failed to login. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const clientLoginAccount = async (
+  values: z.infer<typeof LoginValidators>
+) => {
+  const validatedField = LoginValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { email, password } = validatedField.data;
+
+  try {
+    const user = await db.client.findFirst({
       where: {
         email,
       },
@@ -3398,27 +3456,36 @@ export const getEmployeeLeaveBalance = async (
   employeeId: string,
   year: number
 ) => {
-  let balance = await db.employeeLeaveBalance.findUnique({
-    where: {
-      employeeId_year: {
-        employeeId,
-        year,
-      },
-    },
-  });
-
-  if (!balance) {
-    balance = await db.employeeLeaveBalance.create({
-      data: {
-        year,
-        employeeId,
-        paidLeaveTotal: 5,
-        paidLeaveUsed: 0,
-      },
-    });
+  if (!employeeId || !year) {
+    throw new Error("Missing required parameters: employeeId or year");
   }
 
-  return balance;
+  try {
+    let balance = await db.employeeLeaveBalance.findUnique({
+      where: {
+        employeeId_year: {
+          employeeId,
+          year,
+        },
+      },
+    });
+
+    if (!balance) {
+      balance = await db.employeeLeaveBalance.create({
+        data: {
+          year,
+          employeeId,
+          paidLeaveTotal: 5,
+          paidLeaveUsed: 0,
+        },
+      });
+    }
+
+    return balance;
+  } catch (error) {
+    console.error("Error in getEmployeeLeaveBalance:", error);
+    throw error;
+  }
 };
 
 export const updateLeaveBalance = async (
@@ -3441,5 +3508,166 @@ export const updateLeaveBalance = async (
         },
       },
     });
+  }
+};
+
+export const createEvaluation = async (data: {
+  employeeId: string;
+  clientId: string | null;
+  date: Date;
+  average: number;
+  summary: string;
+  comments?: string;
+  ratings: {
+    criteria: string;
+    description: string;
+    rating: number;
+    comments?: string;
+  }[];
+}) => {
+  try {
+    // Create the evaluation first
+    const evaluation = await db.evaluation.create({
+      data: {
+        date: data.date,
+        average: data.average,
+        summary: data.summary,
+        comments: data.comments,
+        employeeId: data.employeeId,
+        clientId: data.clientId,
+      },
+    });
+
+    // Then create all the ratings
+    const ratings = await db.evaluationRating.createMany({
+      data: data.ratings.map((rating) => ({
+        criteria: rating.criteria,
+        description: rating.description,
+        rating: rating.rating,
+        comments: rating.comments,
+        evaluationId: evaluation.id,
+      })),
+    });
+
+    return { evaluation, ratings };
+  } catch (error) {
+    console.error("Error creating evaluation:", error);
+    return { error: "Failed to create evaluation" };
+  }
+};
+
+export const getEmployeeEvaluations = async (employeeId: string) => {
+  try {
+    const evaluations = await db.evaluation.findMany({
+      where: { employeeId },
+      include: {
+        ratings: true,
+        client: true,
+      },
+      orderBy: {
+        date: "desc",
+      },
+    });
+    return evaluations;
+  } catch (error) {
+    console.error("Error fetching evaluations:", error);
+    throw new Error("Failed to fetch evaluations");
+  }
+};
+
+export const createTicket = async (
+  values: z.infer<typeof TicketValidators>
+) => {
+  const { user } = await useClient();
+  const validatedField = TicketValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { type, priority, title, description, attachments, employeeId } =
+    validatedField.data;
+
+  try {
+    await db.ticket.create({
+      data: {
+        type,
+        priority,
+        title,
+        description,
+        attachments,
+        employeeId,
+        clientId: user?.id,
+      },
+    });
+
+    return { success: "Ticket created successfully" };
+  } catch (error: any) {
+    console.error("Error creating ticket", error);
+    return {
+      error: `Failed to create ticket. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const updateTicket = async (
+  values: z.infer<typeof TicketValidators>,
+  id: string
+) => {
+  const { user } = await useClient();
+  if (!id) {
+    return { error: "Ticket ID is required" };
+  }
+
+  const validatedField = TicketValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { type, priority, title, description, attachments, employeeId } =
+    validatedField.data;
+
+  try {
+    await db.ticket.update({
+      where: { id },
+      data: {
+        type,
+        priority,
+        title,
+        description,
+        attachments,
+        employeeId,
+        clientId: user?.id,
+      },
+    });
+
+    return { success: "Ticket updated successfully" };
+  } catch (error: any) {
+    console.error("Error updating ticket", error);
+    return {
+      error: `Failed to update ticket. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const deleteTicket = async (id: string) => {
+  if (!id) {
+    return { error: "Ticket ID is required" };
+  }
+
+  try {
+    await db.ticket.delete({
+      where: { id },
+    });
+
+    return { success: "Ticket deleted successfully" };
+  } catch (error: any) {
+    console.error("Error deleting ticket", error);
+    return {
+      error: `Failed to delete ticket. Please try again. ${error.message || ""}`,
+    };
   }
 };

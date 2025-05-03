@@ -159,6 +159,8 @@ model Employee {
   requestedPRs         PurchaseRequest[]      @relation("RequestedBy")
   receivedPRs          PurchaseRequest[]      @relation("ReceivedBy")
   EmployeeLeaveBalance EmployeeLeaveBalance[]
+  Evaluation           Evaluation[]
+  Ticket               Ticket[]
 
   @@index([jobTitleId])
   @@index([departmentId])
@@ -497,6 +499,8 @@ model Client {
 
   Employee    Employee[]
   Transaction Transaction[]
+  Evaluation  Evaluation[]
+  Ticket      Ticket[]
 }
 
 model Supplier {
@@ -561,4 +565,84 @@ model Logs {
   User   UserAccount @relation(fields: [userId], references: [id])
 
   @@index([userId])
+}
+
+model Evaluation {
+  id       String   @id @default(cuid())
+  date     DateTime
+  average  Float
+  summary  String
+  comments String?
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  clientId String?
+  client   Client? @relation(fields: [clientId], references: [id])
+
+  ratings EvaluationRating[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([employeeId])
+  @@index([clientId])
+}
+
+model EvaluationRating {
+  id          String  @id @default(cuid())
+  criteria    String
+  description String
+  rating      Int
+  comments    String?
+
+  evaluationId String
+  evaluation   Evaluation @relation(fields: [evaluationId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([evaluationId])
+}
+
+enum TicketType {
+  technical
+  billing
+  general
+  employee
+  other
+}
+
+enum TicketPriority {
+  low
+  medium
+  high
+  critical
+}
+
+enum TicketStatus {
+  Open
+  InProgress
+  Resolved
+  Closed
+}
+
+model Ticket {
+  id          String         @id @default(cuid())
+  title       String
+  description String
+  type        TicketType
+  priority    TicketPriority
+  status      TicketStatus   @default(Open)
+  attachments String[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  employeeId String?
+  employee   Employee? @relation(fields: [employeeId], references: [id])
+  clientId   String?
+  client     Client?   @relation(fields: [clientId], references: [id])
+
+  @@index([employeeId])
+  @@index([clientId])
 }

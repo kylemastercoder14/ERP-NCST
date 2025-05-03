@@ -11,6 +11,7 @@ import {
   SIDEBAR_REPORTING_MANAGER_PROCUREMENT,
   SIDEBAR_HEAD_INVENTORY,
   SIDEBAR_SUPPLIER,
+  SIDEBAR_CLIENT,
 } from "@/lib/constants";
 
 export function cn(...inputs: ClassValue[]) {
@@ -44,6 +45,8 @@ export const getSidebarItems = (department?: string, position?: string) => {
     return SIDEBAR_HEAD_HR;
   } else if (department === "Supplier" && position === "Staff") {
     return SIDEBAR_SUPPLIER;
+  } else if (department === "Client" && position === "Staff") {
+    return SIDEBAR_CLIENT;
   } else if (department === "Inventory" && position === "Head Department") {
     return SIDEBAR_HEAD_INVENTORY;
   } else if (department === "Finance" && position === "Head Department") {

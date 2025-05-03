@@ -93,6 +93,10 @@ export const SIDEBAR_HEAD_OPERATION = [
         title: "Onboarding & Training",
         url: "/head/onboarding-training",
       },
+      {
+        title: "Employee Evaluation",
+        url: "/head/employee-evaluation",
+      },
     ],
   },
   {
@@ -246,6 +250,10 @@ export const SIDEBAR_HEAD_CRM = [
       {
         title: "Sales Monitoring",
         url: "/head/sales-monitoring",
+      },
+      {
+        title: "Ticket Management",
+        url: "/head/ticket-management",
       },
     ],
   },
@@ -454,6 +462,27 @@ export const SIDEBAR_SUPPLIER = [
   },
 ];
 
+export const SIDEBAR_CLIENT = [
+  {
+    title: "General",
+    url: "#",
+    items: [
+      {
+        title: "Dashboard",
+        url: "/client/dashboard",
+      },
+      {
+        title: "Employee Management",
+        url: "/client/employee-management",
+      },
+      {
+        title: "Submit Ticket",
+        url: "/client/submit-ticket",
+      },
+    ],
+  },
+];
+
 export const SIDEBAR_REPORTING_MANAGER_PROCUREMENT = [
   {
     title: "General",
@@ -556,8 +585,6 @@ export const LEAVETYPE = [
   "Paternity Leave",
   "Special Leave",
   "Emergency Leave",
-  "Unpaid Leave",
-  "Paid Leave",
 ];
 
 export const SALARYTYPE = ["Hourly", "Daily", "Fixed"];
