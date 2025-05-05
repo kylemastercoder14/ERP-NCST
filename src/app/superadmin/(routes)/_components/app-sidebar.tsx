@@ -26,7 +26,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Admin } from "@prisma/client";
-import { TeamSwitcher } from '../../../../components/global/logo';
+import { TeamSwitcher } from "./team-switcher";
 
 // Helper function to recursively render menu items
 const renderMenuItem = (
@@ -107,13 +107,13 @@ export function AppSidebar({
   const branches = [
     {
       name: "BAT Security Services INC.",
-      branch: "Cavite Branch"
+      branch: "Cavite Branch",
     },
     {
       name: "BAT Security Services INC.",
-      branch: "Batangas Branch"
+      branch: "Batangas Branch",
     },
-  ]
+  ];
   return (
     <Sidebar variant="floating" {...props}>
       <SidebarHeader>
