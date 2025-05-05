@@ -129,7 +129,7 @@ export const SIDEBAR_HEAD_OPERATION = [
 
 export const SIDEBAR_HEAD_HR = [
   {
-    title: "General", // dont mind this
+    title: "General",
     url: "#",
     items: [
       {
@@ -511,6 +511,217 @@ export const SIDEBAR_REPORTING_MANAGER_PROCUREMENT = [
       {
         title: "Purchase Requested",
         url: "/reporting-manager/purchase-requested",
+      },
+    ],
+  },
+];
+
+export const SIDEBAR_SUPERADMIN = [
+  {
+    title: "Human Resource Management",
+    url: "#",
+    items: [
+      {
+        title: "Applicants List",
+        url: "/head/applicants-list",
+      },
+      {
+        title: "Employee Management",
+        url: "#",
+        items: [
+          // show this in collapsible
+          {
+            title: "Employee List",
+            url: "/head/employee-management",
+          },
+          { title: "Add Employee", url: "/head/employee-management/create" },
+        ],
+      },
+      {
+        title: "Attendance Management",
+        url: "#",
+        items: [
+          {
+            title: "Attendance Monitoring",
+            url: "/head/attendance-management",
+          },
+          {
+            title: "Overtime Request",
+            url: "/head/attendance-management/overtime-undertime",
+          },
+        ],
+      },
+      {
+        title: "Payroll Management",
+        url: "/head/payroll-management",
+        items: [
+          {
+            title: "Base Salary",
+            url: "/head/payroll-management/base-salary",
+          },
+          {
+            title: "Payslip Generation",
+            url: "/head/payroll-management/payslip-generation",
+          },
+        ],
+      },
+      {
+        title: "Leave Management",
+        url: "/head/leave-management",
+      },
+      {
+        title: "Onboarding & Training",
+        url: "/head/onboarding-training",
+      },
+    ],
+  },
+  {
+    title: "CRM",
+    url: "#",
+    items: [
+      {
+        title: "Client Management",
+        url: "#",
+        items: [
+          {
+            title: "Client List",
+            url: "/head/client-management",
+          },
+          { title: "Add Client", url: "/head/client-management/create" },
+        ],
+      },
+      {
+        title: "Sales Monitoring",
+        url: "/head/sales-monitoring",
+      },
+      {
+        title: "Ticket Management",
+        url: "/head/ticket-management",
+      },
+    ],
+  },
+  {
+    title: "Finance & Accounting",
+    url: "#",
+    items: [
+      {
+        title: "Sales Management",
+        url: "#",
+        items: [
+          // show this in collapsible
+          {
+            title: "Ledger",
+            url: "/head/sales-management",
+          },
+          {
+            title: "Accounts Payable",
+            url: "/head/sales-management/accounts-payable",
+          },
+          {
+            title: "Accounts Receivable",
+            url: "/head/sales-management/accounts-receivable",
+          },
+        ],
+      },
+      {
+        title: "Client Payment Management",
+        url: "/head/client-payment-management",
+      },
+    ],
+  },
+  {
+    title: "Operations Management",
+    url: "#",
+    items: [
+      {
+        title: "Deployment Scheduling",
+        url: "/head/deployment-scheduling",
+      },
+      {
+        title: "Shift Monitoring",
+        url: "/head/shift-monitoring",
+      },
+      {
+        title: "Onboarding & Training",
+        url: "/head/onboarding-training",
+      },
+      {
+        title: "Employee Evaluation",
+        url: "/head/employee-evaluation",
+      },
+    ],
+  },
+  {
+    title: "Procurement Management",
+    url: "#",
+    items: [
+      {
+        title: "Items List",
+        url: "/head/items-list",
+      },
+      {
+        title: "Supplier Management",
+        url: "/head/supplier-management",
+      },
+      {
+        title: "Purchase Request",
+        url: "/head/purchase-request",
+      },
+      {
+        title: "Withdrawal Management",
+        url: "/head/withdrawal-management",
+      },
+    ],
+  },
+  {
+    title: "Inventory",
+    url: "#",
+    items: [
+      {
+        title: "Inventory Management",
+        url: "/head/inventory-management",
+      },
+      {
+        title: "Withdrawal Management",
+        url: "/head/withdrawal-management",
+      },
+      {
+        title: "List of Purchase Orders",
+        url: "/head/purchase-orders",
+      },
+      {
+        title: "Purchase Request",
+        url: "/head/purchase-request",
+      },
+    ],
+  },
+  {
+    title: "Others",
+    url: "#",
+    items: [
+      {
+        title: "Job Posting",
+        url: "/head/job-posting",
+      },
+      {
+        title: "Withdrawal Management",
+        url: "/head/withdrawal-management",
+      },
+      {
+        title: "Purchase Request",
+        url: "/head/purchase-request",
+      },
+      {
+        title: "Reports Management",
+        url: "/head/reports-management",
+      },
+      {
+        title: "Settings",
+        url: "/head/settings",
+      },
+      {
+        title: "Logs",
+        url: "/head/logs",
       },
     ],
   },

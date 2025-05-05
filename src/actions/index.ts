@@ -28,6 +28,7 @@ import {
   JobPostValidators,
   TicketValidators,
   ForgotPasswordValidators,
+  ResetPasswordValidators,
 } from "@/validators";
 import nodemailer from "nodemailer";
 import { CreateAccountHTML } from "@/components/email-templates/create-account";
@@ -136,7 +137,7 @@ export const forgotPassword = async (
 
     const randomTwelveToken = generateRandomPassword(12);
 
-    const resetLink = `https://bat-security-services-inc.vercel.app/forgot-password?token=${randomTwelveToken}&email=${email}`;
+    const resetLink = `https://bat-security-services-inc.vercel.app/reset-password?token=${randomTwelveToken}&email=${email}`;
 
     const emailContent = {
       resetLink,
@@ -164,6 +165,50 @@ export const forgotPassword = async (
     console.error("Something went wrong.", error);
     return {
       error: `Something went wrong. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const resetPassword = async (
+  values: z.infer<typeof ResetPasswordValidators>,
+  email: string
+) => {
+  const validatedField = ResetPasswordValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { password, confirmPassword } = validatedField.data;
+
+  if (password !== confirmPassword) {
+    return { error: "Passwords do not match." };
+  }
+
+  try {
+    const user = await db.userAccount.findFirst({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) {
+      return { error: "No user account found." };
+    }
+
+    await db.userAccount.update({
+      where: { id: user.id },
+      data: {
+        password,
+      },
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error resetting password", error);
+    return {
+      error: `Failed to reset password. Please try again. ${error.message || ""}`,
     };
   }
 };
@@ -238,6 +283,62 @@ export const clientLoginAccount = async (
 
   try {
     const user = await db.client.findFirst({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) {
+      return { error: "No user account found." };
+    }
+
+    if (user.password !== password) {
+      return { error: "Invalid password" };
+    }
+
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+    const alg = "HS256";
+
+    const jwt = await new jose.SignJWT({})
+      .setProtectedHeader({ alg })
+      .setExpirationTime("72h")
+      .setSubject(user.id.toString())
+      .sign(secret);
+
+    (
+      await // Set the cookie with the JWT
+      cookies()
+    ).set("Authorization", jwt, {
+      httpOnly: true, // Set to true for security
+      secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+      maxAge: 60 * 60 * 24 * 3, // Cookie expiration (3 days in seconds)
+      sameSite: "strict", // Adjust according to your needs
+      path: "/", // Adjust path as needed
+    });
+
+    return { token: jwt, user: user };
+  } catch (error: any) {
+    console.error("Error logging in user", error);
+    return {
+      error: `Failed to login. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const superAdminLoginAccount = async (
+  values: z.infer<typeof LoginValidators>
+) => {
+  const validatedField = LoginValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { email, password } = validatedField.data;
+
+  try {
+    const user = await db.admin.findFirst({
       where: {
         email,
       },

@@ -33,6 +33,15 @@ export const ForgotPasswordValidators = z.object({
     .min(1, { message: "Email is required" }),
 });
 
+export const ResetPasswordValidators = z.object({
+  password: z
+    .string()
+    .min(8, { message: "Password must be at least 8 characters long" }),
+  confirmPassword: z
+    .string()
+    .min(1, { message: "Confirm password is required" }),
+});
+
 export const ApplicantValidators = z.object({
   positionDesired: z
     .string()
