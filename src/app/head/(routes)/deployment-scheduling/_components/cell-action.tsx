@@ -18,9 +18,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import AlertModal from "@/components/ui/alert-modal";
 import React from "react";
-import { changeTrainingStatus, getAllClients } from "@/actions";
+import { assignToClient, getAllClients } from "@/actions";
 import { Modal } from "@/components/ui/modal";
 import { Client } from "@prisma/client";
 import {
@@ -31,27 +30,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import SendEmailForm from "@/components/forms/send-email-form";
-import ChangeApplicantStatusForm from '@/components/forms/change-status-applicant-form';
 
 interface CellActionProps {
   id: string;
-  name: string;
   trainingStatus: string;
-  departmentSession: string;
+  email: string;
 }
 
 export const CellAction: React.FC<CellActionProps> = ({
   id,
-  name,
   trainingStatus,
-  departmentSession,
+  email
 }) => {
   const router = useRouter();
-  const [emailModalOpen, setEmailModalOpen] = React.useState(false);
-  const [orientationOpen, setOrientationOpen] = React.useState(false);
-  const [trainingOpen, setTrainingOpen] = React.useState(false);
-  const [deploymentOpen, setDeploymentOpen] = React.useState(false);
   const [finalOpen, setFinalOpen] = React.useState(false);
   const [clientId, setClientId] = React.useState("");
   const [clientsData, setClientsData] = React.useState<Client[]>([]);
@@ -69,40 +60,10 @@ export const CellAction: React.FC<CellActionProps> = ({
     fetchClients();
   }, []);
 
-  const onTraining = async () => {
-    setLoading(true);
-    try {
-      await changeTrainingStatus(id, "Training");
-      toast.success("Successfully changed to Training.");
-      router.refresh();
-    } catch (error) {
-      console.log(error);
-      toast.error("Something went wrong.");
-    } finally {
-      setLoading(false);
-      setTrainingOpen(false);
-    }
-  };
-
-  const onDeployment = async () => {
-    setLoading(true);
-    try {
-      await changeTrainingStatus(id, "Deployment");
-      toast.success("Successfully changed to Deployment.");
-      router.refresh();
-    } catch (error) {
-      console.log(error);
-      toast.error("Something went wrong.");
-    } finally {
-      setLoading(false);
-      setTrainingOpen(false);
-    }
-  };
-
   const onFinal = async () => {
     setLoading(true);
     try {
-      await changeTrainingStatus(id, "Assigned", clientId);
+      await assignToClient(id, clientId, email);
       toast.success("Successfully assigned to client.");
       router.refresh();
     } catch (error) {
@@ -116,29 +77,6 @@ export const CellAction: React.FC<CellActionProps> = ({
 
   return (
     <>
-      <Modal
-        isOpen={orientationOpen}
-        onClose={() => setOrientationOpen(false)}
-        title="Change the applicant status"
-        description="Change the applicant status to Passed or Failed"
-      >
-        <ChangeApplicantStatusForm
-          employeeId={id}
-          onClose={() => setOrientationOpen(false)}
-        />
-      </Modal>
-      <AlertModal
-        onConfirm={onTraining}
-        isOpen={trainingOpen}
-        onClose={() => setTrainingOpen(false)}
-        loading={loading}
-      />
-      <AlertModal
-        onConfirm={onDeployment}
-        isOpen={deploymentOpen}
-        onClose={() => setDeploymentOpen(false)}
-        loading={loading}
-      />
       <Modal
         isOpen={finalOpen}
         onClose={() => setFinalOpen(false)}
@@ -173,24 +111,6 @@ export const CellAction: React.FC<CellActionProps> = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          {trainingStatus === "Initial Interview" && (
-            <DropdownMenuItem onClick={() => setOrientationOpen(true)}>
-              <BookA className="w-4 h-4 mr-2" />
-              Change Status
-            </DropdownMenuItem>
-          )}
-          {trainingStatus === "Orientation" && (
-            <DropdownMenuItem onClick={() => setTrainingOpen(true)}>
-              <Megaphone className="w-4 h-4 mr-2" />
-              Change To Training
-            </DropdownMenuItem>
-          )}
-          {trainingStatus === "Training" && (
-            <DropdownMenuItem onClick={() => setDeploymentOpen(true)}>
-              <BookOpenCheck className="w-4 h-4 mr-2" />
-              For Deployment
-            </DropdownMenuItem>
-          )}
           {trainingStatus === "Deployment" && (
             <DropdownMenuItem onClick={() => setFinalOpen(true)}>
               <BookOpenCheck className="w-4 h-4 mr-2" />

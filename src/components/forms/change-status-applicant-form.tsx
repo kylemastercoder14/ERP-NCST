@@ -12,17 +12,19 @@ import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import CustomFormField from "@/components/global/custom-formfield";
 import { FormFieldType } from "@/lib/constants";
-import { sendInitialInterviewEmployeeStatus } from "@/actions";
+import { sendEmployeeStatus } from "@/actions";
+import { TrainingStatus } from '@/types';
 
 const ChangeApplicantStatusForm = ({
   employeeId,
   onClose,
+  trainingStatus,
 }: {
   employeeId: string;
   onClose: () => void;
+  trainingStatus: TrainingStatus;
 }) => {
   const router = useRouter();
-
   const form = useForm<z.infer<typeof SendApplicantStatusValidators>>({
     resolver: zodResolver(SendApplicantStatusValidators),
     defaultValues: {
@@ -31,16 +33,12 @@ const ChangeApplicantStatusForm = ({
     },
   });
 
-  const { isSubmitting } = form.formState;
-
   const onSubmit = async (
     values: z.infer<typeof SendApplicantStatusValidators>
   ) => {
     try {
-      const res = await sendInitialInterviewEmployeeStatus(
-        values,
-        employeeId as string
-      );
+      const res = await sendEmployeeStatus(values, trainingStatus, employeeId);
+
       if (res.success) {
         toast.success(res.success);
         router.refresh();
@@ -49,43 +47,42 @@ const ChangeApplicantStatusForm = ({
         toast.error(res.error);
       }
     } catch (error) {
-      toast.error("An error occurred sending email notification.");
+      toast.error("Failed to update status");
       console.error(error);
     }
   };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="grid mt-5 gap-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <CustomFormField
           control={form.control}
           fieldType={FormFieldType.SELECT}
-          isRequired={true}
-          dynamicOptions={["Passed", "Failed"].map((status) => ({
-            label: status,
-            value: status,
-          }))}
           name="status"
-          disabled={isSubmitting}
           label="Status"
-          placeholder="Select a status"
+          placeholder="Select status"
+          dynamicOptions={[
+            { label: "Passed", value: "Passed" },
+            { label: "Failed", value: "Failed" },
+          ]}
         />
+
         {form.watch("status") === "Failed" && (
           <CustomFormField
             control={form.control}
             fieldType={FormFieldType.TEXTAREA}
-            isRequired={true}
             name="remarks"
-            disabled={isSubmitting}
-            label="Reason for failure"
-            placeholder="Enter the reason for failure"
+            label="Remarks"
+            placeholder="Enter remarks for failure"
           />
         )}
-        <div className="flex items-center justify-end">
-          <Button onClick={() => router.back()} type="button" variant="ghost">
+
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button disabled={isSubmitting} type="submit">
-            Save Changes
+          <Button type="submit" disabled={form.formState.isSubmitting}>
+            {form.formState.isSubmitting ? "Saving..." : "Save Changes"}
           </Button>
         </div>
       </form>

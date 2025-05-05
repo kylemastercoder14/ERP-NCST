@@ -90,3 +90,19 @@ export interface PayslipGenerationWithProps extends Employee {
 export interface AccomplishmentReportWithProps extends AccomplishmentReport {
   Employee: Employee;
 }
+
+export const TRAINING_STATUSES = [
+  "Initial Interview",
+  "Final Interview",
+  "Orientation",
+  "Physical Training",
+  "Customer Service Training",
+  "Deployment",
+  "Deployed",
+] as const;
+
+export const APPLICATION_STATUSES = ["Passed", "Failed"] as const;
+
+// Create types from the constants
+export type TrainingStatus = (typeof TRAINING_STATUSES)[number];
+export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];

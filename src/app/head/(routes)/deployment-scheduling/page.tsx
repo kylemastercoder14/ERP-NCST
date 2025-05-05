@@ -20,6 +20,7 @@ const Page = async () => {
 	include: {
 	  JobTitle: true,
 	  Department: true,
+	  UserAccount: true,
 	},
   });
 
@@ -37,6 +38,7 @@ const Page = async () => {
 		  phoneNumber: item.celNo,
 		  address: item.presentAddress,
 		  positionDesired: item.JobTitle.name,
+		  email: item.UserAccount[0].email,
 		  gender: item.sex,
 		  civilStatus: item.civilStatus,
 		  departmentSession: departmentSession || "",

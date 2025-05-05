@@ -129,6 +129,7 @@ model Employee {
   signature      String
   isNewEmployee  Boolean @default(true)
   trainingStatus String?
+  status         String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

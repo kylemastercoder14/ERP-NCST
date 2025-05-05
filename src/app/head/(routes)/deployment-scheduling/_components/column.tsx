@@ -9,6 +9,7 @@ export type ApplicantColumn = {
   licenseNo: string;
   name: string;
   phoneNumber: string;
+  email: string;
   address: string;
   trainingStatus: string;
   gender: string;
@@ -156,9 +157,8 @@ export const columns: ColumnDef<ApplicantColumn>[] = [
     cell: ({ row }) => (
       <CellAction
         id={row.original.id}
-        name={row.original.name}
         trainingStatus={row.original.trainingStatus}
-        departmentSession={row.original.departmentSession}
+        email={row.original.email}
       />
     ),
   },

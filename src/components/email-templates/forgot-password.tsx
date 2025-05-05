@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import {
   Body,
   Container,
@@ -14,25 +15,19 @@ import {
 } from "@react-email/components";
 import * as React from "react";
 
-interface InitialInterviewDetailsProps {
-  email: string;
-  date: string;
-  time: string;
-  location: string;
+interface ForgotPasswordProps {
+  resetLink: string;
+  expiryHours?: number;
 }
 
-export const InitialInterviewDetails = ({
-  email,
-  date,
-  time,
-  location,
-}: InitialInterviewDetailsProps) => (
+export const ForgotPasswordEmail = ({
+  resetLink,
+  expiryHours = 24,
+}: ForgotPasswordProps) => (
   <Html>
     <Head />
     <Body style={main}>
-      <Preview>
-        Initial Interview Invitation - BAT Security Services INC.
-      </Preview>
+      <Preview>Reset your BAT Security Services password</Preview>
       <Container style={container}>
         <Section style={coverSection}>
           <Section style={imageSection}>
@@ -40,52 +35,40 @@ export const InitialInterviewDetails = ({
               src="https://firebasestorage.googleapis.com/v0/b/personaapplication-b086b.appspot.com/o/454317114_122094839102469739_5197759434856842856_n-fotor-2025031302019.png?alt=media&token=064d24ca-41f9-4538-8149-fa543d9f4af9"
               width="60"
               height="60"
-              alt="Logo"
+              alt="BAT Security Logo"
             />
           </Section>
           <Section style={upperSection}>
-            <Heading style={h1}>Initial Interview Invitation</Heading>
-            <Text style={mainText}>Dear Applicant ({email}),</Text>
+            <Heading style={h1}>Password Reset Request</Heading>
             <Text style={mainText}>
-              Congratulations! You are invited for an Initial Interview with BAT
-              Security Services INC. Below are the details:
+              We received a request to reset the password for your BAT Security
+              Services account.
             </Text>
 
             <Section style={verificationSection}>
-              <Text style={verifyText}>Date:</Text>
-              <Text style={codeText}>{date}</Text>
-
-              <Text style={verifyText}>Time:</Text>
-              <Text style={codeText}>{time}</Text>
-
-              <Text style={verifyText}>Location:</Text>
-              <Text style={codeText}>{location}</Text>
+              <Text style={verifyText}>
+                Click the link below to reset your password:
+              </Text>
+              <Link href={resetLink} style={resetLinkStyle}>
+                Reset Password
+              </Link>
+              <Text style={validityText}>
+                This link will expire in {expiryHours} hours.
+              </Text>
             </Section>
 
             <Text style={mainText}>
-              Please make sure to arrive 10-15 minutes before your scheduled
-              time. Bring a valid ID and any supporting documents.
+              If you didn't request this password reset, you can safely ignore
+              this email. Your password won't be changed until you access the
+              link above and create a new one.
             </Text>
-
-            <Section style={formSection}>
-              <Text style={formText}>
-                Please complete the employee form by clicking the button below:
-              </Text>
-              <Link href={"https://bat-security-services-inc.vercel.app/new-applicant"} target='_blank' style={button}>
-                Complete Employee Form
-              </Link>
-              <Text style={noteText}>
-                Note: The form can only be filled out once and must be submitted
-                on or before {date}.
-              </Text>
-            </Section>
           </Section>
-
           <Hr />
           <Section style={lowerSection}>
             <Text style={cautionText}>
-              If you have any questions, feel free to contact us. We look
-              forward to meeting you!
+              For security reasons, BAT Security Services will never email you
+              asking for your password. This link can only be used once and will
+              expire after {expiryHours} hours.
             </Text>
           </Section>
         </Section>
@@ -102,6 +85,14 @@ export const InitialInterviewDetails = ({
           >
             batsecurityservices.com
           </Link>
+          . View our{" "}
+          <Link
+            href="https://batsecurityservices.com/privacy-policy"
+            target="_blank"
+            style={link}
+          >
+            privacy policy
+          </Link>
           .
         </Text>
       </Container>
@@ -109,20 +100,23 @@ export const InitialInterviewDetails = ({
   </Html>
 );
 
-export const InitialInterviewDetailsHTML = (
-  props: InitialInterviewDetailsProps
-) =>
-  render(<InitialInterviewDetails {...props} />, {
+export const ForgotPasswordEmailHTML = (props: ForgotPasswordProps) =>
+  render(<ForgotPasswordEmail {...props} />, {
     pretty: true,
   });
 
-// Styles (updated with new styles for the form section)
-const main = { backgroundColor: "#fff", color: "#212121" };
+// Styles
+const main = {
+  backgroundColor: "#fff",
+  color: "#212121",
+};
+
 const container = {
   padding: "20px",
   margin: "0 auto",
   backgroundColor: "#eee",
 };
+
 const h1 = {
   color: "#333",
   fontFamily:
@@ -131,6 +125,7 @@ const h1 = {
   fontWeight: "bold",
   marginBottom: "15px",
 };
+
 const link = {
   color: "#eec80f",
   fontFamily:
@@ -138,6 +133,21 @@ const link = {
   fontSize: "14px",
   textDecoration: "underline",
 };
+
+const resetLinkStyle = {
+  backgroundColor: "#eec80f",
+  borderRadius: "4px",
+  color: "#000",
+  fontFamily:
+    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif",
+  fontSize: "16px",
+  fontWeight: "bold",
+  textDecoration: "none",
+  padding: "12px 24px",
+  margin: "20px 0",
+  display: "inline-block",
+};
+
 const text = {
   color: "#333",
   fontFamily:
@@ -145,6 +155,7 @@ const text = {
   fontSize: "14px",
   margin: "24px 0",
 };
+
 const imageSection = {
   backgroundColor: "#252f3d",
   display: "flex",
@@ -152,55 +163,41 @@ const imageSection = {
   alignItems: "center",
   justifyContent: "center",
 };
+
 const coverSection = { backgroundColor: "#fff" };
+
 const upperSection = { padding: "25px 35px" };
+
 const lowerSection = { padding: "25px 35px" };
-const footerText = { ...text, fontSize: "12px", padding: "0 20px" };
-const verifyText = {
-  ...text,
-  margin: "5px 0",
-  fontWeight: "bold",
-  textAlign: "center" as const,
-};
-const codeText = {
-  ...text,
-  fontWeight: "bold",
-  fontSize: "20px",
-  margin: "5px 0",
-  textAlign: "center" as const,
-};
-const verificationSection = {
-  margin: "20px 0",
-};
-const mainText = { ...text, marginBottom: "14px" };
-const cautionText = { ...text, margin: "0px" };
-const formSection = {
-  margin: "20px 0",
-  textAlign: "center" as const,
-};
-const formText = {
-  ...text,
-  marginBottom: "16px",
-};
-const noteText = {
+
+const footerText = {
   ...text,
   fontSize: "12px",
-  color: "#666",
-  fontStyle: "italic",
-  marginTop: "10px",
+  padding: "0 20px",
 };
-const button = {
-  backgroundColor: "#eec80f",
-  borderRadius: "4px",
-  color: "#000",
-  fontFamily:
-    "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif",
-  fontSize: "14px",
-  fontWeight: "bold",
-  textDecoration: "none",
+
+const verifyText = {
+  ...text,
+  margin: "10px 0 5px 0",
   textAlign: "center" as const,
-  display: "block",
-  width: "200px",
-  padding: "12px 20px",
-  margin: "0 auto",
 };
+
+const validityText = {
+  ...text,
+  margin: "10px 0",
+  textAlign: "center" as const,
+  fontSize: "12px",
+  color: "#666",
+};
+
+const verificationSection = {
+  display: "flex",
+  flexDirection: "column" as const,
+  alignItems: "center",
+  justifyContent: "center",
+  margin: "20px 0",
+};
+
+const mainText = { ...text, marginBottom: "14px" };
+
+const cautionText = { ...text, margin: "0px", fontSize: "12px" };

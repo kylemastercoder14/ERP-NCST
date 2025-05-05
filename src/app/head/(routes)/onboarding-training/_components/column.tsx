@@ -3,6 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { ChevronsUpDown } from "lucide-react";
 import { CellAction } from "./cell-action";
+import { TrainingStatus } from "@/types";
 
 export type ApplicantColumn = {
   id: string;
@@ -15,6 +16,8 @@ export type ApplicantColumn = {
   civilStatus: string;
   positionDesired: string;
   departmentSession: string;
+  branch: string;
+  assessor: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -157,8 +160,11 @@ export const columns: ColumnDef<ApplicantColumn>[] = [
       <CellAction
         id={row.original.id}
         name={row.original.name}
-        trainingStatus={row.original.trainingStatus}
+        trainingStatus={row.original.trainingStatus as TrainingStatus}
+        branch={row.original.branch}
         departmentSession={row.original.departmentSession}
+        jobTitle={row.original.positionDesired}
+        assessor={row.original.assessor}
       />
     ),
   },

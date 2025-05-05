@@ -27,6 +27,7 @@ import {
   SendApplicantStatusValidators,
   JobPostValidators,
   TicketValidators,
+  ForgotPasswordValidators,
 } from "@/validators";
 import nodemailer from "nodemailer";
 import { CreateAccountHTML } from "@/components/email-templates/create-account";
@@ -40,8 +41,13 @@ import {
   generateWithdrawalCode,
 } from "@/lib/utils";
 import { InitialInterviewDetailsHTML } from "@/components/email-templates/initial-interview";
-import { InitialInterviewStatusHTML } from "@/components/email-templates/status-applicant";
-import { useClient } from "../hooks/use-client";
+import {
+  TrainingStatusEmailHTML,
+  TrainingStatusEmailProps,
+} from "@/components/email-templates/status-applicant";
+import { useClient } from "@/hooks/use-client";
+import { TrainingStatus } from "@/types";
+import { ForgotPasswordEmailHTML } from "@/components/email-templates/forgot-password";
 
 export const loginAccount = async (values: z.infer<typeof LoginValidators>) => {
   const validatedField = LoginValidators.safeParse(values);
@@ -101,6 +107,63 @@ export const loginAccount = async (values: z.infer<typeof LoginValidators>) => {
     console.error("Error logging in user", error);
     return {
       error: `Failed to login. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const forgotPassword = async (
+  values: z.infer<typeof ForgotPasswordValidators>
+) => {
+  const validatedField = ForgotPasswordValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { email } = validatedField.data;
+
+  try {
+    const user = await db.userAccount.findFirst({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) {
+      return { error: "No user account found." };
+    }
+
+    const randomTwelveToken = generateRandomPassword(12);
+
+    const resetLink = `https://bat-security-services-inc.vercel.app/forgot-password?token=${randomTwelveToken}&email=${email}`;
+
+    const emailContent = {
+      resetLink,
+      expiryHours: 1,
+    };
+
+    // Email sending configuration
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER || "bats3curity.9395@gmail.com",
+        pass: process.env.EMAIL_PASSWORD || "wfffyihhttplludl",
+      },
+    });
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER || "bats3curity.9395@gmail.com",
+      to: email,
+      subject: `Forgot Password - BAT Security Services INC.`,
+      html: await ForgotPasswordEmailHTML(emailContent),
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("Something went wrong.", error);
+    return {
+      error: `Something went wrong. Please try again. ${error.message || ""}`,
     };
   }
 };
@@ -357,9 +420,12 @@ Thank you and we look forward to meeting you!`,
   }
 };
 
-export const sendInitialInterviewEmployeeStatus = async (
+export const sendEmployeeStatus = async (
   values: z.infer<typeof SendApplicantStatusValidators>,
-  employeeId: string
+  currentStatus: TrainingStatus,
+  employeeId: string,
+  clientId?: string,
+  branch?: string
 ) => {
   const validatedField = SendApplicantStatusValidators.safeParse(values);
 
@@ -370,63 +436,110 @@ export const sendInitialInterviewEmployeeStatus = async (
 
   const { status, remarks } = validatedField.data;
 
-  const res = await db.userAccount.findFirst({
-    where: {
-      employeeId,
-    },
-  });
-
-  if (status === "Passed") {
-    // Change training status or handle passed applicant
-    await changeTrainingStatus(employeeId, "Orientation");
-  } else {
-    // Handle failed applicant (delete records, etc.)
-    await deleteApplicant(employeeId);
-    await db.userAccount.delete({
-      where: {
-        email: res?.email || "",
+  // Fetch employee with user account and company data
+  const [employee, company] = await Promise.all([
+    db.employee.findUnique({
+      where: { id: employeeId },
+      include: {
+        UserAccount: true,
       },
-    });
+    }),
+    clientId ? db.client.findUnique({ where: { id: clientId } }) : null,
+  ]);
+
+  if (!employee || !employee.UserAccount || employee.UserAccount.length === 0) {
+    return { error: "Employee not found or missing user account" };
   }
 
-  // Customize the HTML content based on status and remarks
-  const htmlContent = await InitialInterviewStatusHTML({
-    email: res?.email || "",
+  // Correct status progression
+  const statusFlow: TrainingStatus[] = [
+    "Initial Interview",
+    "Final Interview",
+    "Orientation",
+    "Physical Training",
+    "Customer Service Training",
+    "Deployment",
+    "Deployed",
+  ];
+
+  // Validate current status exists in flow
+  const currentIndex = statusFlow.indexOf(currentStatus);
+  if (currentIndex === -1) {
+    return { error: "Invalid current status" };
+  }
+
+  // Get next status
+  const getNextStatus = () => {
+    return statusFlow[currentIndex + 1] || currentStatus;
+  };
+
+  // Determine new status
+  let newTrainingStatus: TrainingStatus = currentStatus;
+  if (status === "Passed") {
+    newTrainingStatus = getNextStatus();
+  } else if (status === "Failed") {
+    newTrainingStatus = "Deployed";
+  }
+
+  // Calculate date 2 days from now
+  const twoDaysLater = new Date();
+  twoDaysLater.setDate(twoDaysLater.getDate() + 2);
+
+  // Update employee data
+  const updateData = {
     status,
-    remarks,
+    trainingStatus: newTrainingStatus,
+    ...(newTrainingStatus === "Deployed" &&
+      status === "Passed" && {
+        clientId,
+        isNewEmployee: false,
+      }),
+    updatedAt: new Date(),
+  };
+
+  await db.employee.update({
+    where: { id: employeeId },
+    data: updateData,
   });
 
+  // Prepare email content with 2 days later date
+  const emailContent: TrainingStatusEmailProps = {
+    email: employee.UserAccount[0].email,
+    trainingStatus: currentStatus,
+    applicationStatus: status as "Passed" | "Failed",
+    date: twoDaysLater.toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }),
+    time: "8:00 AM",
+    location: "BAT Security Services INC. Office",
+    branch,
+    company: company?.name,
+    remarks,
+  };
+
+  // Email sending configuration
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: "bats3curity.9395@gmail.com",
-      pass: "wfffyihhttplludl",
+      user: process.env.EMAIL_USER || "bats3curity.9395@gmail.com",
+      pass: process.env.EMAIL_PASSWORD || "wfffyihhttplludl",
     },
   });
 
-  const message = {
-    from: "bats3curity.9395@gmail.com",
-    to: res?.email || "",
-    subject: "Initial Interview Status - BAT Security Services INC.",
-    text: `Hello ${res?.email || ""},
-
-We would like to inform you about the status of your initial interview with BAT Security Services INC.
-
-Status: ${status}
-
-${status === "Failed" ? `Remarks: ${remarks}` : ""}
-
-Thank you for your time and we wish you the best in your future endeavors.`,
-    html: htmlContent,
-  };
-
   try {
-    await transporter.sendMail(message);
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER || "bats3curity.9395@gmail.com",
+      to: employee.UserAccount[0].email,
+      subject: `${currentStatus} Status Update - BAT Security Services INC.`,
+      html: await TrainingStatusEmailHTML(emailContent),
+    });
 
-    return { success: "Email has been sent." };
+    return { success: "Status updated and notification sent successfully." };
   } catch (error) {
-    console.error("Error sending notification", error);
-    return { message: "An error occurred. Please try again." };
+    console.error("Error sending email:", error);
+    return { error: "Failed to send notification email." };
   }
 };
 
@@ -636,43 +749,6 @@ export const createApplicant = async (
     console.error("Error creating employee", error);
     return {
       error: `Failed to create employee. Please try again. ${error.message || ""}`,
-    };
-  }
-};
-
-export const changeTrainingStatus = async (
-  employeeId: string,
-  status: string,
-  clientId?: string
-) => {
-  if (!employeeId) {
-    return { error: "Employee ID is required" };
-  }
-
-  try {
-    if (status === "Assigned") {
-      await db.employee.update({
-        where: { id: employeeId },
-        data: {
-          isNewEmployee: false,
-          trainingStatus: "",
-          clientId,
-        },
-      });
-    }
-
-    await db.employee.update({
-      where: { id: employeeId },
-      data: {
-        trainingStatus: status,
-      },
-    });
-
-    return { success: "Employee successfully changed to Orientation" };
-  } catch (error: any) {
-    console.error("Error changing employee status", error);
-    return {
-      error: `Failed to change employee status. Please try again. ${error.message || ""}`,
     };
   }
 };
@@ -3668,6 +3744,210 @@ export const deleteTicket = async (id: string) => {
     console.error("Error deleting ticket", error);
     return {
       error: `Failed to delete ticket. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const sendTrainingStatus = async (
+  currentStatus: TrainingStatus,
+  employeeId: string,
+  status: "Passed" | "Failed",
+  clientId?: string,
+  branch?: string,
+  data?: {
+    average: number;
+    summary: string;
+    comments?: string;
+    ratings: {
+      rating: number;
+      comments: string;
+    }[];
+  }
+) => {
+  // Fetch employee with user account and company data
+  const [employee, company] = await Promise.all([
+    db.employee.findUnique({
+      where: { id: employeeId },
+      include: {
+        UserAccount: true,
+      },
+    }),
+    clientId ? db.client.findUnique({ where: { id: clientId } }) : null,
+  ]);
+
+  if (!employee || !employee.UserAccount || employee.UserAccount.length === 0) {
+    return { error: "Employee not found or missing user account" };
+  }
+
+  // Correct status progression
+  const statusFlow: TrainingStatus[] = [
+    "Initial Interview",
+    "Final Interview",
+    "Orientation",
+    "Physical Training",
+    "Customer Service Training",
+    "Deployment",
+  ];
+
+  // Validate current status exists in flow
+  const currentIndex = statusFlow.indexOf(currentStatus);
+  if (currentIndex === -1) {
+    return { error: "Invalid current status" };
+  }
+
+  // Get next status
+  const getNextStatus = () => {
+    return statusFlow[currentIndex + 1] || currentStatus;
+  };
+
+  // Determine new status
+  let newTrainingStatus: TrainingStatus = currentStatus;
+  if (status === "Passed") {
+    newTrainingStatus = getNextStatus();
+  } else if (status === "Failed") {
+    newTrainingStatus = "Deployed";
+  }
+
+  // Calculate date 2 days from now
+  const twoDaysLater = new Date();
+  twoDaysLater.setDate(twoDaysLater.getDate() + 2);
+
+  // Update employee data
+  const updateData = {
+    status,
+    trainingStatus: newTrainingStatus,
+    ...(newTrainingStatus === "Deployed" &&
+      status === "Passed" && {
+        clientId,
+        isNewEmployee: false,
+      }),
+    updatedAt: new Date(),
+  };
+
+  await db.employee.update({
+    where: { id: employeeId },
+    data: updateData,
+  });
+
+  // Prepare email content with 2 days later date
+  const emailContent: TrainingStatusEmailProps = {
+    email: employee.UserAccount[0].email,
+    trainingStatus: currentStatus,
+    applicationStatus: status as "Passed" | "Failed",
+    date: twoDaysLater.toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }),
+    time: "8:00 AM",
+    location: "BAT Security Services INC. Office",
+    branch,
+    company: company?.name,
+    remarks: data?.comments,
+    averageRating: data?.average,
+    failureReason: "",
+    overallPerformance: data?.summary,
+  };
+
+  // Email sending configuration
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER || "bats3curity.9395@gmail.com",
+      pass: process.env.EMAIL_PASSWORD || "wfffyihhttplludl",
+    },
+  });
+
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER || "bats3curity.9395@gmail.com",
+      to: employee.UserAccount[0].email,
+      subject: `${currentStatus} Status Update - BAT Security Services INC.`,
+      html: await TrainingStatusEmailHTML(emailContent),
+    });
+
+    return { success: "Status updated and notification sent successfully." };
+  } catch (error) {
+    console.error("Error sending email:", error);
+    return { error: "Failed to send notification email." };
+  }
+};
+
+export const assignToClient = async (
+  employeeId: string,
+  clientId: string,
+  email: string
+) => {
+  if (!employeeId || !clientId) {
+    return { error: "Employee ID and Client ID are required" };
+  }
+
+  try {
+    const userAccount = await db.userAccount.findFirst({
+      where: {
+        employeeId,
+      },
+      include: {
+        Employee: true,
+      },
+    });
+
+    const client = await db.client.findUnique({
+      where: { id: clientId },
+    });
+
+    await db.employee.update({
+      where: { id: employeeId },
+      data: {
+        clientId,
+        isNewEmployee: false,
+        trainingStatus: "Deployed",
+      },
+    });
+
+    // Calculate date 2 days from now
+    const twoDaysLater = new Date();
+    twoDaysLater.setDate(twoDaysLater.getDate() + 2);
+
+    // Prepare email content with 2 days later date
+    const emailContent: TrainingStatusEmailProps = {
+      email,
+      trainingStatus: "Deployment",
+      applicationStatus: "Passed",
+      date: twoDaysLater.toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      }),
+      time: "8:00 AM",
+      location: "BAT Security Services INC. Office",
+      branch: userAccount?.Employee.branch,
+      company: client?.name,
+      remarks: "",
+      failureReason: "",
+    };
+
+    // Email sending configuration
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER || "bats3curity.9395@gmail.com",
+        pass: process.env.EMAIL_PASSWORD || "wfffyihhttplludl",
+      },
+    });
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER || "bats3curity.9395@gmail.com",
+      to: email,
+      subject: `You are now ready for deployment - BAT Security Services INC.`,
+      html: await TrainingStatusEmailHTML(emailContent),
+    });
+
+    return { success: "Status updated and notification sent successfully." };
+  } catch (error: any) {
+    console.error("Error assigning employee to client", error);
+    return {
+      error: `Failed to assign employee to client. Please try again. ${error.message || ""}`,
     };
   }
 };

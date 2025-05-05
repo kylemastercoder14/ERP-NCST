@@ -26,6 +26,13 @@ export const LoginValidators = z.object({
   password: z.string().min(1, { message: "Password is required" }),
 });
 
+export const ForgotPasswordValidators = z.object({
+  email: z
+    .string()
+    .email({ message: "Invalid email address" })
+    .min(1, { message: "Email is required" }),
+});
+
 export const ApplicantValidators = z.object({
   positionDesired: z
     .string()
@@ -143,7 +150,7 @@ export const SendEmailEmployeeValidators = z.object({
 });
 
 export const SendApplicantStatusValidators = z.object({
-  status: z.string().min(1, { message: "Date is required" }),
+  status: z.string().min(1, { message: "Status is required" }),
   remarks: z.string().optional(),
 });
 

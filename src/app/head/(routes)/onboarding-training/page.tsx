@@ -25,6 +25,7 @@ const Page = async () => {
   });
 
   const departmentSession = user?.Employee?.Department.name;
+  const assessor = user?.Employee.firstName + " " + user?.Employee.lastName;
 
   const formatData = (status: string): ApplicantColumn[] => {
     return (
@@ -41,6 +42,8 @@ const Page = async () => {
           gender: item.sex,
           civilStatus: item.civilStatus,
           departmentSession: departmentSession || "",
+          branch: item.branch,
+          assessor: assessor,
           createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),
           updatedAt: format(
             new Date(item.updatedAt),
@@ -58,7 +61,7 @@ const Page = async () => {
         />
       </div>
       <Separator className="my-5" />
-      <Tabs defaultValue="initial">
+      <Tabs defaultValue={`${departmentSession === "Human Resource" ? "initial" : "orientation"}`}>
         <TabsList>
           {departmentSession === "Human Resource" ? (
             <>
@@ -71,7 +74,6 @@ const Page = async () => {
               <TabsTrigger value="physical-training">
                 Physical Training
               </TabsTrigger>
-              <TabsTrigger value="mental-training">Mental Training</TabsTrigger>
               <TabsTrigger value="customer-service-training">
                 Customer Service Training
               </TabsTrigger>
