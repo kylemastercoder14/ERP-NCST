@@ -20,24 +20,52 @@ import {
 } from "@/components/ui/sidebar";
 import AlertModal from "@/components/ui/alert-modal";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { logoutUser } from "@/actions";
+import { getAllNotificationsOperations, logoutUser } from "@/actions";
 import ModeToggle from "./mode-toggle";
+import { Badge } from "../ui/badge";
+import { AccomplishmentReportWithProps } from "@/types";
 
-export function NavUser({ name, email }: { name: string; email: string }) {
+export function NavUser({
+  name,
+  email,
+  visibleNotification,
+  branch,
+}: {
+  name: string;
+  email: string;
+  visibleNotification?: boolean;
+  branch?: string;
+}) {
   const router = useRouter();
   const { isMobile } = useSidebar();
+  const [notifications, setNotifications] = useState<
+    AccomplishmentReportWithProps[]
+  >([]);
   const [open, setOpen] = useState(false);
   const handleLogout = async () => {
     try {
       await logoutUser();
       toast.success("Logged out successfully");
-      router.push("/superadmin/sign-in");
+      router.push("/sign-in");
     } catch (error) {
       console.error(error);
     }
   };
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      const res = await getAllNotificationsOperations(branch as string);
+      if (res.data) {
+        setNotifications(res.data);
+      } else {
+        return null;
+      }
+    };
+
+    fetchNotifications();
+  }, [branch]);
   return (
     <>
       <AlertModal
@@ -56,6 +84,14 @@ export function NavUser({ name, email }: { name: string; email: string }) {
                 className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               >
                 <Avatar className="h-8 w-8 rounded-lg relative">
+                  {visibleNotification && notifications.length > 0 && (
+                    <Badge
+                      variant="destructive"
+                      className="rounded-full p-0 size-4 flex items-center justify-center absolute text-[9px] top-0 right-0"
+                    >
+                      {notifications.length}
+                    </Badge>
+                  )}
                   <AvatarFallback className="rounded-lg">
                     {name.charAt(0)}
                   </AvatarFallback>
@@ -93,6 +129,19 @@ export function NavUser({ name, email }: { name: string; email: string }) {
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem>Account</DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => router.push("/head/notifications")}
+                >
+                  <span>Notifications</span>
+                  {visibleNotification && notifications.length > 0 && (
+                    <Badge
+                      variant="destructive"
+                      className="rounded-full ml-auto"
+                    >
+                      {notifications.length}
+                    </Badge>
+                  )}
+                </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => setOpen(true)}>

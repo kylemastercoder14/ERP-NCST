@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
 import { getSidebarItems } from "@/lib/utils";
-import { NavUser } from "@/components/global/nav-user";
 import { ChevronRight } from "lucide-react";
 import {
   Collapsible,
@@ -27,6 +26,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Admin } from "@prisma/client";
 import { TeamSwitcher } from "./team-switcher";
+import { NavUser } from "./nav-user";
 
 // Helper function to recursively render menu items
 const renderMenuItem = (
