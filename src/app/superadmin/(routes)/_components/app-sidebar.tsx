@@ -63,7 +63,7 @@ const renderMenuItem = (
         <CollapsibleTrigger asChild>
           <SidebarMenuButton tooltip={item.title}>
             <span>{item.title}</span>
-            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+            <ChevronRight className="ml-auto transition-transform  duration-200 group-data-[state=open]/collapsible:rotate-90" />
           </SidebarMenuButton>
         </CollapsibleTrigger>
         <CollapsibleContent>
