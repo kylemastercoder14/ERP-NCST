@@ -16,26 +16,39 @@ const Page = async () => {
     },
   });
 
-  const formattedData: AttendanceColumn[] =
-    data.map((item) => {
-      return {
-        id: item.id,
-        licenseNo: item.Employee.licenseNo || "N/A",
-        name: `${item.Employee.firstName} ${item.Employee.middleName || ""} ${item.Employee.lastName}`.trim(),
-        timeIn: format(new Date(item.timeIn), "hh:mm a"),
-        timeOut: format(new Date(item.timeOut), "hh:mm a"),
-        attendanceStatus: item.status,
-        date: format(new Date(item.date), "MMMM dd, yyyy"),
-        createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),
-      };
-    }) || [];
+  const formattedData: AttendanceColumn[] = data.map((item) => {
+    // Helper function to safely format dates
+    const safeFormat = (
+      dateString: string | Date | null | undefined,
+      formatStr: string
+    ) => {
+      if (!dateString) return "N/A";
+      try {
+        const date = new Date(dateString);
+        return isNaN(date.getTime()) ? "N/A" : format(date, formatStr);
+      } catch {
+        return "N/A";
+      }
+    };
+
+    return {
+      id: item.id,
+      licenseNo: item.Employee.licenseNo || "N/A",
+      name: `${item.Employee.firstName} ${item.Employee.middleName || ""} ${item.Employee.lastName}`.trim(),
+      timeIn: item.timeIn || "--",
+      timeOut: item.timeOut || "--",
+      attendanceStatus: item.status,
+      date: item.date,
+      createdAt: safeFormat(item.createdAt, "MMMM dd, yyyy"),
+    };
+  });
 
   return (
     <div>
       <div className="flex items-center justify-between">
         <Heading
           title="Attendance Monitoring"
-          description="Monitor all the attendance of the employees. You can also time in and time out for a specific employee."
+          description="Monitor all the attendance of the employees."
         />
       </div>
       <Separator className="my-5" />

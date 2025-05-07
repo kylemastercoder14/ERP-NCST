@@ -2,7 +2,7 @@
 
 import { ChevronsUpDown } from "lucide-react";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,11 +32,13 @@ export function NavUser({
   email,
   visibleNotification,
   branch,
+  image,
 }: {
   name: string;
   email: string;
   visibleNotification?: boolean;
   branch?: string;
+  image?: string;
 }) {
   const router = useRouter();
   const { isMobile } = useSidebar();
@@ -92,6 +94,7 @@ export function NavUser({
                       {notifications.length}
                     </Badge>
                   )}
+                  <AvatarImage src={image} />
                   <AvatarFallback className="rounded-lg">
                     {name.charAt(0)}
                   </AvatarFallback>
@@ -112,6 +115,7 @@ export function NavUser({
               <DropdownMenuLabel className="p-0 font-normal">
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                   <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarImage src={image} />
                     <AvatarFallback className="rounded-lg">
                       {name.charAt(0)}
                     </AvatarFallback>
@@ -128,7 +132,9 @@ export function NavUser({
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem>Account</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push("/my-account")}>
+                  Account
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => router.push("/head/notifications")}
                 >

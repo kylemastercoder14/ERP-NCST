@@ -123,6 +123,7 @@ export function AppSidebar({
         <NavUser
           name={`${user.Employee.firstName} ${user.Employee.lastName}`}
           email={user.email}
+          image={user.Employee.profilePicture as string}
         />
       </SidebarFooter>
     </Sidebar>

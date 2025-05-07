@@ -1,6 +1,4 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import Heading from "@/components/ui/heading";
 import db from "@/lib/db";
@@ -18,6 +16,7 @@ const Page = async () => {
       createdAt: "desc",
     },
     where: {
+      status: "Pending",
       Employee: {
         branch,
       },
@@ -51,14 +50,9 @@ const Page = async () => {
     <div>
       <div className="flex items-center justify-between">
         <Heading
-          title="Base Salary Management"
-          description="Manage all the base salary here. This will help the system in computing the employee's salary."
+          title="Payroll Approval"
+          description="Manage all the base salary requests. Approve or reject them."
         />
-        <Button size="sm">
-          <Link href={`/head/payroll-management/base-salary/create`}>
-            + Add Base Salary
-          </Link>
-        </Button>
       </div>
       <Separator className="my-5" />
       <BaseSalaryClient data={formattedData} />

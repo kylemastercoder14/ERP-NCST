@@ -5,14 +5,20 @@ import db from "@/lib/db";
 import { PayslipGenerationColumn } from "./_components/column";
 import { format } from "date-fns";
 import PayslipGenerationClient from "./_components/client";
+import { useUser } from "@/hooks/use-user";
 
 const Page = async () => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { user } = await useUser();
+  const branch = user?.Employee.branch;
   const data = await db.employee.findMany({
     where: {
       isNewEmployee: false,
+      branch,
       BaseSalary: {
         some: {
           amount: { gt: 0 },
+          status: "Approved",
         },
       },
     },

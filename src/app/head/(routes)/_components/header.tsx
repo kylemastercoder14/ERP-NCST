@@ -12,8 +12,9 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { usePathname } from "next/navigation";
+import { UserWithProps } from '@/types';
 
-const Header = () => {
+const Header = ({user}: {user: UserWithProps}) => {
   const pathname = usePathname();
 
   // Split the path into segments and remove the first one ('head')
@@ -27,6 +28,8 @@ const Header = () => {
       </header>
     );
   }
+
+  const department = `${user.Employee.branch} | ${user?.Employee.Department.name} Department (${user?.Employee.JobTitle.name})`;
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 px-4">
@@ -61,6 +64,7 @@ const Header = () => {
           })}
         </BreadcrumbList>
       </Breadcrumb>
+      <p className='ml-auto text-sm'>{department}</p>
     </header>
   );
 };

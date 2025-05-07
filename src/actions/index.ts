@@ -36,6 +36,7 @@ import { cookies } from "next/headers";
 import * as jose from "jose";
 import { useUser } from "@/hooks/use-user";
 import { RejectLeaveHTML } from "@/components/email-templates/reject-leave";
+import bcrypt from "bcryptjs";
 import {
   generatePurchaseCode,
   generateRandomPassword,
@@ -49,6 +50,7 @@ import {
 import { useClient } from "@/hooks/use-client";
 import { TrainingStatus } from "@/types";
 import { ForgotPasswordEmailHTML } from "@/components/email-templates/forgot-password";
+import { InquiryEmailHTML } from "../components/email-templates/contact";
 
 export const loginAccount = async (values: z.infer<typeof LoginValidators>) => {
   const validatedField = LoginValidators.safeParse(values);
@@ -4052,3 +4054,144 @@ export const assignToClient = async (
     };
   }
 };
+
+export const contactQuery = async (values: {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}) => {
+  const { name, email, message, subject } = values;
+  try {
+    await db.contact.create({
+      data: {
+        name,
+        email,
+        subject,
+        message,
+      },
+    });
+
+    const emailContent = {
+      name,
+      email,
+      subject,
+      message,
+    };
+
+    // Email sending configuration
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER || "bats3curity.9395@gmail.com",
+        pass: process.env.EMAIL_PASSWORD || "wfffyihhttplludl",
+      },
+    });
+
+    await transporter.sendMail({
+      from: email,
+      to: process.env.EMAIL_USER || "bats3curity.9395@gmail.com",
+      subject: `You have a new inquiry - BAT Security Services INC.`,
+      html: await InquiryEmailHTML(emailContent),
+    });
+
+    return { success: "Message sent successfully" };
+  } catch (error: any) {
+    console.error("Error sending message", error);
+    return {
+      error: `Failed to send message. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const changePayrollStatus = async (
+  baseSalaryId: string,
+  status: string,
+  reason: string
+) => {
+  if (!baseSalaryId) {
+    return { error: "Employee ID is required" };
+  }
+
+  try {
+    await db.baseSalary.update({
+      where: { id: baseSalaryId },
+      data: {
+        status,
+        reason,
+      },
+    });
+
+    return { success: "Payroll status updated successfully" };
+  } catch (error: any) {
+    console.error("Error updating payroll status", error);
+    return {
+      error: `Failed to update payroll status. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export async function updateAccount(
+  data: {
+    firstName: string;
+    lastName: string;
+    profilePicture?: string | null;
+    newPassword?: string;
+    confirmPassword?: string;
+  },
+  employeeId: string
+) {
+  try {
+    // First, find the user account to get its ID
+    const userAccount = await db.userAccount.findFirst({
+      where: { employeeId: employeeId },
+    });
+
+    if (!userAccount) {
+      throw new Error("User account not found");
+    }
+
+    // Update password if provided
+    if (data.newPassword) {
+      const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+      await db.userAccount.update({
+        where: { id: userAccount.id }, // Using id instead of employeeId
+        data: { password: hashedPassword },
+      });
+    }
+
+    // Update employee details
+    const updatedEmployee = await db.employee.update({
+      where: { id: employeeId },
+      data: {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        profilePicture: data.profilePicture || null,
+      },
+      include: { UserAccount: true },
+    });
+
+    return updatedEmployee;
+  } catch (error) {
+    console.error("Error updating account:", error);
+    throw error;
+  }
+}
+
+export async function updateProfileImage(imageUrl: string, employeeId: string) {
+  if (!employeeId) {
+    throw new Error("Unauthorized");
+  }
+
+  try {
+    const updatedEmployee = await db.employee.update({
+      where: { id: employeeId },
+      data: { profilePicture: imageUrl },
+    });
+
+    return updatedEmployee;
+  } catch (error) {
+    console.error("Error updating profile image:", error);
+    throw error;
+  }
+}

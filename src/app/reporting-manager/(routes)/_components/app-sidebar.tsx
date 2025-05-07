@@ -103,7 +103,10 @@ export function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar> & { user: UserWithProps }) {
   const pathname = usePathname();
-  const sidebarItems = getSidebarItems(user?.Employee.Department.name, user?.Employee.JobTitle.name);
+  const sidebarItems = getSidebarItems(
+    user?.Employee.Department.name,
+    user?.Employee.JobTitle.name
+  );
 
   return (
     <Sidebar variant="floating" {...props}>
@@ -123,6 +126,7 @@ export function AppSidebar({
         <NavUser
           name={`${user.Employee.firstName} ${user.Employee.lastName}`}
           email={user.email}
+          image={user.Employee.profilePicture as string}
         />
       </SidebarFooter>
     </Sidebar>

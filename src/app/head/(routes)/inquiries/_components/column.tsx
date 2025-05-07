@@ -2,21 +2,17 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { ChevronsUpDown } from "lucide-react";
-import { CellAction } from "./cell-action";
 
-export type BaseSalaryColumn = {
+export type Column = {
   id: string;
   name: string;
-  licenseNo: string;
-  type: string;
-  amount: string;
-  position: string;
-  department: string;
-  financeStatus: string;
+  email: string;
+  subject: string;
+  message: string;
   createdAt: string;
 };
 
-export const columns: ColumnDef<BaseSalaryColumn>[] = [
+export const columns: ColumnDef<Column>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => {
@@ -25,7 +21,7 @@ export const columns: ColumnDef<BaseSalaryColumn>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="cursor-pointer flex items-center"
         >
-          Employee
+          Name
           <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
         </span>
       );
@@ -35,35 +31,35 @@ export const columns: ColumnDef<BaseSalaryColumn>[] = [
         <div className="flex flex-col">
           <span className="text-sm">{row.original.name}</span>
           <span className="text-muted-foreground text-[12px]">
-            License No.: {row.original.licenseNo}
+            Email Address: {row.original.email}
           </span>
         </div>
       );
     },
   },
   {
-    accessorKey: "type",
+    accessorKey: "subject",
     header: ({ column }) => {
       return (
         <span
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="cursor-pointer flex items-center"
         >
-          Type
+          Subject
           <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
         </span>
       );
     },
   },
   {
-    accessorKey: "positionDesired",
+    accessorKey: "message",
     header: ({ column }) => {
       return (
         <span
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="cursor-pointer flex items-center"
         >
-          Position
+          Message
           <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
         </span>
       );
@@ -71,57 +67,25 @@ export const columns: ColumnDef<BaseSalaryColumn>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex flex-col">
-          <span className="text-sm">{row.original.position}</span>
-          <span className="text-muted-foreground text-[12px]">
-            Department: {row.original.department}
+          <span title={row.original.message} className="text-sm truncate w-60">
+            {row.original.message}
           </span>
         </div>
       );
     },
   },
   {
-    accessorKey: "amount",
+    accessorKey: "createdAt",
     header: ({ column }) => {
       return (
         <span
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="cursor-pointer flex items-center"
         >
-          Base Salary
+          Date Sent
           <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
         </span>
       );
     },
-  },
-  {
-    accessorKey: "financeStatus",
-    header: ({ column }) => {
-      return (
-        <span
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="cursor-pointer flex items-center"
-        >
-          Finance Status
-          <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
-        </span>
-      );
-    },
-    cell: ({ row }) => {
-      return (
-        <div className="flex flex-col">
-          <span className="text-sm">{row.original.financeStatus}</span>
-          <span className="text-muted-foreground text-[12px]">
-            {row.original.financeStatus === "Pending"
-              ? "Waiting for approval"
-              : row.original.financeStatus}
-          </span>
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "actions",
-    header: "",
-    cell: ({ row }) => <CellAction id={row.original.id} />,
   },
 ];

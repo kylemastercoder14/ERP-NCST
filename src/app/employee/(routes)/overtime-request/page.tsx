@@ -43,10 +43,6 @@ const Page = async () => {
       };
     }) || [];
 
-  const now = new Date();
-  const currentHour = now.getHours(); // 24-hour format
-  const isAfter5PM = currentHour >= 17;
-
   return (
     <div>
       <div className="flex items-center justify-between">
@@ -56,8 +52,6 @@ const Page = async () => {
         />
         <Button
           size="sm"
-          disabled={!isAfter5PM}
-          className={!isAfter5PM ? "cursor-not-allowed opacity-50" : ""}
         >
           <Link href={`/employee/overtime-request/create`}>
             + Request Overtime

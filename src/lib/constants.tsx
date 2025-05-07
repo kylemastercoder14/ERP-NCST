@@ -27,16 +27,8 @@ export const SIDEBAR_HEAD_ACCOUNTING = [
         ],
       },
       {
-        title: "Client Payment Management",
-        url: "/head/client-payment-management",
-      },
-      {
-        title: "Collection Tracking",
-        url: "/head/collection-tracking",
-      },
-      {
-        title: "Invoice Generation",
-        url: "/head/invoice-generation",
+        title: "Payroll Approval",
+        url: "/head/payroll-approval",
       },
     ],
   },
@@ -59,10 +51,6 @@ export const SIDEBAR_HEAD_ACCOUNTING = [
       {
         title: "Reports Management",
         url: "/head/reports-management",
-      },
-      {
-        title: "Settings",
-        url: "/head/settings",
       },
       {
         title: "Logs",
@@ -114,10 +102,6 @@ export const SIDEBAR_HEAD_OPERATION = [
       {
         title: "Reports Management",
         url: "/head/reports-management",
-      },
-      {
-        title: "Settings",
-        url: "/head/settings",
       },
       {
         title: "Logs",
@@ -211,10 +195,6 @@ export const SIDEBAR_HEAD_HR = [
         url: "/head/reports-management",
       },
       {
-        title: "Settings",
-        url: "/head/settings",
-      },
-      {
         title: "Logs",
         url: "/head/logs",
       },
@@ -232,8 +212,8 @@ export const SIDEBAR_HEAD_CRM = [
         url: "/head/dashboard",
       },
       {
-        title: "Hotline Management",
-        url: "/head/hotline-management",
+        title: "Inquiries",
+        url: "/head/inquiries",
       },
       {
         title: "Client Management",
@@ -246,10 +226,6 @@ export const SIDEBAR_HEAD_CRM = [
           },
           { title: "Add Client", url: "/head/client-management/create" },
         ],
-      },
-      {
-        title: "Sales Monitoring",
-        url: "/head/sales-monitoring",
       },
       {
         title: "Ticket Management",
@@ -272,10 +248,6 @@ export const SIDEBAR_HEAD_CRM = [
       {
         title: "Reports Management",
         url: "/head/reports-management",
-      },
-      {
-        title: "Settings",
-        url: "/head/settings",
       },
       {
         title: "Logs",
@@ -302,6 +274,12 @@ export const SIDEBAR_HEAD_PROCUREMENT = [
         title: "Supplier Management",
         url: "/head/supplier-management",
       },
+    ],
+  },
+  {
+    title: "Others",
+    url: "#",
+    items: [
       {
         title: "Purchase Request",
         url: "/head/purchase-request",
@@ -310,19 +288,9 @@ export const SIDEBAR_HEAD_PROCUREMENT = [
         title: "Withdrawal Management",
         url: "/head/withdrawal-management",
       },
-    ],
-  },
-  {
-    title: "Others",
-    url: "#",
-    items: [
       {
         title: "Reports Management",
         url: "/head/reports-management",
-      },
-      {
-        title: "Settings",
-        url: "/head/settings",
       },
       {
         title: "Logs",
@@ -350,16 +318,8 @@ export const SIDEBAR_HEAD_INVENTORY = [
         url: "/head/inventory-management",
       },
       {
-        title: "Withdrawal Management",
-        url: "/head/withdrawal-management",
-      },
-      {
         title: "List of Purchase Orders",
         url: "/head/purchase-orders",
-      },
-      {
-        title: "Purchase Request",
-        url: "/head/purchase-request",
       },
     ],
   },
@@ -368,12 +328,16 @@ export const SIDEBAR_HEAD_INVENTORY = [
     url: "#",
     items: [
       {
-        title: "Reports Management",
-        url: "/head/reports-management",
+        title: "Purchase Request",
+        url: "/head/purchase-request",
       },
       {
-        title: "Settings",
-        url: "/head/settings",
+        title: "Withdrawal Management",
+        url: "/head/withdrawal-management",
+      },
+      {
+        title: "Reports Management",
+        url: "/head/reports-management",
       },
       {
         title: "Logs",
