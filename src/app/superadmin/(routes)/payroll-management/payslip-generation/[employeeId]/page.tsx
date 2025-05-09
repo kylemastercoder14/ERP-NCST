@@ -20,6 +20,7 @@ const Page = async (props: {
 	  LeaveManagement: true,
 	  Attendance: true,
 	  ExtraShift: true,
+	  EmployeeLeaveBalance: true
 	},
   });
 
