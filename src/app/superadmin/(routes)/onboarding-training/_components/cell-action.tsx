@@ -158,6 +158,7 @@ export const CellAction: React.FC<CellActionProps> = ({
         description={`Change status from ${trainingStatus} to ${getNextStatus(trainingStatus)}`}
       >
         <ChangeApplicantStatusForm
+          jobTitle={jobTitle}
           employeeId={id}
           trainingStatus={trainingStatus}
           onClose={() => setStatusModalOpen(false)}
