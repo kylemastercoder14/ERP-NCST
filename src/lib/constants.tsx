@@ -30,6 +30,22 @@ export const SIDEBAR_HEAD_ACCOUNTING = [
         title: "Payroll Approval",
         url: "/head/payroll-approval",
       },
+      {
+        title: "Attendance Management",
+        url: "/head/attendance-management",
+      },
+      {
+        title: "Overtime Request",
+        url: "/head/attendance-management/overtime-undertime",
+      },
+      {
+        title: "Leave Management",
+        url: "/head/leave-management",
+      },
+      {
+        title: "Payroll Management",
+        url: "/head/payroll-management/payslip-generation",
+      },
     ],
   },
   {
@@ -84,6 +100,22 @@ export const SIDEBAR_HEAD_OPERATION = [
       {
         title: "Employee Evaluation",
         url: "/head/employee-evaluation",
+      },
+      {
+        title: "Attendance Management",
+        url: "/head/attendance-management",
+      },
+      {
+        title: "Overtime Request",
+        url: "/head/attendance-management/overtime-undertime",
+      },
+      {
+        title: "Leave Management",
+        url: "/head/leave-management",
+      },
+      {
+        title: "Payroll Management",
+        url: "/head/payroll-management/payslip-generation",
       },
     ],
   },
@@ -231,6 +263,22 @@ export const SIDEBAR_HEAD_CRM = [
         title: "Ticket Management",
         url: "/head/ticket-management",
       },
+      {
+        title: "Attendance Management",
+        url: "/head/attendance-management",
+      },
+      {
+        title: "Overtime Request",
+        url: "/head/attendance-management/overtime-undertime",
+      },
+      {
+        title: "Leave Management",
+        url: "/head/leave-management",
+      },
+      {
+        title: "Payroll Management",
+        url: "/head/payroll-management/payslip-generation",
+      },
     ],
   },
   {
@@ -273,6 +321,22 @@ export const SIDEBAR_HEAD_PROCUREMENT = [
       {
         title: "Supplier Management",
         url: "/head/supplier-management",
+      },
+      {
+        title: "Attendance Management",
+        url: "/head/attendance-management",
+      },
+      {
+        title: "Overtime Request",
+        url: "/head/attendance-management/overtime-undertime",
+      },
+      {
+        title: "Leave Management",
+        url: "/head/leave-management",
+      },
+      {
+        title: "Payroll Management",
+        url: "/head/payroll-management/payslip-generation",
       },
     ],
   },
@@ -320,6 +384,22 @@ export const SIDEBAR_HEAD_INVENTORY = [
       {
         title: "List of Purchase Orders",
         url: "/head/purchase-orders",
+      },
+      {
+        title: "Attendance Management",
+        url: "/head/attendance-management",
+      },
+      {
+        title: "Overtime Request",
+        url: "/head/attendance-management/overtime-undertime",
+      },
+      {
+        title: "Leave Management",
+        url: "/head/leave-management",
+      },
+      {
+        title: "Payroll Management",
+        url: "/head/payroll-management/payslip-generation",
       },
     ],
   },

@@ -44,9 +44,27 @@ export const TrainingStatusEmail = ({
   remarks,
 }: TrainingStatusEmailProps) => {
   const getStatusContent = () => {
+    // Common details structure for showing ratings and performance
+    const renderPerformanceDetails = () => (
+      <>
+        {averageRating !== undefined && (
+          <>
+            <Text style={verifyText}>Average Rating:</Text>
+            <Text style={codeText}>{averageRating.toFixed(1)}/5.0</Text>
+          </>
+        )}
+        {overallPerformance && (
+          <>
+            <Text style={verifyText}>Overall Performance:</Text>
+            <Text style={codeText}>{overallPerformance}</Text>
+          </>
+        )}
+      </>
+    );
+
     if (applicationStatus === "Failed") {
       return {
-        title: `${trainingStatus} - Status Update`,
+        title: `${trainingStatus || "Application"} - Status Update`,
         message: "Thank you for participating in our recruitment process.",
         details: (
           <>
@@ -58,6 +76,7 @@ export const TrainingStatusEmail = ({
                 <Text style={remarksText}>{remarks}</Text>
               </>
             )}
+            {renderPerformanceDetails()}
           </>
         ),
         instructions:
@@ -104,6 +123,32 @@ export const TrainingStatusEmail = ({
           ),
           instructions:
             "Please prepare all required documents for onboarding. Smart casual attire is recommended for the orientation.",
+          requirements: (
+            <Section style={requirementsSection}>
+              <Text style={sectionHeaderText}>
+                REQUIRED DOCUMENTS CHECKLIST:
+              </Text>
+              {[
+                "SSS Number/Registration",
+                "PhilHealth Number/Member Data Record",
+                "Pag-IBIG Membership ID/Number",
+                "TIN (Tax Identification Number)",
+                "NBI Clearance (Original)",
+                "Medical Clearance/Health Certificate",
+                "Valid IDs (Original and Photocopy)",
+                "Birth Certificate (PSA Authenticated)",
+                "Diploma/TOR (Photocopy)",
+                "2x2 ID Pictures (White Background)",
+                "Barangay Clearance",
+                "Police Clearance",
+                "Marriage Certificate (if applicable)",
+              ].map((item) => (
+                <Text key={item} style={requirementItemText}>
+                  • {item}
+                </Text>
+              ))}
+            </Section>
+          ),
         };
       case "Orientation":
         return {
@@ -139,18 +184,7 @@ export const TrainingStatusEmail = ({
               <Text style={codeText}>{time}</Text>
               <Text style={verifyText}>Training Location:</Text>
               <Text style={codeText}>{location}</Text>
-              {averageRating && (
-                <>
-                  <Text style={verifyText}>Average Rating:</Text>
-                  <Text style={codeText}>{averageRating.toFixed(1)}/5.0</Text>
-                </>
-              )}
-              {overallPerformance && (
-                <>
-                  <Text style={verifyText}>Overall Performance:</Text>
-                  <Text style={codeText}>{overallPerformance}</Text>
-                </>
-              )}
+              {renderPerformanceDetails()}
             </>
           ),
           instructions:
@@ -169,18 +203,7 @@ export const TrainingStatusEmail = ({
               <Text style={codeText}>{date}</Text>
               <Text style={verifyText}>Reporting Time:</Text>
               <Text style={codeText}>{time}</Text>
-              {averageRating && (
-                <>
-                  <Text style={verifyText}>Average Rating:</Text>
-                  <Text style={codeText}>{averageRating.toFixed(1)}/5.0</Text>
-                </>
-              )}
-              {overallPerformance && (
-                <>
-                  <Text style={verifyText}>Overall Performance:</Text>
-                  <Text style={codeText}>{overallPerformance}</Text>
-                </>
-              )}
+              {renderPerformanceDetails()}
             </>
           ),
           instructions:
@@ -202,6 +225,7 @@ export const TrainingStatusEmail = ({
               <Text style={codeText}>{time}</Text>
               <Text style={verifyText}>Location:</Text>
               <Text style={codeText}>{location}</Text>
+              {renderPerformanceDetails()}
             </>
           ),
           instructions:
@@ -211,7 +235,7 @@ export const TrainingStatusEmail = ({
         return {
           title: "Training Status Update",
           message: "Your training status has been updated.",
-          details: null,
+          details: renderPerformanceDetails(),
           instructions:
             "Please wait for further instructions from our HR department.",
         };
@@ -232,7 +256,7 @@ export const TrainingStatusEmail = ({
                 src="https://firebasestorage.googleapis.com/v0/b/personaapplication-b086b.appspot.com/o/454317114_122094839102469739_5197759434856842856_n-fotor-2025031302019.png?alt=media&token=064d24ca-41f9-4538-8149-fa543d9f4af9"
                 width="60"
                 height="60"
-                alt="Logo"
+                alt="BAT Security Services Logo"
               />
             </Section>
             <Section style={upperSection}>
@@ -242,7 +266,13 @@ export const TrainingStatusEmail = ({
 
               <Section style={verificationSection}>{content.details}</Section>
 
-              <Text style={mainText}>{content.instructions}</Text>
+              {content.requirements && (
+                <Section style={verificationSection}>
+                  {content.requirements}
+                </Section>
+              )}
+
+              <Text style={instructionsText}>{content.instructions}</Text>
             </Section>
 
             <Hr />
@@ -281,34 +311,41 @@ export const TrainingStatusEmailHTML = (props: TrainingStatusEmailProps) =>
   });
 
 // Styles
-const main = { backgroundColor: "#fff", color: "#212121" };
+const main = {
+  backgroundColor: "#fff",
+  color: "#212121",
+  fontFamily:
+    "'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif",
+};
+
 const container = {
   padding: "20px",
   margin: "0 auto",
-  backgroundColor: "#eee",
+  backgroundColor: "#f5f5f5",
+  maxWidth: "600px",
 };
+
 const h1 = {
   color: "#333",
-  fontFamily:
-    "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif",
   fontSize: "20px",
   fontWeight: "bold",
   marginBottom: "15px",
+  textAlign: "center" as const,
 };
+
 const link = {
   color: "#eec80f",
-  fontFamily:
-    "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif",
   fontSize: "14px",
   textDecoration: "underline",
 };
+
 const text = {
   color: "#333",
-  fontFamily:
-    "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif",
   fontSize: "14px",
+  lineHeight: "1.5",
   margin: "24px 0",
 };
+
 const failedText = {
   ...text,
   color: "#d32f2f",
@@ -317,12 +354,14 @@ const failedText = {
   margin: "5px 0",
   textAlign: "center" as const,
 };
+
 const remarksText = {
   ...text,
   color: "#555",
   fontStyle: "italic",
   textAlign: "center" as const,
 };
+
 const imageSection = {
   backgroundColor: "#252f3d",
   display: "flex",
@@ -330,25 +369,89 @@ const imageSection = {
   alignItems: "center",
   justifyContent: "center",
 };
-const coverSection = { backgroundColor: "#fff" };
-const upperSection = { padding: "25px 35px" };
-const lowerSection = { padding: "25px 35px" };
-const footerText = { ...text, fontSize: "12px", padding: "0 20px" };
+
+const coverSection = {
+  backgroundColor: "#fff",
+  borderRadius: "8px",
+  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+};
+
+const upperSection = {
+  padding: "25px 35px",
+};
+
+const lowerSection = {
+  padding: "25px 35px",
+};
+
+const footerText = {
+  ...text,
+  fontSize: "12px",
+  padding: "0 20px",
+  textAlign: "center" as const,
+  marginTop: "20px",
+};
+
 const verifyText = {
   ...text,
   margin: "5px 0",
   fontWeight: "bold",
   textAlign: "center" as const,
 };
+
 const codeText = {
   ...text,
   fontWeight: "bold",
   fontSize: "20px",
-  margin: "5px 0",
+  margin: "5px 0 15px",
   textAlign: "center" as const,
+  color: "#2c7be5",
 };
+
 const verificationSection = {
   margin: "20px 0",
+  backgroundColor: "#f9f9f9",
+  padding: "15px",
+  borderRadius: "4px",
 };
-const mainText = { ...text, marginBottom: "14px" };
-const cautionText = { ...text, margin: "0px" };
+
+const mainText = {
+  ...text,
+  marginBottom: "14px",
+};
+
+const instructionsText = {
+  ...text,
+  backgroundColor: "#fff8e1",
+  padding: "15px",
+  borderRadius: "4px",
+  borderLeft: "4px solid #ffc107",
+};
+
+const cautionText = {
+  ...text,
+  margin: "0px",
+  fontStyle: "italic",
+};
+
+const requirementsSection = {
+  margin: "20px 0",
+  backgroundColor: "#f0f7ff",
+  padding: "15px",
+  borderRadius: "4px",
+};
+
+const sectionHeaderText = {
+  ...text,
+  fontWeight: "bold",
+  fontSize: "16px",
+  marginBottom: "10px",
+  textAlign: "center" as const,
+  color: "#0056b3",
+};
+
+const requirementItemText = {
+  ...text,
+  margin: "5px 0",
+  paddingLeft: "10px",
+};

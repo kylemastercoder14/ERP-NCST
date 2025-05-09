@@ -11,28 +11,57 @@ const Page = async () => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { user } = await useUser();
   const branch = user?.Employee.branch;
-  const data = await db.employee.findMany({
-    where: {
-      isNewEmployee: false,
-      branch,
-      BaseSalary: {
-        some: {
-          amount: { gt: 0 },
-          status: "Approved",
+  const departmentSession = user?.Employee.Department.name;
+
+  let data;
+  if (departmentSession === "Human Resource") {
+    data = await db.employee.findMany({
+      where: {
+        isNewEmployee: false,
+        branch,
+        BaseSalary: {
+          some: {
+            amount: { gt: 0 },
+            status: "Approved",
+          },
         },
       },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    include: {
-      BaseSalary: true,
-      Department: true,
-      JobTitle: true,
-      GovernmentMandatories: true,
-      PaySlip: true,
-    },
-  });
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        BaseSalary: true,
+        Department: true,
+        JobTitle: true,
+        GovernmentMandatories: true,
+        PaySlip: true,
+      },
+    });
+  } else {
+    data = await db.employee.findMany({
+      where: {
+        isNewEmployee: false,
+        branch,
+        id: user?.employeeId,
+        BaseSalary: {
+          some: {
+            amount: { gt: 0 },
+            status: "Approved",
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        BaseSalary: true,
+        Department: true,
+        JobTitle: true,
+        GovernmentMandatories: true,
+        PaySlip: true,
+      },
+    });
+  }
 
   const formattedData: PayslipGenerationColumn[] =
     data.map((item) => {

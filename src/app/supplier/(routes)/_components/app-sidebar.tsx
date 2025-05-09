@@ -123,6 +123,8 @@ export function AppSidebar({
         <NavUser
           name={user.name}
           email={user.email}
+          image={user.logo as string}
+          userLogged="Supplier"
         />
       </SidebarFooter>
     </Sidebar>

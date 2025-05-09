@@ -149,22 +149,21 @@ export function CustomerServiceTrainingForm({
         return;
       }
 
-      const evaluationData = {
-        average: calculateAverage(),
-        summary: generateSummary(),
-        comments: comment,
-        ratings: evaluations.map((e) => ({
-          rating: e.rating || 0,
-          comments: "",
-        })),
-      };
-
       const res = await sendTrainingStatus(
         currentStatus,
         employeeId,
         status,
-        "",
-        JSON.stringify(evaluationData)
+        undefined,
+        undefined,
+        {
+          average: calculateAverage(),
+          summary: generateSummary(),
+          comments: comment,
+          ratings: evaluations.map((e) => ({
+            rating: e.rating || 0,
+            comments: "",
+          })),
+        }
       );
 
       if (res.error) {

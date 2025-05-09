@@ -11,6 +11,7 @@ export type ExtraShiftColumn = {
   date: string;
   type: string;
   timeIn: string;
+  departmentSession: string;
   timeOut: string;
   status: string;
   createdAt: string;
@@ -134,7 +135,7 @@ export const columns: ColumnDef<ExtraShiftColumn>[] = [
     accessorKey: "actions",
     header: "",
     cell: ({ row }) => (
-      <CellAction id={row.original.id} status={row.original.status} />
+      <CellAction id={row.original.id} status={row.original.status} departmentSession={row.original.departmentSession} />
     ),
   },
 ];

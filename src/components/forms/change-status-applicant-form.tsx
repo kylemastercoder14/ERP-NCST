@@ -13,16 +13,18 @@ import { Button } from "@/components/ui/button";
 import CustomFormField from "@/components/global/custom-formfield";
 import { FormFieldType } from "@/lib/constants";
 import { sendEmployeeStatus } from "@/actions";
-import { TrainingStatus } from '@/types';
+import { TrainingStatus } from "@/types";
 
 const ChangeApplicantStatusForm = ({
   employeeId,
   onClose,
   trainingStatus,
+  jobTitle,
 }: {
   employeeId: string;
   onClose: () => void;
   trainingStatus: TrainingStatus;
+  jobTitle: string;
 }) => {
   const router = useRouter();
   const form = useForm<z.infer<typeof SendApplicantStatusValidators>>({
@@ -37,7 +39,14 @@ const ChangeApplicantStatusForm = ({
     values: z.infer<typeof SendApplicantStatusValidators>
   ) => {
     try {
-      const res = await sendEmployeeStatus(values, trainingStatus, employeeId);
+      const res = await sendEmployeeStatus(
+        values,
+        trainingStatus,
+        employeeId,
+        undefined, // clientId (not needed for status changes)
+        undefined, // branch (not needed for status changes)
+        jobTitle // pass jobTitle here
+      );
 
       if (res.success) {
         toast.success(res.success);

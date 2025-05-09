@@ -8,6 +8,7 @@ import { LedgerColumn } from "./_components/column";
 import { format } from "date-fns";
 import LedgerClient from "./_components/client";
 import ExportToExcel from "./_components/export-to-excel";
+import ImportFromExcel from './_components/import-from-excel';
 
 const Page = async () => {
   const data = await db.transaction.findMany({
@@ -57,6 +58,7 @@ const Page = async () => {
         />
         <div className="flex items-center gap-2">
           <ExportToExcel data={formattedData} />
+          <ImportFromExcel />
           <Button size="sm">
             <Link href={`/head/sales-management/create`}>
               + Record new transaction

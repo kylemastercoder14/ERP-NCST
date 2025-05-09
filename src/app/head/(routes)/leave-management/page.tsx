@@ -7,21 +7,47 @@ import db from "@/lib/db";
 import { LeaveManagementColumn } from "./_components/column";
 import { format } from "date-fns";
 import ApplicantClient from "./_components/client";
+import { useUser } from "@/hooks/use-user";
 
 const Page = async () => {
-  const data = await db.leaveManagement.findMany({
-    orderBy: {
-      createdAt: "desc",
-    },
-    include: {
-      Employee: true,
-      ApprovedBy: {
-        include: {
-          Employee: true,
-        }
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { user } = await useUser();
+  const departmentSession = user?.Employee.Department.name;
+
+  let data;
+
+  if (departmentSession === "Human Resource") {
+    data = await db.leaveManagement.findMany({
+      orderBy: {
+        createdAt: "desc",
       },
-    },
-  });
+      include: {
+        Employee: true,
+        ApprovedBy: {
+          include: {
+            Employee: true,
+          },
+        },
+      },
+    });
+  }else {
+    data = await db.leaveManagement.findMany({
+      where: {
+        employeeId: user?.employeeId,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        Employee: true,
+        ApprovedBy: {
+          include: {
+            Employee: true,
+          },
+        },
+      },
+    });
+  }
 
   const formattedData: LeaveManagementColumn[] =
     data.map((item) => {

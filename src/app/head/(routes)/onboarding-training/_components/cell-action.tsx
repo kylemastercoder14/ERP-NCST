@@ -46,6 +46,25 @@ interface CellActionProps {
   assessor: string;
 }
 
+const getStatusFlow = (jobTitle: string): TrainingStatus[] => {
+  if (jobTitle === "Head Department") {
+    return [
+      "Initial Interview",
+      "Final Interview",
+      // Head Department stops here - no training or deployment
+    ];
+  } else {
+    return [
+      "Initial Interview",
+      "Final Interview",
+      "Orientation",
+      "Physical Training",
+      "Customer Service Training",
+      "Deployment",
+    ];
+  }
+};
+
 export const CellAction: React.FC<CellActionProps> = ({
   id,
   name,
@@ -56,6 +75,7 @@ export const CellAction: React.FC<CellActionProps> = ({
   assessor,
 }) => {
   const router = useRouter();
+  const statusFlow = getStatusFlow(jobTitle);
   const [loading, setLoading] = React.useState(false);
   const [statusModalOpen, setStatusModalOpen] = React.useState(false);
   const [physicalTrainingModalOpen, setPhysicalTrainingModalOpen] =
@@ -89,7 +109,8 @@ export const CellAction: React.FC<CellActionProps> = ({
         "Deployment",
         id,
         selectedClient,
-        branch
+        branch,
+        jobTitle // Pass jobTitle to the function
       );
 
       if (res.success) {
@@ -105,16 +126,6 @@ export const CellAction: React.FC<CellActionProps> = ({
       setLoading(false);
     }
   };
-
-  // Status flow in correct order
-  const statusFlow: TrainingStatus[] = [
-    "Initial Interview",
-    "Final Interview",
-    "Orientation",
-    "Physical Training",
-    "Customer Service Training",
-    "Deployment",
-  ];
 
   const getNextStatus = (currentStatus: TrainingStatus): TrainingStatus => {
     const currentIndex = statusFlow.indexOf(currentStatus);
@@ -134,6 +145,14 @@ export const CellAction: React.FC<CellActionProps> = ({
       case "Deployment":
         setDeploymentModalOpen(true);
         break;
+      case "Final Interview":
+        if (jobTitle === "Head Department") {
+          // Special handling for Head Department final interview
+          setStatusModalOpen(true);
+        } else {
+          setStatusModalOpen(true);
+        }
+        break;
       default:
         setStatusModalOpen(true);
     }
@@ -142,6 +161,12 @@ export const CellAction: React.FC<CellActionProps> = ({
   const getActionLabel = () => {
     const nextStatus = getNextStatus(trainingStatus);
 
+    if (
+      trainingStatus === "Final Interview" &&
+      jobTitle === "Head Department"
+    ) {
+      return "Complete Hiring Process";
+    }
     if (trainingStatus === "Deployment") {
       return "Assign to Client";
     }
@@ -160,6 +185,7 @@ export const CellAction: React.FC<CellActionProps> = ({
         <ChangeApplicantStatusForm
           employeeId={id}
           trainingStatus={trainingStatus}
+          jobTitle={jobTitle}
           onClose={() => setStatusModalOpen(false)}
         />
       </Modal>

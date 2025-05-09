@@ -79,7 +79,68 @@ const PayslipGenerationForm = ({
   const philhealth = baseSalary * 0.035;
   const pagibig = baseSalary * 0.03;
   const tin = baseSalary * 0.1;
-  const totalDeductions = sss + philhealth + pagibig + tin;
+
+  // Calculate absent days - NEW IMPLEMENTATION
+  const today = new Date();
+  const currentMonth = today.getMonth();
+
+  // Get all dates from 1st to today's date in the month
+  const datesPassedInMonth = Array.from(
+    { length: today.getDate() },
+    (_, i) => new Date(currentYear, currentMonth, i + 1)
+  );
+
+  // Filter out weekends (optional - adjust based on your work week)
+  const workDaysPassed = datesPassedInMonth.filter(
+    (date) => date.getDay() !== 0 && date.getDay() !== 6 // 0 = Sunday, 6 = Saturday
+  );
+
+  // Get dates employee was present (from attendance records)
+  const presentDates =
+    initialData?.Attendance.map((att) => new Date(att.date)) || [];
+
+  // Calculate absences by checking which work days passed have no attendance
+  let absentDays = 0;
+  workDaysPassed.forEach((workDay) => {
+    const wasPresent = presentDates.some((presentDate) =>
+      isSameDate(presentDate, workDay)
+    );
+
+    const isHoliday = [...regularHolidays, ...specialHolidays].some((holiday) =>
+      isSameDate(holiday, workDay)
+    );
+
+    if (!wasPresent && !isHoliday) {
+      absentDays++;
+    }
+  });
+
+  const absentDeduction = absentDays * dailyRate;
+
+  // Calculate undertime (same as before)
+  let undertimeHours = 0;
+  const standardWorkingHours = 8;
+  const hourlyRate = dailyRate / standardWorkingHours;
+
+  initialData?.Attendance.forEach((att) => {
+    if (att.timeIn && att.timeOut) {
+      const timeIn = new Date(att.timeIn);
+      const timeOut = new Date(att.timeOut);
+      const hoursWorked =
+        (timeOut.getTime() - timeIn.getTime()) / (1000 * 60 * 60);
+
+      if (hoursWorked < standardWorkingHours) {
+        undertimeHours += standardWorkingHours - hoursWorked;
+      }
+    }
+  });
+
+  const undertimeDeduction = undertimeHours * hourlyRate;
+
+  // Update total deductions to include absent and undertime deductions
+  const totalDeductions =
+    sss + philhealth + pagibig + tin + absentDeduction + undertimeDeduction;
+
   // Find the leave balance for the current year
   const currentYearLeaveBalance = initialData?.EmployeeLeaveBalance.find(
     (balance) => balance.year === currentYear
@@ -183,7 +244,9 @@ const PayslipGenerationForm = ({
             </div>
             <div className="grid grid-cols-2 gap-5">
               <p className="font-semibold">Days Worked: </p>
-              <p>{initialData?.Attendance.length}</p>
+              <p>
+                {presentDates.length} of {workDaysPassed.length} days
+              </p>
             </div>
           </div>
           <div className="space-y-2">
@@ -265,7 +328,18 @@ const PayslipGenerationForm = ({
                 {numberOfPaidLeaves !== 1 && "s"}): ₱
                 {parseFloat(leavePay.toFixed(2)).toLocaleString()}
               </TableCell>
+              <TableCell>
+                Absent Deduction ({absentDays} day
+                {absentDays !== 1 && "s"}): ₱
+                {parseFloat(absentDeduction.toFixed(2)).toLocaleString()}
+              </TableCell>
+            </TableRow>
+            <TableRow>
               <TableCell></TableCell>
+              <TableCell>
+                Undertime Deduction ({undertimeHours.toFixed(1)} hrs): ₱
+                {parseFloat(undertimeDeduction.toFixed(2)).toLocaleString()}
+              </TableCell>
             </TableRow>
             <TableRow>
               <TableCell>

@@ -33,12 +33,14 @@ export function NavUser({
   visibleNotification,
   branch,
   image,
+  userLogged,
 }: {
   name: string;
   email: string;
   visibleNotification?: boolean;
   branch?: string;
   image?: string;
+  userLogged?: string;
 }) {
   const router = useRouter();
   const { isMobile } = useSidebar();
@@ -50,7 +52,13 @@ export function NavUser({
     try {
       await logoutUser();
       toast.success("Logged out successfully");
-      router.push("/sign-in");
+      if (userLogged === "Client") {
+        router.push("/client/sign-in");
+      } else if (userLogged === "Supplier") {
+        router.push("/supplier/sign-in");
+      } else {
+        router.push("/sign-in");
+      }
     } catch (error) {
       console.error(error);
     }
@@ -132,22 +140,34 @@ export function NavUser({
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem onClick={() => router.push("/my-account")}>
+                <DropdownMenuItem
+                  onClick={() => {
+                    if (userLogged === "Client") {
+                      router.push("/client/my-account");
+                    } else if (userLogged === "Supplier") {
+                      router.push("/supplier/my-account");
+                    } else {
+                      router.push("/my-account");
+                    }
+                  }}
+                >
                   Account
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => router.push("/head/notifications")}
-                >
-                  <span>Notifications</span>
-                  {visibleNotification && notifications.length > 0 && (
-                    <Badge
-                      variant="destructive"
-                      className="rounded-full ml-auto"
-                    >
-                      {notifications.length}
-                    </Badge>
-                  )}
-                </DropdownMenuItem>
+                {userLogged === "Managerial" && (
+                  <DropdownMenuItem
+                    onClick={() => router.push("/head/notifications")}
+                  >
+                    <span>Notifications</span>
+                    {visibleNotification && notifications.length > 0 && (
+                      <Badge
+                        variant="destructive"
+                        className="rounded-full ml-auto"
+                      >
+                        {notifications.length}
+                      </Badge>
+                    )}
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => setOpen(true)}>

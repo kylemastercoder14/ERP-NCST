@@ -42,6 +42,17 @@ export function LoginForm() {
         toast.error(res.error);
       } else {
         toast.success("Successfully logged in your account");
+
+        // First check if password is still auto-generated
+        if (!res.isPasswordHashed) {
+          // Redirect to my-account page to change password
+          setTimeout(() => {
+            router.push("/my-account");
+          }, 1000);
+          return;
+        }
+
+        // If password is already hashed, proceed with normal role-based routing
         if (res.user?.Employee.JobTitle.name === "Regular Employee") {
           setTimeout(() => {
             router.push("/employee/dashboard");

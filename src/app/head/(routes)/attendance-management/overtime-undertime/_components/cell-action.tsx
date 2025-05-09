@@ -14,14 +14,23 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import AlertModal from "@/components/ui/alert-modal";
 import React from "react";
-import { deleteExtraShift, approveExtraShift, rejectExtraShift } from "@/actions";
+import {
+  deleteExtraShift,
+  approveExtraShift,
+  rejectExtraShift,
+} from "@/actions";
 
 interface CellActionProps {
   id: string;
   status: string;
+  departmentSession?: string;
 }
 
-export const CellAction: React.FC<CellActionProps> = ({ id, status }) => {
+export const CellAction: React.FC<CellActionProps> = ({
+  id,
+  status,
+  departmentSession,
+}) => {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -114,18 +123,20 @@ export const CellAction: React.FC<CellActionProps> = ({ id, status }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          {(status === "Pending" || status === "Rejected") && (
+          {(status === "Pending" &&
+            departmentSession === "Reporting Manager") && (
             <DropdownMenuItem onClick={() => setApproveModal(true)}>
               <Check className="w-4 h-4 mr-2" />
               Approve
             </DropdownMenuItem>
           )}
-          {status === "Pending" && (
-            <DropdownMenuItem onClick={() => setRejectModal(true)}>
-              <X className="w-4 h-4 mr-2" />
-              Reject
-            </DropdownMenuItem>
-          )}
+          {status === "Pending" &&
+            departmentSession === "Reporting Manager" && (
+              <DropdownMenuItem onClick={() => setRejectModal(true)}>
+                <X className="w-4 h-4 mr-2" />
+                Reject
+              </DropdownMenuItem>
+            )}
           <DropdownMenuSeparator />
           <DropdownMenuItem disabled onClick={() => setOpen(true)}>
             <Trash className="w-4 h-4 mr-2" />

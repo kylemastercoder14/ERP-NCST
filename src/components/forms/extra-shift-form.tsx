@@ -46,6 +46,9 @@ const ExtraShiftForm = ({
         if (res.success) {
           toast.success(res.success);
           router.back();
+          setTimeout(() => {
+            router.refresh();
+          }, 1000);
         } else {
           toast.error(res.error);
         }
@@ -54,6 +57,9 @@ const ExtraShiftForm = ({
         if (res.success) {
           toast.success(res.success);
           router.back();
+          setTimeout(() => {
+            router.refresh();
+          }, 1000);
         } else {
           toast.error(res.error);
         }

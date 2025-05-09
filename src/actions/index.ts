@@ -50,7 +50,7 @@ import {
 import { useClient } from "@/hooks/use-client";
 import { TrainingStatus } from "@/types";
 import { ForgotPasswordEmailHTML } from "@/components/email-templates/forgot-password";
-import { InquiryEmailHTML } from "../components/email-templates/contact";
+import { InquiryEmailHTML } from "@/components/email-templates/contact";
 
 export const loginAccount = async (values: z.infer<typeof LoginValidators>) => {
   const validatedField = LoginValidators.safeParse(values);
@@ -81,8 +81,22 @@ export const loginAccount = async (values: z.infer<typeof LoginValidators>) => {
       return { error: "No user account found." };
     }
 
-    if (user.password !== password) {
-      return { error: "Invalid password" };
+    // Check if password is hashed (bcrypt hashes start with '$2b$' or '$2a$')
+    const isPasswordHashed =
+      user.password.startsWith("$2b$") || user.password.startsWith("$2a$");
+
+    // For hashed passwords: compare using bcrypt
+    if (isPasswordHashed) {
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return { error: "Invalid password" };
+      }
+    }
+    // For non-hashed passwords (auto-generated): direct comparison
+    else {
+      if (user.password !== password) {
+        return { error: "Invalid password" };
+      }
     }
 
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
@@ -105,7 +119,8 @@ export const loginAccount = async (values: z.infer<typeof LoginValidators>) => {
       path: "/", // Adjust path as needed
     });
 
-    return { token: jwt, user: user };
+    // Return isPasswordHashed flag along with other data
+    return { token: jwt, user: user, isPasswordHashed };
   } catch (error: any) {
     console.error("Error logging in user", error);
     return {
@@ -238,8 +253,22 @@ export const supplierLoginAccount = async (
       return { error: "No user account found." };
     }
 
-    if (user.password !== password) {
-      return { error: "Invalid password" };
+    // Check if password is hashed (bcrypt hashes start with '$2b$' or '$2a$')
+    const isPasswordHashed =
+      user.password.startsWith("$2b$") || user.password.startsWith("$2a$");
+
+    // For hashed passwords: compare using bcrypt
+    if (isPasswordHashed) {
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return { error: "Invalid password" };
+      }
+    }
+    // For non-hashed passwords (auto-generated): direct comparison
+    else {
+      if (user.password !== password) {
+        return { error: "Invalid password" };
+      }
     }
 
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
@@ -262,7 +291,7 @@ export const supplierLoginAccount = async (
       path: "/", // Adjust path as needed
     });
 
-    return { token: jwt, user: user };
+    return { token: jwt, user: user, isPasswordHashed };
   } catch (error: any) {
     console.error("Error logging in user", error);
     return {
@@ -294,8 +323,22 @@ export const clientLoginAccount = async (
       return { error: "No user account found." };
     }
 
-    if (user.password !== password) {
-      return { error: "Invalid password" };
+    // Check if password is hashed (bcrypt hashes start with '$2b$' or '$2a$')
+    const isPasswordHashed =
+      user.password.startsWith("$2b$") || user.password.startsWith("$2a$");
+
+    // For hashed passwords: compare using bcrypt
+    if (isPasswordHashed) {
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return { error: "Invalid password" };
+      }
+    }
+    // For non-hashed passwords (auto-generated): direct comparison
+    else {
+      if (user.password !== password) {
+        return { error: "Invalid password" };
+      }
     }
 
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
@@ -318,7 +361,7 @@ export const clientLoginAccount = async (
       path: "/", // Adjust path as needed
     });
 
-    return { token: jwt, user: user };
+    return { token: jwt, user: user, isPasswordHashed };
   } catch (error: any) {
     console.error("Error logging in user", error);
     return {
@@ -534,7 +577,8 @@ export const sendEmployeeStatus = async (
   currentStatus: TrainingStatus,
   employeeId: string,
   clientId?: string,
-  branch?: string
+  branch?: string,
+  jobTitle?: string
 ) => {
   const validatedField = SendApplicantStatusValidators.safeParse(values);
 
@@ -560,16 +604,19 @@ export const sendEmployeeStatus = async (
     return { error: "Employee not found or missing user account" };
   }
 
-  // Correct status progression
-  const statusFlow: TrainingStatus[] = [
-    "Initial Interview",
-    "Final Interview",
-    "Orientation",
-    "Physical Training",
-    "Customer Service Training",
-    "Deployment",
-    "Deployed",
-  ];
+  // Define status flow based on job title
+  const statusFlow: TrainingStatus[] =
+    jobTitle !== "Regular Employee"
+      ? ["Initial Interview", "Final Interview", "Deployed"]
+      : [
+          "Initial Interview",
+          "Final Interview",
+          "Orientation",
+          "Physical Training",
+          "Customer Service Training",
+          "Deployment",
+          "Deployed",
+        ];
 
   // Validate current status exists in flow
   const currentIndex = statusFlow.indexOf(currentStatus);
@@ -577,17 +624,24 @@ export const sendEmployeeStatus = async (
     return { error: "Invalid current status" };
   }
 
-  // Get next status
-  const getNextStatus = () => {
-    return statusFlow[currentIndex + 1] || currentStatus;
-  };
-
-  // Determine new status
-  let newTrainingStatus: TrainingStatus = currentStatus;
+  // Determine new status with proper type assertion
+  let newTrainingStatus: TrainingStatus;
   if (status === "Passed") {
-    newTrainingStatus = getNextStatus();
+    // Special case for Head Department - skip to Deployed after Final Interview
+    if (
+      jobTitle !== "Regular Employee" &&
+      currentStatus === "Final Interview"
+    ) {
+      newTrainingStatus = "Deployed";
+    } else {
+      // For all other cases, move to next status in flow
+      newTrainingStatus = statusFlow[currentIndex + 1] || currentStatus;
+    }
   } else if (status === "Failed") {
+    // Failed status always goes to Deployed
     newTrainingStatus = "Deployed";
+  } else {
+    newTrainingStatus = currentStatus;
   }
 
   // Calculate date 2 days from now
@@ -598,11 +652,12 @@ export const sendEmployeeStatus = async (
   const updateData = {
     status,
     trainingStatus: newTrainingStatus,
-    ...(newTrainingStatus === "Deployed" &&
-      status === "Passed" && {
-        clientId,
-        isNewEmployee: false,
-      }),
+    ...(newTrainingStatus === "Deployed" && {
+      isNewEmployee: false,
+      // Only assign client if not Head Department and in Deployment status
+      ...(jobTitle !== "Head Department" &&
+        currentStatus === "Deployment" && { clientId }),
+    }),
     updatedAt: new Date(),
   };
 
@@ -864,7 +919,8 @@ export const createApplicant = async (
 
 export const changePurchaseRequestStatusSupplier = async (
   id: string,
-  status: string
+  status: string,
+  reason?: string
 ) => {
   const { user } = await useUser();
   if (!id) {
@@ -918,6 +974,7 @@ export const changePurchaseRequestStatusSupplier = async (
         where: { id },
         data: {
           supplierStatus: status,
+          supplierRemark: reason,
         },
       });
     }
@@ -4216,6 +4273,122 @@ export async function updateProfileImage(imageUrl: string, employeeId: string) {
     return updatedEmployee;
   } catch (error) {
     console.error("Error updating profile image:", error);
+    throw error;
+  }
+}
+
+export async function updateClientAccount(
+  data: {
+    name: string;
+    email: string;
+    logo?: string | null;
+    address?: string;
+    contactNo?: string;
+    newPassword?: string;
+  },
+  clientId: string
+) {
+  try {
+    // Update password if provided
+    if (data.newPassword) {
+      const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+      await db.client.update({
+        where: { id: clientId },
+        data: { password: hashedPassword },
+      });
+    }
+
+    // Update client details
+    const updatedClient = await db.client.update({
+      where: { id: clientId },
+      data: {
+        name: data.name,
+        email: data.email,
+        logo: data.logo || null,
+        address: data.address,
+        contactNo: data.contactNo,
+      },
+    });
+
+    return updatedClient;
+  } catch (error) {
+    console.error("Error updating account:", error);
+    throw error;
+  }
+}
+
+export async function updateClientLogo(imageUrl: string, clientId: string) {
+  if (!clientId) {
+    throw new Error("Unauthorized");
+  }
+
+  try {
+    const updatedClient = await db.client.update({
+      where: { id: clientId },
+      data: { logo: imageUrl },
+    });
+
+    return updatedClient;
+  } catch (error) {
+    console.error("Error updating logo:", error);
+    throw error;
+  }
+}
+
+export async function updateSupplierLogo(imageUrl: string, supplierId: string) {
+  if (!supplierId) {
+    throw new Error("Unauthorized");
+  }
+
+  try {
+    const updatedSupplier = await db.supplier.update({
+      where: { id: supplierId },
+      data: { logo: imageUrl },
+    });
+
+    return updatedSupplier;
+  } catch (error) {
+    console.error("Error updating logo:", error);
+    throw error;
+  }
+}
+
+export async function updateSupplierAccount(
+  data: {
+    name: string;
+    email: string;
+    logo?: string | null;
+    address?: string;
+    contactNo?: string;
+    newPassword?: string;
+  },
+  supplierId: string
+) {
+  try {
+    // Update password if provided
+    if (data.newPassword) {
+      const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+      await db.supplier.update({
+        where: { id: supplierId },
+        data: { password: hashedPassword },
+      });
+    }
+
+    // Update supplier details
+    const updatedSupplier = await db.supplier.update({
+      where: { id: supplierId },
+      data: {
+        name: data.name,
+        email: data.email,
+        logo: data.logo || null,
+        address: data.address,
+        contactNo: data.contactNo,
+      },
+    });
+
+    return updatedSupplier;
+  } catch (error) {
+    console.error("Error updating account:", error);
     throw error;
   }
 }
