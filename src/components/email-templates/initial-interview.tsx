@@ -18,6 +18,9 @@ interface InitialInterviewDetailsProps {
   email: string;
   date: string;
   time: string;
+  department: string;
+  jobTitle: string;
+  branch: string;
   location: string;
 }
 
@@ -25,6 +28,9 @@ export const InitialInterviewDetails = ({
   email,
   date,
   time,
+  department,
+  jobTitle,
+  branch,
   location,
 }: InitialInterviewDetailsProps) => (
   <Html>
@@ -71,7 +77,11 @@ export const InitialInterviewDetails = ({
               <Text style={formText}>
                 Please complete the employee form by clicking the button below:
               </Text>
-              <Link href={"https://bat-security-services-inc.vercel.app/new-applicant"} target='_blank' style={button}>
+              <Link
+                href={`https://bat-security-services-inc.vercel.app/new-applicant?department=${department}&jobTitle=${jobTitle}&branch=${branch}&email=${email}`}
+                target="_blank"
+                style={button}
+              >
                 Complete Employee Form
               </Link>
               <Text style={noteText}>

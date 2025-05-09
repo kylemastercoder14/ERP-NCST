@@ -1,6 +1,6 @@
 "use client";
 
-import { JobPosting } from "@prisma/client";
+import { Department, JobPosting, JobTitle } from "@prisma/client";
 import { format } from "date-fns";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -19,16 +19,14 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller } from "react-hook-form";
 import * as z from "zod";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { toast } from "sonner";
 import { submitApplication } from "@/actions";
 import { uploadFile } from "@/lib/upload";
+
+type JobPostingWithDepartment = JobPosting & {
+  department: Department | null;
+  JobTitle: JobTitle | null;
+};
 
 // Form validation schema
 const applyFormSchema = z.object({
@@ -36,6 +34,8 @@ const applyFormSchema = z.object({
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
   branch: z.string().min(1, "Branch is required"),
+  department: z.string().optional(),
+  jobPosition: z.string().optional(),
   resume: z.any().refine((files) => files.length > 0, "Resume is required"),
 });
 
@@ -45,10 +45,12 @@ const ApplyNowForm = ({
   jobTitle,
   onClose,
   jobPostId,
+  jobPost,
 }: {
   jobTitle: string;
   onClose: () => void;
   jobPostId: string;
+  jobPost: JobPostingWithDepartment;
 }) => {
   const {
     register,
@@ -58,6 +60,15 @@ const ApplyNowForm = ({
     reset,
   } = useForm<ApplyFormValues>({
     resolver: zodResolver(applyFormSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      branch: jobPost.branch || "",
+      jobPosition: jobPost?.JobTitle?.id || "",
+      department: jobPost?.department?.id || "",
+      resume: null,
+    },
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -82,10 +93,15 @@ const ApplyNowForm = ({
 
       const res = await submitApplication(
         {
-          ...data,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          branch: data.branch,
+          jobTitle: jobPost.JobTitle?.id ?? "",
+          department: jobPost.department?.id ?? "",
           resume: uploadedUrl.url,
         },
-        jobPostId as string
+        jobPostId
       );
 
       if (res.success) {
@@ -124,8 +140,8 @@ const ApplyNowForm = ({
           Application Submitted!
         </h3>
         <p className="text-sm text-gray-500">
-          Thank you for applying to BAT Security Services INC. We&apos;ll review your
-          application and get back to you soon.
+          Thank you for applying to BAT Security Services INC. We&apos;ll review
+          your application and get back to you soon.
         </p>
         <div className="mt-6">
           <Button
@@ -148,6 +164,16 @@ const ApplyNowForm = ({
         Apply for {jobTitle}
       </h2>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 mt-4">
+        <input
+          type="hidden"
+          {...register("jobPosition")}
+          value={jobPost.JobTitle?.id ?? ""}
+        />
+        <input
+          type="hidden"
+          {...register("department")}
+          value={jobPost.department?.id ?? ""}
+        />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <Label htmlFor="firstName">First Name</Label>
@@ -193,21 +219,39 @@ const ApplyNowForm = ({
           )}
         </div>
 
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div>
+            <Label htmlFor="department">Department</Label>
+            <Input
+              id="department"
+              value={jobPost.department?.name || ""}
+              disabled
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label htmlFor="jobPosition">Job Position</Label>
+            <Input
+              id="jobPosition"
+              value={jobPost.JobTitle?.name || ""}
+              disabled
+              className="mt-1"
+            />
+          </div>
+        </div>
         <div>
           <Label htmlFor="branch">Branch</Label>
           <Controller
             name="branch"
             control={control}
             render={({ field }) => (
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Select a branch" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Cavite">Cavite</SelectItem>
-                  <SelectItem value="Batangas">Batangas</SelectItem>
-                </SelectContent>
-              </Select>
+              <Input
+                id="branch"
+                {...field}
+                placeholder="Enter branch"
+                className="mt-1"
+                disabled
+              />
             )}
           />
           {errors.branch && (
@@ -286,7 +330,7 @@ const ApplyNowForm = ({
   );
 };
 
-const JobPost = ({ jobPosts }: { jobPosts: JobPosting[] }) => {
+const JobPost = ({ jobPosts }: { jobPosts: JobPostingWithDepartment[] }) => {
   const sortedJobs = [...jobPosts].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
@@ -295,7 +339,8 @@ const JobPost = ({ jobPosts }: { jobPosts: JobPosting[] }) => {
     Record<string, boolean>
   >({});
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedJob, setSelectedJob] = useState<JobPosting | null>(null);
+  const [selectedJob, setSelectedJob] =
+    useState<JobPostingWithDepartment | null>(null);
   const [isApplyNowModalOpen, setIsApplyNowModalOpen] = useState(false);
 
   const toggleDescription = (jobId: string) => {
@@ -305,7 +350,7 @@ const JobPost = ({ jobPosts }: { jobPosts: JobPosting[] }) => {
     }));
   };
 
-  const openModal = (job: JobPosting) => {
+  const openModal = (job: JobPostingWithDepartment) => {
     setSelectedJob(job);
     setIsModalOpen(true);
   };
@@ -443,6 +488,7 @@ const JobPost = ({ jobPosts }: { jobPosts: JobPosting[] }) => {
               onClose={() => setIsApplyNowModalOpen(false)}
               jobTitle={selectedJob.title}
               jobPostId={selectedJob.id}
+              jobPost={selectedJob}
             />
           )}
         </Modal>

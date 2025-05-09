@@ -279,6 +279,9 @@ export const JobPostValidators = z.object({
   attachment: z.string().min(1, { message: "Attachment is required" }),
   description: z.string().min(1, { message: "Description is required" }),
   financialStatus: z.string().optional(),
+  department: z.string().min(1, { message: "Department is required" }),
+  jobPosition: z.string().min(1, { message: "Job position is required" }),
+  branch: z.string().min(1, { message: "Branch is required" }),
 });
 
 export const SupplierManagementValidators = z.object({

@@ -22,6 +22,7 @@ const Page = async () => {
         jobTitles={jobTitles}
         departments={departments}
         initialData={null}
+        isNewApplicant={true}
       />
     </div>
   );

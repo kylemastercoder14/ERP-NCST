@@ -454,7 +454,10 @@ export const createAccount = async (
 
 export const sendInitialInterviewEmployee = async (
   values: z.infer<typeof SendEmailEmployeeValidators>,
-  email: string
+  email: string,
+  department: string,
+  jobTitle: string,
+  branch: string
 ) => {
   const validatedField = SendEmailEmployeeValidators.safeParse(values);
 
@@ -484,6 +487,9 @@ export const sendInitialInterviewEmployee = async (
     email: email,
     date: formattedDate,
     time: formattedTime,
+    department,
+    jobTitle,
+    branch,
     location,
   });
 
@@ -3232,7 +3238,8 @@ export const createJobPost = async (
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
-  const { title, description, attachment } = validatedField.data;
+  const { title, description, attachment, jobPosition, department, branch } =
+    validatedField.data;
 
   try {
     await db.jobPosting.create({
@@ -3240,6 +3247,9 @@ export const createJobPost = async (
         title,
         description,
         attachment,
+        jobTitleId: jobPosition,
+        branch,
+        departmentId: department,
       },
     });
 
@@ -3267,8 +3277,15 @@ export const updateJobPost = async (
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
-  const { title, description, attachment, financialStatus } =
-    validatedField.data;
+  const {
+    title,
+    description,
+    attachment,
+    financialStatus,
+    jobPosition,
+    department,
+    branch,
+  } = validatedField.data;
 
   try {
     await db.jobPosting.update({
@@ -3278,6 +3295,9 @@ export const updateJobPost = async (
         description,
         attachment,
         finacialStatus: financialStatus,
+        jobTitleId: jobPosition,
+        branch,
+        departmentId: department,
       },
     });
 
@@ -3296,6 +3316,8 @@ export const submitApplication = async (
     lastName: string;
     email: string;
     branch: string;
+    department: string;
+    jobTitle: string;
     resume: string;
   },
   jobPostId: string
@@ -3308,6 +3330,8 @@ export const submitApplication = async (
         email: data.email,
         branch: data.branch,
         resume: data.resume,
+        departmentId: data.department,
+        jobTitleId: data.jobTitle,
         jobPostingId: jobPostId,
       },
     });

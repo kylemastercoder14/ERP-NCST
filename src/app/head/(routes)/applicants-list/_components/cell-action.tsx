@@ -22,9 +22,18 @@ import SendEmailForm from "@/components/forms/send-email-form";
 interface CellActionProps {
   id: string;
   email: string;
+  departmentId?: string;
+  jobTitleId?: string;
+  branch?: string;
 }
 
-export const CellAction: React.FC<CellActionProps> = ({ id, email }) => {
+export const CellAction: React.FC<CellActionProps> = ({
+  id,
+  email,
+  departmentId,
+  jobTitleId,
+  branch,
+}) => {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const [viewModal, setViewModal] = React.useState(false);
@@ -58,7 +67,13 @@ export const CellAction: React.FC<CellActionProps> = ({ id, email }) => {
         title="Send Email"
         description="Send additional information to the employee."
       >
-        <SendEmailForm email={email} onClose={() => setEmailModalOpen(false)} />
+        <SendEmailForm
+          departmentId={departmentId}
+          jobTitleId={jobTitleId}
+          branch={branch}
+          email={email}
+          onClose={() => setEmailModalOpen(false)}
+        />
       </Modal>
       <AlertModal
         onConfirm={onDelete}

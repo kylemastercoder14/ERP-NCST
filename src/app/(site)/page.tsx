@@ -17,6 +17,10 @@ export default async function Home() {
     where: {
       finacialStatus: "Approved",
     },
+    include: {
+      department: true,
+      JobTitle: true,
+    }
   });
   return (
     <>

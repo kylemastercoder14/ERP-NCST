@@ -10,6 +10,10 @@ export type Column = {
   email: string;
   resume: string;
   branch: string;
+  department: string;
+  jobTitle: string;
+  jobTitleId: string;
+  departmentId: string;
   createdAt: string;
 };
 
@@ -64,10 +68,10 @@ export const columns: ColumnDef<Column>[] = [
           rel="noopener noreferrer"
           className="text-blue-500 flex items-center gap-1 hover:underline"
         >
-          <Download className='size-4' /> Download Resume
+          <Download className="size-4" /> Download Resume
         </a>
       );
-    }
+    },
   },
   {
     accessorKey: "branch",
@@ -78,6 +82,34 @@ export const columns: ColumnDef<Column>[] = [
           className="cursor-pointer flex items-center"
         >
           Branch
+          <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "department",
+    header: ({ column }) => {
+      return (
+        <span
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="cursor-pointer flex items-center"
+        >
+          Department
+          <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: "jobTitle",
+    header: ({ column }) => {
+      return (
+        <span
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="cursor-pointer flex items-center"
+        >
+          Job Title
           <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
         </span>
       );
@@ -100,6 +132,14 @@ export const columns: ColumnDef<Column>[] = [
   {
     accessorKey: "actions",
     header: "",
-    cell: ({ row }) => <CellAction id={row.original.id} email={row.original.email} />,
+    cell: ({ row }) => (
+      <CellAction
+        id={row.original.id}
+        email={row.original.email}
+        departmentId={row.original.departmentId}
+        jobTitleId={row.original.jobTitleId}
+        branch={row.original.branch}
+      />
+    ),
   },
 ];

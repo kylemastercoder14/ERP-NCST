@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { EmployeeWithProps } from "@/types";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -24,20 +24,27 @@ const ApplicantForm = ({
   initialData,
   jobTitles,
   departments,
+  isNewApplicant = false,
 }: {
   initialData: EmployeeWithProps | null;
   jobTitles: JobTitle[];
   departments: Department[];
+  isNewApplicant?: boolean;
 }) => {
   const action = initialData ? "Save Changes" : "Submit";
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const departmentId = searchParams.get("department");
+  const jobTitleId = searchParams.get("jobTitle");
+  const branch = searchParams.get("branch");
+  const email = searchParams.get("email");
 
   const form = useForm<z.infer<typeof ApplicantValidators>>({
     resolver: zodResolver(ApplicantValidators),
     defaultValues: {
-      positionDesired: initialData?.JobTitle.id || "",
-      department: initialData?.Department.id || "",
-      email: initialData?.UserAccount?.email || "",
+      positionDesired: initialData?.JobTitle.id || jobTitleId || "",
+      department: initialData?.Department.id || departmentId || "",
+      email: initialData?.UserAccount?.email || email || "",
       licenseNo: initialData?.licenseNo || "",
       expiryDate: initialData?.expiryDate || "",
       firstName: initialData?.firstName || "",
@@ -73,7 +80,7 @@ const ApplicantForm = ({
       philhealthNo: initialData?.philhealthNo || "",
       pagibigNo: initialData?.pagibigNo || "",
       signature: initialData?.signature || "",
-      branch: initialData?.branch || "",
+      branch: initialData?.branch || branch || "",
       isOnlyChild: true,
       isNewEmployee: initialData?.isNewEmployee || true,
       children:
@@ -297,15 +304,17 @@ const ApplicantForm = ({
           className="mt-5"
         >
           <div className="space-y-4">
-            <CustomFormField
-              control={form.control}
-              fieldType={FormFieldType.CHECKBOX}
-              isRequired={true}
-              name="isNewEmployee"
-              disabled={isSubmitting}
-              label="Is this a new employee?"
-              description="Check this box if this is a new employee."
-            />
+            {!isNewApplicant && (
+              <CustomFormField
+                control={form.control}
+                fieldType={FormFieldType.CHECKBOX}
+                isRequired={true}
+                name="isNewEmployee"
+                disabled={isSubmitting}
+                label="Is this a new employee?"
+                description="Check this box if this is a new employee."
+              />
+            )}
             <div className="grid lg:grid-cols-3 grid-cols-1 gap-4">
               <CustomFormField
                 control={form.control}
@@ -316,7 +325,7 @@ const ApplicantForm = ({
                   value: job.id,
                   label: job.name,
                 }))}
-                disabled={isSubmitting}
+                disabled={isSubmitting || !!jobTitleId}
                 label="Position Desired"
                 placeholder="Select position desired"
               />
@@ -329,7 +338,7 @@ const ApplicantForm = ({
                   value: department.id,
                   label: department.name,
                 }))}
-                disabled={isSubmitting}
+                disabled={isSubmitting || !!departmentId}
                 label="Department"
                 placeholder="Select department"
               />
@@ -342,7 +351,7 @@ const ApplicantForm = ({
                   value: branch,
                   label: branch,
                 }))}
-                disabled={isSubmitting}
+                disabled={isSubmitting || !!branch}
                 label="Branch"
                 placeholder="Select branch"
               />
@@ -353,7 +362,9 @@ const ApplicantForm = ({
                 fieldType={FormFieldType.INPUT}
                 isRequired={true}
                 name="email"
-                disabled={!!initialData?.UserAccount?.email?.trim() || isSubmitting}
+                disabled={
+                  !!initialData?.UserAccount?.email?.trim() || isSubmitting || !!email
+                }
                 label="Email Address"
                 placeholder="Enter email address"
               />

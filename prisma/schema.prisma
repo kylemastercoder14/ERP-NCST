@@ -20,13 +20,17 @@ model Admin {
 }
 
 model ApplicantList {
-  id        String @id @default(cuid())
-  email     String @unique
-  firstName String
-  lastName  String
-  resume    String
-  status    String @default("Pending") // Pending, Interviewed, Hired, Rejected
-  branch    String @default("Cavite")
+  id           String      @id @default(cuid())
+  email        String      @unique
+  firstName    String
+  lastName     String
+  resume       String
+  status       String      @default("Pending") // Pending, Interviewed, Hired, Rejected
+  branch       String      @default("Cavite")
+  departmentId String?
+  Department   Department? @relation(fields: [departmentId], references: [id])
+  jobTitleId   String?
+  JobTitle     JobTitle?   @relation(fields: [jobTitleId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -35,20 +39,30 @@ model ApplicantList {
   jobPostingId String?
 
   @@index([jobPostingId])
+  @@index([departmentId])
+  @@index([jobTitleId])
 }
 
 model JobPosting {
-  id             String @id @default(cuid())
+  id             String      @id @default(cuid())
   title          String
   description    String
   attachment     String
-  status         String @default("Open")
-  finacialStatus String @default("Pending") // Pending, Approved, Rejected
+  status         String      @default("Open")
+  finacialStatus String      @default("Pending")
+  jobTitleId     String?
+  JobTitle       JobTitle?   @relation(fields: [jobTitleId], references: [id])
+  departmentId   String?
+  department     Department? @relation(fields: [departmentId], references: [id])
+  branch         String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   applicantList ApplicantList[]
+
+  @@index([departmentId])
+  @@index([jobTitleId])
 }
 
 model UserAccount {
@@ -75,7 +89,9 @@ model JobTitle {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  Employee Employee[]
+  Employee      Employee[]
+  ApplicantList ApplicantList[]
+  JobPosting    JobPosting[]
 }
 
 model Department {
@@ -85,7 +101,9 @@ model Department {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  Employee Employee[]
+  Employee      Employee[]
+  ApplicantList ApplicantList[]
+  JobPosting    JobPosting[]
 }
 
 model Employee {

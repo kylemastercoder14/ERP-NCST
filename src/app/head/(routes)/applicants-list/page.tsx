@@ -11,6 +11,10 @@ const Page = async () => {
     orderBy: {
       createdAt: "desc",
     },
+    include: {
+      Department: true,
+      JobTitle: true,
+    },
   });
 
   const formattedData: Column[] =
@@ -21,6 +25,10 @@ const Page = async () => {
         email: item.email,
         resume: item.resume,
         branch: item.branch,
+        department: item.Department?.name || "N/A",
+        jobTitle: item.JobTitle?.name || "N/A",
+        departmentId: item.departmentId || "",
+        jobTitleId: item.jobTitleId || "",
         createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),
       };
     }) || [];

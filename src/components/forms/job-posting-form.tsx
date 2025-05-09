@@ -12,16 +12,20 @@ import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import CustomFormField from "@/components/global/custom-formfield";
 import { FormFieldType } from "@/lib/constants";
-import { JobPosting } from "@prisma/client";
+import { Department, JobPosting, JobTitle } from "@prisma/client";
 import { createJobPost, updateJobPost } from "@/actions";
 import Heading from "@/components/ui/heading";
 
 const JobPostingForm = ({
   initialData,
   department,
+  departments,
+  jobPositions,
 }: {
   initialData: JobPosting | null;
   department: string | null;
+  departments: Department[];
+  jobPositions: JobTitle[];
 }) => {
   const router = useRouter();
   const title = initialData ? "Edit Job Post" : "Create Job Post";
@@ -36,6 +40,9 @@ const JobPostingForm = ({
       description: initialData?.description || "",
       attachment: initialData?.attachment || "",
       financialStatus: initialData?.finacialStatus || "Pending",
+      department: initialData?.departmentId || "",
+      jobPosition: initialData?.jobTitleId || "",
+      branch: initialData?.branch || "",
     },
   });
 
@@ -100,6 +107,47 @@ const JobPostingForm = ({
             disabled={isSubmitting}
             label="Attachment"
             description="Only png, jpg, jpeg and webp files are accepted. Max size is 2MB."
+          />
+          <div className="grid lg:grid-cols-2 grid-cols-1 gap-5">
+            <CustomFormField
+              control={form.control}
+              fieldType={FormFieldType.SELECT}
+              isRequired={true}
+              name="department"
+              disabled={isSubmitting}
+              label="Department"
+              placeholder="Select the department of the job post"
+              dynamicOptions={departments.map((department) => ({
+                value: department.id,
+                label: department.name,
+              }))}
+            />
+            <CustomFormField
+              control={form.control}
+              fieldType={FormFieldType.SELECT}
+              isRequired={true}
+              name="jobPosition"
+              disabled={isSubmitting}
+              label="Job Position"
+              placeholder="Select the job position of the job post"
+              dynamicOptions={jobPositions.map((jobPosition) => ({
+                value: jobPosition.id,
+                label: jobPosition.name,
+              }))}
+            />
+          </div>
+          <CustomFormField
+            control={form.control}
+            fieldType={FormFieldType.SELECT}
+            isRequired={true}
+            name="branch"
+            disabled={isSubmitting}
+            label="Branch"
+            placeholder="Select the branch of the job post"
+            dynamicOptions={[
+              { value: "Cavite", label: "Cavite" },
+              { value: "Batangas", label: "Batangas" },
+            ]}
           />
           {department === "Finance" && (
             <CustomFormField
