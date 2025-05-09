@@ -1,6 +1,7 @@
 import React from "react";
-import ApplicantForm from "@/components/forms/applicant-form";
+
 import db from "@/lib/db";
+import Client from "./client";
 
 const Page = async () => {
   // jobTitle Lists
@@ -18,12 +19,7 @@ const Page = async () => {
   });
   return (
     <div className="px-10 py-5">
-      <ApplicantForm
-        jobTitles={jobTitles}
-        departments={departments}
-        initialData={null}
-        isNewApplicant={true}
-      />
+      <Client jobTitles={jobTitles} departments={departments} />
     </div>
   );
 };
