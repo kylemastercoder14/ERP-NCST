@@ -19,6 +19,7 @@ import {
   Supplier,
   Withdrawal,
   WithdrawalItem,
+  EmployeeLeaveBalance,
 } from "@prisma/client";
 
 export interface EmployeeWithProps extends Employee {
@@ -85,6 +86,7 @@ export interface PayslipGenerationWithProps extends Employee {
   ExtraShift: ExtraShift[];
   GovernmentMandatories: GovernmentMandatories[];
   LeaveManagement: LeaveManagement[];
+  EmployeeLeaveBalance: EmployeeLeaveBalance[];
 }
 
 export interface AccomplishmentReportWithProps extends AccomplishmentReport {

@@ -19,6 +19,7 @@ const Page = async (props: {
 	  GovernmentMandatories: true,
 	  LeaveManagement: true,
 	  Attendance: true,
+	  EmployeeLeaveBalance: true,
 	  ExtraShift: true,
 	},
   });

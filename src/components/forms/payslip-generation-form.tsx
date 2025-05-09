@@ -66,6 +66,8 @@ const PayslipGenerationForm = ({
   const regularHolidayPay = calculatedRegularHolidayPay;
   const specialWorkingHolidayPay = calculatedSpecialHolidayPay;
 
+  const currentYear = new Date().getFullYear();
+
   const totalEarnings =
     baseSalary +
     overtimePay +
@@ -78,7 +80,15 @@ const PayslipGenerationForm = ({
   const pagibig = baseSalary * 0.03;
   const tin = baseSalary * 0.1;
   const totalDeductions = sss + philhealth + pagibig + tin;
-  const netPay = totalEarnings - totalDeductions;
+  // Find the leave balance for the current year
+  const currentYearLeaveBalance = initialData?.EmployeeLeaveBalance.find(
+    (balance) => balance.year === currentYear
+  );
+
+  // Check if paidLeaveUsed is 0 for the current year
+  const hasBonus = currentYearLeaveBalance?.paidLeaveUsed === 0;
+  const bonus = hasBonus ? baseSalary * 0.1 : 0;
+  const netPay = totalEarnings + bonus - totalDeductions;
 
   const printRef = React.useRef<HTMLDivElement>(null);
 
@@ -263,6 +273,15 @@ const PayslipGenerationForm = ({
                 <span>
                   {" "}
                   ₱{parseFloat(totalEarnings.toFixed(2)).toLocaleString()}
+                  {bonus && (
+                    <span>
+                      {" "}
+                      + Bonus: ₱{parseFloat(
+                        bonus.toFixed(2)
+                      ).toLocaleString()}{" "}
+                      (Bonus awarded for maintaining paid leave threshold)
+                    </span>
+                  )}
                 </span>
               </TableCell>
               <TableCell>
@@ -277,7 +296,7 @@ const PayslipGenerationForm = ({
           <TableFooter>
             <TableRow>
               <TableCell colSpan={2}>
-                Net Pay: {" "}
+                Net Pay:{" "}
                 <span className="text-xl">
                   ₱{parseFloat(netPay.toFixed(2)).toLocaleString()}
                 </span>
