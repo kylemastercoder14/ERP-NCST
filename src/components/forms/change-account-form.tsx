@@ -118,7 +118,7 @@ const ChangeAccountForm = ({
       );
 
       toast.success("Account updated successfully!");
-      router.refresh();
+      router.push("/head/dashboard");
     } catch (error) {
       console.error("Error updating account:", error);
       toast.error("Error updating account");
@@ -168,7 +168,7 @@ const ChangeAccountForm = ({
                 <FormItem>
                   <FormLabel>First Name</FormLabel>
                   <FormControl>
-                    <Input {...field} disabled={isLoading} />
+                    <Input {...field} disabled />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -181,7 +181,7 @@ const ChangeAccountForm = ({
                 <FormItem>
                   <FormLabel>Last Name</FormLabel>
                   <FormControl>
-                    <Input {...field} disabled={isLoading} />
+                    <Input {...field} disabled />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -233,14 +233,6 @@ const ChangeAccountForm = ({
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button
-              variant="ghost"
-              onClick={() => router.back()}
-              type="button"
-              disabled={isLoading}
-            >
-              Cancel
-            </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Save Changes

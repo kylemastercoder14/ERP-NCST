@@ -19,6 +19,30 @@ model Admin {
   updatedAt DateTime @updatedAt
 }
 
+model ApplicantRequest {
+  id                 String              @id @default(cuid())
+  totalApplicants    Int
+  genderRequirements GenderRequirement[]
+  minAge             Int
+  maxAge             Int
+  clientId           String
+  Client             Client              @relation(fields: [clientId], references: [id])
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  @@index([clientId])
+}
+
+model GenderRequirement {
+  id                 String           @id @default(cuid())
+  gender             String
+  count              Int
+  applicantRequestId String
+  applicantRequest   ApplicantRequest @relation(fields: [applicantRequestId], references: [id])
+
+  @@index([applicantRequestId])
+}
+
 model ApplicantList {
   id           String      @id @default(cuid())
   email        String      @unique
@@ -520,10 +544,11 @@ model Client {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  Employee    Employee[]
-  Transaction Transaction[]
-  Evaluation  Evaluation[]
-  Ticket      Ticket[]
+  Employee         Employee[]
+  Transaction      Transaction[]
+  Evaluation       Evaluation[]
+  Ticket           Ticket[]
+  ApplicantRequest ApplicantRequest[]
 }
 
 model Supplier {
@@ -563,7 +588,7 @@ model Transaction {
   type           TransactionType // enum: DEBIT or CREDIT
   accountType    AccountType // enum: ASSET, LIABILITY, EQUITY, INCOME, EXPENSE
   subAccountType String
-  journalEntryId String          @unique
+  journalEntryId String?
   attachment     String?
   supplierId     String?
   Supplier       Supplier?       @relation(fields: [supplierId], references: [id])
@@ -679,4 +704,14 @@ model Ticket {
 
   @@index([employeeId])
   @@index([clientId])
+}
+
+model SiteSettings {
+  id              String  @id @default(cuid())
+  maintenanceMode Boolean @default(false)
+  maintenanceEndDate DateTime?
+  maintenanceMessage String? @default("We're currently performing scheduled maintenance. Please check back soon.")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

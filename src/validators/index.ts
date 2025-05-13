@@ -385,3 +385,46 @@ export const TicketValidators = z.object({
   employeeId: z.string().optional(),
   attachments: z.array(z.string()).optional(),
 });
+
+export const GenderRequirementValidator = z.object({
+  gender: z.enum(["MALE", "FEMALE"]),
+  count: z.coerce
+    .number()
+    .min(0)
+    .max(100, "Count per gender cannot exceed 100"),
+});
+
+export const ApplicantRequestValidators = z
+  .object({
+    totalApplicants: z.coerce.number().min(1, "At least 1 applicant required"),
+    genderRequirements: z
+      .array(GenderRequirementValidator)
+      .min(1, "At least one gender requirement is needed")
+      .refine(
+        (genders) => genders.some((g) => g.count > 0),
+        "At least one gender must have a count greater than 0"
+      ),
+    minAge: z.coerce
+      .number()
+      .min(18, "Minimum age is 18")
+      .max(60, "Maximum minimum age is 60"),
+    maxAge: z.coerce
+      .number()
+      .min(18, "Minimum age is 18")
+      .max(60, "Maximum age is 60"),
+  })
+  .refine((data) => data.minAge <= data.maxAge, {
+    message: "Minimum age must be less than or equal to maximum age",
+    path: ["minAge"],
+  });
+
+export const SiteSettingsValidators = z.object({
+  maintenanceMode: z.boolean().default(false),
+  maintenanceMessage: z
+    .string()
+    .optional()
+    .default(
+      "We're currently performing scheduled maintenance. Please check back soon."
+    ),
+  maintenanceEndDate: z.string().optional(),
+});

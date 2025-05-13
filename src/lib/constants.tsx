@@ -257,6 +257,7 @@ export const SIDEBAR_HEAD_CRM = [
             url: "/head/client-management",
           },
           { title: "Add Client", url: "/head/client-management/create" },
+          { title: "Applicant Request", url: "/head/client-management/applicant-request" },
         ],
       },
       {
@@ -523,6 +524,10 @@ export const SIDEBAR_CLIENT = [
         title: "Submit Ticket",
         url: "/client/submit-ticket",
       },
+      {
+        title: "Applicant Request",
+        url: "/client/applicant-request",
+      },
     ],
   },
 ];
@@ -760,8 +765,8 @@ export const SIDEBAR_SUPERADMIN = [
         url: "/head/reports-management",
       },
       {
-        title: "Settings",
-        url: "/head/settings",
+        title: "Site Settings",
+        url: "/superadmin/settings",
       },
       {
         title: "Logs",

@@ -127,7 +127,7 @@ const ChangeAccountForm = ({
       );
 
       toast.success("Account updated successfully!");
-      router.refresh();
+      router.push("/client/dashboard");
     } catch (error) {
       console.error("Error updating account:", error);
       toast.error("Error updating account");
@@ -174,7 +174,7 @@ const ChangeAccountForm = ({
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input {...field} disabled={isLoading} />
+                    <Input {...field} disabled />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

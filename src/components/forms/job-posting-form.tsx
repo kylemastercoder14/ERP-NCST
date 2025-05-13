@@ -33,6 +33,7 @@ const JobPostingForm = ({
     ? "Please fill all the information to update the job post."
     : "Please fill all the information to add a new job post.";
   const action = initialData ? "Save Changes" : "Submit";
+
   const form = useForm<z.infer<typeof JobPostValidators>>({
     resolver: zodResolver(JobPostValidators),
     defaultValues: {
@@ -45,6 +46,17 @@ const JobPostingForm = ({
       branch: initialData?.branch || "",
     },
   });
+
+  // Watch the department field value
+  const selectedDepartmentId = form.watch("department");
+
+  // Filter job positions based on selected department
+  const filteredJobPositions = selectedDepartmentId
+    ? departments.find((d) => d.id === selectedDepartmentId)?.name ===
+      "Operation"
+      ? jobPositions.filter((job) => job.name === "Regular Employee")
+      : jobPositions
+    : jobPositions;
 
   const { isSubmitting } = form.formState;
 
@@ -130,7 +142,7 @@ const JobPostingForm = ({
               disabled={isSubmitting}
               label="Job Position"
               placeholder="Select the job position of the job post"
-              dynamicOptions={jobPositions.map((jobPosition) => ({
+              dynamicOptions={filteredJobPositions.map((jobPosition) => ({
                 value: jobPosition.id,
                 label: jobPosition.name,
               }))}

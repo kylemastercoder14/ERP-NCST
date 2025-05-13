@@ -69,6 +69,7 @@ const SendEmailForm = ({
         <CustomFormField
           control={form.control}
           fieldType={FormFieldType.DATE_PICKER}
+          isBirthdate={false}
           isRequired={true}
           name="date"
           disabled={isSubmitting}

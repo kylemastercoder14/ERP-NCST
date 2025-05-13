@@ -29,6 +29,7 @@ import {
   TicketValidators,
   ForgotPasswordValidators,
   ResetPasswordValidators,
+  ApplicantRequestValidators,
 } from "@/validators";
 import nodemailer from "nodemailer";
 import { CreateAccountHTML } from "@/components/email-templates/create-account";
@@ -51,6 +52,7 @@ import { useClient } from "@/hooks/use-client";
 import { TrainingStatus } from "@/types";
 import { ForgotPasswordEmailHTML } from "@/components/email-templates/forgot-password";
 import { InquiryEmailHTML } from "@/components/email-templates/contact";
+import { TicketStatus } from "@prisma/client";
 
 export const loginAccount = async (values: z.infer<typeof LoginValidators>) => {
   const validatedField = LoginValidators.safeParse(values);
@@ -1932,10 +1934,22 @@ export const clockOutEmployee = async (
 
 export const savePayslipToPdf = async (
   fileName: string,
+  batDeduction: number,
+  salary: number,
   monthToday: string,
-  employeeId: string
+  employeeId: string,
+  employeeName: string
 ) => {
   try {
+    // Validate all required fields
+    if (!fileName || !employeeId || !monthToday || !employeeName) {
+      throw new Error("Missing required fields for payslip creation");
+    }
+
+    if (isNaN(batDeduction)) batDeduction = 0;
+    if (isNaN(salary)) throw new Error("Invalid salary amount");
+
+    // Check for existing payslip
     const existingPayslip = await db.paySlip.findFirst({
       where: {
         employeeId,
@@ -1947,6 +1961,7 @@ export const savePayslipToPdf = async (
       return { error: "Payslip already exists for this month." };
     }
 
+    // Create payslip record
     await db.paySlip.create({
       data: {
         file: fileName,
@@ -1954,11 +1969,80 @@ export const savePayslipToPdf = async (
         employeeId,
       },
     });
+
+    // Only create transactions if there's a BAT deduction
+    if (batDeduction > 0) {
+      // Get latest transaction to generate next journal entry number
+      const latestTransaction = await db.transaction.findFirst({
+        where: {
+          journalEntryId: {
+            startsWith: "JE",
+          },
+        },
+        orderBy: { createdAt: "desc" },
+        select: { journalEntryId: true },
+      });
+
+      let nextJournalEntryNumber = "JE000001";
+      if (latestTransaction?.journalEntryId) {
+        const currentNumber = parseInt(
+          latestTransaction.journalEntryId.replace("JE", "")
+        );
+        if (!isNaN(currentNumber)) {
+          const nextNumber = currentNumber + 1;
+          nextJournalEntryNumber = `JE${nextNumber.toString().padStart(6, "0")}`;
+        }
+      }
+
+      // Create both transactions as a single atomic operation
+      await db.$transaction([
+        // BAT Deduction (Credit)
+        db.transaction.create({
+          data: {
+            name: `BAT Deduction from ${employeeName} - ${monthToday}`,
+            accountType: "LIABILITY",
+            amount: batDeduction,
+            type: "CREDIT",
+            description: `BAT withheld from ${employeeName} salary for ${monthToday}`,
+            journalEntryId: nextJournalEntryNumber,
+            subAccountType: "PAYROLL_TAXES_PAYABLE",
+            attachment: fileName,
+            status: "Paid",
+          },
+        }),
+        // Salary Expense (Debit)
+        db.transaction.create({
+          data: {
+            name: `${employeeName} Salary - ${monthToday}`,
+            accountType: "EXPENSE",
+            amount: salary,
+            type: "DEBIT",
+            description: `Salary paid to ${employeeName} for ${monthToday}`,
+            journalEntryId: nextJournalEntryNumber,
+            subAccountType: "WAGES_EXPENSE",
+            attachment: fileName,
+            status: "Paid",
+          },
+        }),
+      ]);
+    }
+
     return { success: "Payslip saved successfully", fileName };
   } catch (error: any) {
-    console.error("Error saving payslip to PDF", error);
+    console.error("Error saving payslip to PDF", {
+      error: error.message,
+      stack: error.stack,
+      input: {
+        fileName,
+        batDeduction,
+        salary,
+        monthToday,
+        employeeId,
+        employeeName,
+      },
+    });
     return {
-      error: `Failed to save payslip. ${error.message || ""}`,
+      error: `Failed to save payslip. ${error.message || "Unknown error"}`,
     };
   }
 };
@@ -4392,3 +4476,92 @@ export async function updateSupplierAccount(
     throw error;
   }
 }
+
+export const createRequestApplicant = async (
+  values: z.infer<typeof ApplicantRequestValidators>,
+  clientId: string
+) => {
+  const validatedField = ApplicantRequestValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { genderRequirements, totalApplicants, minAge, maxAge } =
+    validatedField.data;
+
+  try {
+    await db.applicantRequest.create({
+      data: {
+        genderRequirements: { create: genderRequirements },
+        totalApplicants,
+        clientId,
+        minAge,
+        maxAge,
+      },
+    });
+
+    return { success: "Applicant request created successfully" };
+  } catch (error: any) {
+    console.error("Error creating applicant request", error);
+    return {
+      error: `Failed to create applicant request. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const updateRequestApplicant = async (
+  values: z.infer<typeof ApplicantRequestValidators>,
+  id: string
+) => {
+  const validatedField = ApplicantRequestValidators.safeParse(values);
+
+  if (!validatedField.success) {
+    const errors = validatedField.error.errors.map((err) => err.message);
+    return { error: `Validation Error: ${errors.join(", ")}` };
+  }
+
+  const { genderRequirements, totalApplicants, minAge, maxAge } =
+    validatedField.data;
+
+  try {
+    await db.applicantRequest.update({
+      where: { id },
+      data: {
+        genderRequirements: { create: genderRequirements },
+        totalApplicants,
+        minAge,
+        maxAge,
+      },
+    });
+    return { success: "Applicant request updated successfully" };
+  } catch (error: any) {
+    console.error("Error updating applicant request", error);
+    return {
+      error: `Failed to update applicant request. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const updateTicketStatus = async (id: string, status: TicketStatus) => {
+  if (!id) {
+    return { error: "Ticket ID is required" };
+  }
+
+  try {
+    await db.ticket.update({
+      where: { id },
+      data: {
+        status: status,
+      },
+    });
+
+    return { success: "Ticket status updated successfully" };
+  } catch (error: any) {
+    console.error("Error updating ticket status", error);
+    return {
+      error: `Failed to update ticket status. Please try again. ${error.message || ""}`,
+    };
+  }
+};

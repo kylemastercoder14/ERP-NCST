@@ -64,7 +64,8 @@ import {
 import SignatureInput from "@/components/ui/signature-input";
 import { TimePicker } from "@/components/ui/time-picker";
 import MultipleImageUpload from "../ui/multiple-images-upload";
-import RichTextEditor from './richtext-editor';
+import RichTextEditor from "./richtext-editor";
+import { Switch } from "@/components/ui/switch";
 
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {}
@@ -95,6 +96,7 @@ interface CustomProps {
   government?: boolean;
   tooltipContent?: string;
   imageCount?: number;
+  isBirthdate?: boolean;
 }
 
 const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
@@ -113,6 +115,7 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
     onChange,
     government,
     imageCount,
+    isBirthdate = true,
   } = props;
 
   const [showPassword, setShowPassword] = useState(false);
@@ -216,7 +219,22 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
         </>
       );
 
-      case FormFieldType.RICHTEXT:
+    case FormFieldType.SWITCH:
+      return (
+        <>
+          <FormControl>
+            <Switch
+              disabled={disabled}
+              checked={field.value}
+              onCheckedChange={field.onChange}
+            />
+          </FormControl>
+
+          {description && <FormDescription>{description}</FormDescription>}
+        </>
+      );
+
+    case FormFieldType.RICHTEXT:
       return (
         <>
           <FormControl>
@@ -450,6 +468,9 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
                 }
                 fromYear={DATE_YEAR_MIN}
                 toYear={2050}
+                disabled={
+                  !isBirthdate ? (date) => date < new Date() : undefined
+                }
               />
             </PopoverContent>
           </Popover>

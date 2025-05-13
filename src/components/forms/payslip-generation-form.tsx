@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React from "react";
@@ -136,10 +137,17 @@ const PayslipGenerationForm = ({
   });
 
   const undertimeDeduction = undertimeHours * hourlyRate;
+  const batDeduction = baseSalary * 0.2;
 
   // Update total deductions to include absent and undertime deductions
   const totalDeductions =
-    sss + philhealth + pagibig + tin + absentDeduction + undertimeDeduction;
+    sss +
+    philhealth +
+    pagibig +
+    tin +
+    absentDeduction +
+    undertimeDeduction +
+    batDeduction;
 
   // Find the leave balance for the current year
   const currentYearLeaveBalance = initialData?.EmployeeLeaveBalance.find(
@@ -153,39 +161,79 @@ const PayslipGenerationForm = ({
 
   const printRef = React.useRef<HTMLDivElement>(null);
 
+  // Updated handleSavePayslip
   const handleSavePayslip = async (pdfBlob: Blob) => {
     setLoading(true);
 
     try {
-      // Prepare data for S3 upload
-      const fileName = `Payslip_${initialData?.lastName}_${monthToday}_${yearToday}.pdf`;
+      if (!initialData) {
+        throw new Error("Employee data not available");
+      }
+
+      // Validate required data
+      if (!monthToday || !yearToday) {
+        throw new Error("Date information missing");
+      }
+
+      const fileName = `Payslip_${initialData.lastName}_${monthToday}_${yearToday}.pdf`;
       const file = new File([pdfBlob], fileName, { type: "application/pdf" });
 
-      const { url } = await upload(file);
-
-      const res = await savePayslipToPdf(
-        url,
-        monthToday,
-        initialData?.id as string
-      );
-      if (res.success) {
-        handlePrint(); // Separate print logic to avoid triggering multiple prints
-        toast.success("Payslip saved successfully!");
-        router.refresh();
-      } else {
-        toast.error(res.error);
+      // Upload to S3 with error handling
+      const uploadResult = await upload(file);
+      if (!uploadResult?.url) {
+        throw new Error("Failed to upload file to storage");
       }
-    } catch (error) {
-      console.error("Error uploading payslip:", error);
-      toast.error("Failed to upload payslip.");
+      const { url } = uploadResult;
+
+      const fullName = `${initialData.firstName} ${initialData.lastName}`;
+
+      // Save payslip (with transactions if there's a deduction)
+      const transactionRes = await savePayslipToPdf(
+        url,
+        batDeduction,
+        netPay,
+        monthToday,
+        initialData.id,
+        fullName
+      );
+
+      if (transactionRes.error) {
+        throw new Error(transactionRes.error);
+      }
+
+      // Only proceed to print if everything succeeded
+      handlePrint();
+      toast.success(
+        batDeduction > 0
+          ? "Payslip and deduction recorded successfully"
+          : "Payslip saved successfully"
+      );
+      router.refresh();
+    } catch (error: any) {
+      console.error("Payslip processing error:", {
+        error: error.message,
+        stack: error.stack,
+        initialData,
+        monthToday,
+        yearToday,
+        batDeduction,
+        netPay,
+      });
+      toast.error(error.message || "Failed to process payslip");
     } finally {
       setLoading(false);
     }
   };
 
+  // Enhanced printing function with error handling
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: `Payslip_${initialData?.lastName}_${monthToday}_${yearToday}`,
+    onAfterPrint: () => console.log("Payslip printed successfully"),
+    onPrintError: (error) => {
+      console.error("Printing error:", error);
+      toast.error("Failed to print payslip");
+    },
   });
 
   return (
@@ -339,6 +387,13 @@ const PayslipGenerationForm = ({
               <TableCell>
                 Undertime Deduction ({undertimeHours.toFixed(1)} hrs): ₱
                 {parseFloat(undertimeDeduction.toFixed(2)).toLocaleString()}
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell></TableCell>
+              <TableCell>
+                BAT Deduction (20%): ₱
+                {parseFloat(batDeduction.toFixed(2)).toLocaleString()}
               </TableCell>
             </TableRow>
             <TableRow>
