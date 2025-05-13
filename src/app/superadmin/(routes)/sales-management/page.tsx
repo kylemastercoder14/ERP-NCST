@@ -43,7 +43,7 @@ const Page = async () => {
         status: request.status,
         accountType: request.accountType,
         subAccountType: request.subAccountType,
-        journalEntry: request.journalEntryId,
+        journalEntry: request.journalEntryId || "",
         transactionDate: format(new Date(request.createdAt), "MMMM dd, yyyy"),
       };
     }) || [];
