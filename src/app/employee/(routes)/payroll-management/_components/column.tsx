@@ -2,7 +2,6 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { ChevronsUpDown, Share } from "lucide-react";
-import { CellAction } from "./cell-action";
 import Link from "next/link";
 
 export type PayrollColumn = {
@@ -50,7 +49,7 @@ export const columns: ColumnDef<PayrollColumn>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="cursor-pointer flex items-center"
         >
-          Amount
+          Base Salary
           <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
         </span>
       );
@@ -93,10 +92,5 @@ export const columns: ColumnDef<PayrollColumn>[] = [
         </span>
       );
     },
-  },
-  {
-    accessorKey: "actions",
-    header: "",
-    cell: ({ row }) => <CellAction id={row.original.id} />,
   },
 ];

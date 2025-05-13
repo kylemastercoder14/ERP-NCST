@@ -128,6 +128,7 @@ model Department {
   Employee      Employee[]
   ApplicantList ApplicantList[]
   JobPosting    JobPosting[]
+  Logs          Logs[]
 }
 
 model Employee {
@@ -606,13 +607,16 @@ model Transaction {
 model Logs {
   id String @id @default(cuid())
 
-  action    String
-  createdAt DateTime @default(now())
+  action       String
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id])
+  createdAt    DateTime   @default(now())
 
   userId String
   User   UserAccount @relation(fields: [userId], references: [id])
 
   @@index([userId])
+  @@index([departmentId])
 }
 
 model Evaluation {
@@ -707,10 +711,10 @@ model Ticket {
 }
 
 model SiteSettings {
-  id              String  @id @default(cuid())
-  maintenanceMode Boolean @default(false)
+  id                 String    @id @default(cuid())
+  maintenanceMode    Boolean   @default(false)
   maintenanceEndDate DateTime?
-  maintenanceMessage String? @default("We're currently performing scheduled maintenance. Please check back soon.")
+  maintenanceMessage String?   @default("We're currently performing scheduled maintenance. Please check back soon.")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

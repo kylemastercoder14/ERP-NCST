@@ -27,14 +27,15 @@ export default async function MaintenancePage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center flex-col bg-white px-4">
-      <div className="max-w-xl w-full p-8 text-center">
+      <div className="max-w-2xl w-full p-8 text-center">
         <Image
-          src="/assets/maintenance.jpg"
+          src="/maintenance.jpg"
           alt="Maintenance"
-          width={200}
-          height={200}
+          width={400}
+          height={400}
+          className='mx-auto'
         />
-        <div className="space-y-4">
+        <div className="space-y-4 mt-3">
           <h1 className="text-3xl font-bold text-red-600 mb-2">
             🚧 Under Maintenance
           </h1>

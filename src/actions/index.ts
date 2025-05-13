@@ -53,6 +53,9 @@ import { TrainingStatus } from "@/types";
 import { ForgotPasswordEmailHTML } from "@/components/email-templates/forgot-password";
 import { InquiryEmailHTML } from "@/components/email-templates/contact";
 import { TicketStatus } from "@prisma/client";
+import { useDepartmentLog } from "@/hooks/use-department-log";
+
+const { createDepartmentLog } = useDepartmentLog();
 
 export const loginAccount = async (values: z.infer<typeof LoginValidators>) => {
   const validatedField = LoginValidators.safeParse(values);
@@ -566,6 +569,10 @@ Thank you and we look forward to meeting you!`,
 
   try {
     await transporter.sendMail(message);
+    await createDepartmentLog(
+      "Human Resource",
+      `Sent an email to ${email} for Initial Interview`
+    );
 
     return { success: "Email has been sent." };
   } catch (error) {
@@ -702,6 +709,11 @@ export const sendEmployeeStatus = async (
       html: await TrainingStatusEmailHTML(emailContent),
     });
 
+    await createDepartmentLog(
+      "Human Resource",
+      `Sent an email to ${employee.UserAccount[0].email} for ${currentStatus} status`
+    );
+
     return { success: "Status updated and notification sent successfully." };
   } catch (error) {
     console.error("Error sending email:", error);
@@ -738,6 +750,11 @@ export const sendAccountToEmail = async (
 
   try {
     await transporter.sendMail(message);
+
+    await createDepartmentLog(
+      "Human Resource",
+      `Sent an email to ${email} for account creation`
+    );
 
     return { success: "Email has been sent." };
   } catch (error) {
@@ -910,6 +927,11 @@ export const createApplicant = async (
       },
     });
 
+    await createDepartmentLog(
+      "Human Resource",
+      `Created an employee with ID ${res.id}`
+    );
+
     return { success: "Employee created successfully" };
   } catch (error: any) {
     console.error("Error creating employee", error);
@@ -980,6 +1002,11 @@ export const changePurchaseRequestStatusSupplier = async (
         },
       });
     }
+
+    await createDepartmentLog(
+      "Procurement",
+      `Updated purchase request status to ${status} for ID ${id}`
+    );
 
     return { success: "Purchase request status updated successfully." };
   } catch (error: any) {
@@ -1149,6 +1176,11 @@ export const updateApplicant = async (
       },
     });
 
+    await createDepartmentLog(
+      "Human Resource",
+      `Updated employee with ID ${id}`
+    );
+
     return { success: "Applicant successfully updated!" };
   } catch (error: any) {
     console.error("Error updating applicant", error);
@@ -1167,6 +1199,11 @@ export const deleteApplicant = async (id: string) => {
     await db.employee.delete({
       where: { id },
     });
+
+    await createDepartmentLog(
+      "Human Resource",
+      `Deleted employee with ID ${id}`
+    );
 
     return { success: "Employee successfully deleted!" };
   } catch (error: any) {
@@ -1362,6 +1399,11 @@ export const approvePurchaseRequest = async (
       data: updateData,
     });
 
+    await createDepartmentLog(
+      "Finance",
+      `Updated purchase request status to ${status} for ID ${id}`
+    );
+
     return { success: `Purchase request ${status.toLowerCase()} successfully` };
   } catch (error: any) {
     console.error("Error approving purchase request", error);
@@ -1397,6 +1439,11 @@ export const rejectOvertime = async (
         Employee: { include: { UserAccount: true } },
       },
     });
+
+    await createDepartmentLog(
+      "Operation",
+      `Rejected overtime request with ID ${id}`
+    );
 
     return { success: "Overtime rejected successfully" };
   } catch (error: any) {
@@ -1435,6 +1482,10 @@ export const sendReasonForRejection = async (
 
   try {
     await transporter.sendMail(message);
+    await createDepartmentLog(
+      "Operation",
+      `Sent an email to ${email} for leave rejection`
+    );
 
     return { success: "Email has been sent." };
   } catch (error) {
@@ -1463,6 +1514,11 @@ export const createBaseSalary = async (
         amount,
       },
     });
+
+    await createDepartmentLog(
+      "Human Resource",
+      `Created a base salary for employee ID ${employee}`
+    );
 
     return { success: "Base salary created successfully" };
   } catch (error: any) {
@@ -1500,6 +1556,11 @@ export const updateBaseSalary = async (
       },
     });
 
+    await createDepartmentLog(
+      "Human Resource",
+      `Updated base salary for employee ID ${employee}`
+    );
+
     return { success: "Base salary updated successfully" };
   } catch (error: any) {
     console.error("Error updating base salary", error);
@@ -1518,6 +1579,11 @@ export const deleteBaseSalary = async (id: string) => {
     await db.baseSalary.delete({
       where: { id },
     });
+
+    await createDepartmentLog(
+      "Human Resource",
+      `Deleted base salary with ID ${id}`
+    );
 
     return { success: "Base salary deleted successfully" };
   } catch (error: any) {
@@ -1835,6 +1901,11 @@ export const approveExtraShift = async (id: string) => {
       },
     });
 
+    await createDepartmentLog(
+      "Operation",
+      `Approved extra shift request with ID ${id}`
+    );
+
     return { success: "Extra shift approved successfully" };
   } catch (error: any) {
     console.error("Error approving extra shift", error);
@@ -1852,6 +1923,11 @@ export const rejectExtraShift = async (id: string) => {
         status: "Rejected",
       },
     });
+
+    await createDepartmentLog(
+      "Operation",
+      `Rejected extra shift request with ID ${id}`
+    );
 
     return { success: "Extra shift rejected successfully" };
   } catch (error: any) {
@@ -2026,6 +2102,11 @@ export const savePayslipToPdf = async (
         }),
       ]);
     }
+
+    await createDepartmentLog(
+      "Human Resource",
+      `Created payslip for ${employeeName} for the month of ${monthToday}`
+    );
 
     return { success: "Payslip saved successfully", fileName };
   } catch (error: any) {
@@ -2383,6 +2464,11 @@ export const updatePurchaseRequestStatus = async (
       }
     }
 
+    await createDepartmentLog(
+      "Finance",
+      `Updated purchase request status to ${status} for ID ${id}`
+    );
+
     return { success: "Purchase request status updated successfully" };
   } catch (error: any) {
     console.error("Error updating purchase request status", error);
@@ -2448,6 +2534,11 @@ export const updateWithdrawalStatus = async (
       }
     }
 
+    await createDepartmentLog(
+      "Inventory",
+      `Updated withdrawal status to ${status} for ID ${id}`
+    );
+
     return { success: "Withdrawal status updated successfully" };
   } catch (error: any) {
     console.error("Error updating withdrawal status", error);
@@ -2479,6 +2570,11 @@ export const createClient = async (
         contactNo: "",
       },
     });
+
+    await createDepartmentLog(
+      "Customer Relationship",
+      `Created a new client: ${name}`
+    );
 
     return { success: "Client created successfully" };
   } catch (error: any) {
@@ -2520,6 +2616,11 @@ export const updateClient = async (
       },
     });
 
+    await createDepartmentLog(
+      "Customer Relationship",
+      `Updated client information for ${name}`
+    );
+
     return { success: "Client updated successfully" };
   } catch (error: any) {
     console.error("Error updating client", error);
@@ -2547,6 +2648,11 @@ export const deleteClient = async (id: string) => {
     await db.client.delete({
       where: { id },
     });
+
+    await createDepartmentLog(
+      "Customer Relationship",
+      `Deleted client with ID ${id}`
+    );
 
     return { success: "Client deleted successfully" };
   } catch (error: any) {
@@ -2579,6 +2685,8 @@ export const createSupplier = async (
         contactNo: "",
       },
     });
+
+    await createDepartmentLog("Procurement", `Created a new supplier: ${name}`);
 
     return { success: "Supplier created successfully" };
   } catch (error: any) {
@@ -2620,6 +2728,11 @@ export const updateSupplier = async (
       },
     });
 
+    await createDepartmentLog(
+      "Procurement",
+      `Updated supplier information for ${name}`
+    );
+
     return { success: "Supplier updated successfully" };
   } catch (error: any) {
     console.error("Error updating Supplier", error);
@@ -2644,6 +2757,8 @@ export const deleteSupplier = async (id: string) => {
     await db.supplier.delete({
       where: { id },
     });
+
+    await createDepartmentLog("Procurement", `Deleted supplier with ID ${id}`);
 
     return { success: "Supplier deleted successfully" };
   } catch (error: any) {
@@ -2810,6 +2925,8 @@ export const createItem = async (values: z.infer<typeof ItemValidators>) => {
       },
     });
 
+    await createDepartmentLog("Procurement", `Created a new item: ${name}`);
+
     return { success: "Item created successfully" };
   } catch (error: any) {
     console.error("Error creating item", error);
@@ -2856,6 +2973,11 @@ export const updateItem = async (
       },
     });
 
+    await createDepartmentLog(
+      "Procurement",
+      `Updated item information for ${name}`
+    );
+
     return { success: "Item updated successfully" };
   } catch (error: any) {
     console.error("Error updating item", error);
@@ -2874,6 +2996,8 @@ export const deleteItem = async (id: string) => {
     await db.items.delete({
       where: { id },
     });
+
+    await createDepartmentLog("Procurement", `Deleted item with ID ${id}`);
 
     return { success: "Item deleted successfully" };
   } catch (error: any) {
@@ -2932,6 +3056,11 @@ export const createAccountPayable = async (
         attachment,
       },
     });
+
+    await createDepartmentLog(
+      "Finance",
+      `Created a new account payable: ${name}`
+    );
 
     return { success: "Account payable created successfully" };
   } catch (error: any) {
@@ -3006,6 +3135,11 @@ export const updateAccountPayable = async (
       },
     });
 
+    await createDepartmentLog(
+      "Finance",
+      `Updated account payable information for ${name}`
+    );
+
     return { success: "Account payable updated successfully" };
   } catch (error: any) {
     console.error("Error updating account payable", error);
@@ -3063,6 +3197,11 @@ export const createAccountReceivable = async (
         attachment,
       },
     });
+
+    await createDepartmentLog(
+      "Finance",
+      `Created a new account receivable: ${name}`
+    );
 
     return { success: "Account receivable created successfully" };
   } catch (error: any) {
@@ -3137,6 +3276,11 @@ export const updateAccountReceivable = async (
       },
     });
 
+    await createDepartmentLog(
+      "Finance",
+      `Updated account receivable information for ${name}`
+    );
+
     return { success: "Account receivable updated successfully" };
   } catch (error: any) {
     console.error("Error updating account receivable", error);
@@ -3158,6 +3302,11 @@ export const markAsPaid = async (id: string) => {
         status: "Paid",
       },
     });
+
+    await createDepartmentLog(
+      "Finance",
+      `Marked transaction with ID ${id} as paid`
+    );
 
     return { success: "Transaction marked as paid successfully" };
   } catch (error: any) {
@@ -3228,6 +3377,8 @@ export const createTransaction = async (
 
       return newTransaction;
     });
+
+    await createDepartmentLog("Finance", `Created a new transaction: ${name}`);
 
     return { success: "Transaction created successfully", data: result };
   } catch (error: any) {
@@ -3314,6 +3465,11 @@ export const updateTransaction = async (
       });
     });
 
+    await createDepartmentLog(
+      "Finance",
+      `Updated transaction information for ${name}`
+    );
+
     return { success: "Transaction updated successfully" };
   } catch (error: any) {
     console.error("Error updating transaction", error);
@@ -3337,6 +3493,11 @@ export const addTreshold = async (id: string, treshold: number) => {
         treshold,
       },
     });
+
+    await createDepartmentLog(
+      "Inventory",
+      `Set reorder threshold for item ID ${id} to ${treshold}`
+    );
 
     return { success: "Reorder threshold set successfully" };
   } catch (error: any) {
@@ -3394,6 +3555,11 @@ export const createJobPost = async (
       },
     });
 
+    await createDepartmentLog(
+      "Human Resource",
+      `Created a new job post: ${title}`
+    );
+
     return { success: "Job post created successfully" };
   } catch (error: any) {
     console.error("Error creating job post", error);
@@ -3441,6 +3607,11 @@ export const updateJobPost = async (
         departmentId: department,
       },
     });
+
+    await createDepartmentLog(
+      "Human Resource",
+      `Updated job post information for ${title}`
+    );
 
     return { success: "Job post updated successfully" };
   } catch (error: any) {
@@ -3738,6 +3909,11 @@ export const approveLeave = async (leaveId: string) => {
       });
     }
 
+    await createDepartmentLog(
+      "Operation",
+      `Approved leave request for employee ID ${leave.employeeId}`
+    );
+
     return {
       success: "Leave approved successfully",
       data: updatedLeave,
@@ -3786,6 +3962,10 @@ export const rejectLeave = async (
     const email = res.Employee.UserAccount[0].email;
 
     await sendReasonForRejection(name, email, reasonForRejection);
+    await createDepartmentLog(
+      "Operation",
+      `Rejected leave request for employee ID ${res.Employee.id}`
+    );
 
     return { success: "Leave rejected successfully" };
   } catch (error: any) {
@@ -4134,6 +4314,16 @@ export const sendTrainingStatus = async (
       html: await TrainingStatusEmailHTML(emailContent),
     });
 
+    await createDepartmentLog(
+      "Operation",
+      `Updated training status for employee ID ${employeeId} to ${newTrainingStatus}`
+    );
+
+    await createDepartmentLog(
+      "Human Resource",
+      `Updated training status for employee ID ${employeeId} to ${newTrainingStatus}`
+    );
+
     return { success: "Status updated and notification sent successfully." };
   } catch (error) {
     console.error("Error sending email:", error);
@@ -4211,6 +4401,11 @@ export const assignToClient = async (
       html: await TrainingStatusEmailHTML(emailContent),
     });
 
+    await createDepartmentLog(
+      "Operation",
+      `Assigned employee ID ${employeeId} to client ID ${clientId}`
+    );
+
     return { success: "Status updated and notification sent successfully." };
   } catch (error: any) {
     console.error("Error assigning employee to client", error);
@@ -4286,6 +4481,11 @@ export const changePayrollStatus = async (
         reason,
       },
     });
+
+    await createDepartmentLog(
+      "Finance",
+      `Updated payroll status for employee ID ${baseSalaryId} to ${status}`
+    );
 
     return { success: "Payroll status updated successfully" };
   } catch (error: any) {
@@ -4556,6 +4756,11 @@ export const updateTicketStatus = async (id: string, status: TicketStatus) => {
         status: status,
       },
     });
+
+    await createDepartmentLog(
+      "Customer Relationship",
+      `Updated ticket status for ticket ID ${id} to ${status}`
+    );
 
     return { success: "Ticket status updated successfully" };
   } catch (error: any) {

@@ -48,7 +48,7 @@ const Page = async () => {
               (id) => id.employeeId === user?.employeeId
             )!
               .amount.toFixed(2)
-              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}` // Add commas after formatting
+              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
           : "N/A",
         deductions: `₱${totalDeductions
           .toFixed(2)

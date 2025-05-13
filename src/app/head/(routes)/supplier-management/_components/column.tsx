@@ -73,20 +73,6 @@ export const columns: ColumnDef<SupplierColumn>[] = [
     },
   },
   {
-    accessorKey: "itemsCount",
-    header: ({ column }) => {
-      return (
-        <span
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="cursor-pointer flex items-center"
-        >
-          No. of Items
-          <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
-        </span>
-      );
-    },
-  },
-  {
     accessorKey: "actions",
     header: "",
     cell: ({ row }) => (
