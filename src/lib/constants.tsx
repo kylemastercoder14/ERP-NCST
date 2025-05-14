@@ -65,10 +65,6 @@ export const SIDEBAR_HEAD_ACCOUNTING = [
         url: "/head/purchase-request",
       },
       {
-        title: "Reports Management",
-        url: "/head/reports-management",
-      },
-      {
         title: "Logs",
         url: "/head/logs",
       },
@@ -130,10 +126,6 @@ export const SIDEBAR_HEAD_OPERATION = [
       {
         title: "Purchase Request",
         url: "/head/purchase-request",
-      },
-      {
-        title: "Reports Management",
-        url: "/head/reports-management",
       },
       {
         title: "Logs",
@@ -223,10 +215,6 @@ export const SIDEBAR_HEAD_HR = [
         url: "/head/purchase-request",
       },
       {
-        title: "Reports Management",
-        url: "/head/reports-management",
-      },
-      {
         title: "Logs",
         url: "/head/logs",
       },
@@ -295,10 +283,6 @@ export const SIDEBAR_HEAD_CRM = [
         url: "/head/purchase-request",
       },
       {
-        title: "Reports Management",
-        url: "/head/reports-management",
-      },
-      {
         title: "Logs",
         url: "/head/logs",
       },
@@ -352,10 +336,6 @@ export const SIDEBAR_HEAD_PROCUREMENT = [
       {
         title: "Withdrawal Management",
         url: "/head/withdrawal-management",
-      },
-      {
-        title: "Reports Management",
-        url: "/head/reports-management",
       },
       {
         title: "Logs",
@@ -415,10 +395,6 @@ export const SIDEBAR_HEAD_INVENTORY = [
       {
         title: "Withdrawal Management",
         url: "/head/withdrawal-management",
-      },
-      {
-        title: "Reports Management",
-        url: "/head/reports-management",
       },
       {
         title: "Logs",
@@ -759,10 +735,6 @@ export const SIDEBAR_SUPERADMIN = [
       {
         title: "Purchase Request",
         url: "/head/purchase-request",
-      },
-      {
-        title: "Reports Management",
-        url: "/head/reports-management",
       },
       {
         title: "Site Settings",

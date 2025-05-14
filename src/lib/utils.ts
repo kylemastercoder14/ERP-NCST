@@ -356,3 +356,77 @@ export function display12HourValue(hours: number) {
   if (hours % 12 > 9) return `${hours}`;
   return `0${hours % 12}`;
 }
+
+export const getTrend = (percentage: number): "up" | "down" | "neutral" => {
+  if (percentage > 0) return "up";
+  if (percentage < 0) return "down";
+  return "neutral";
+};
+
+export function calculatePercentageDifference(
+  previous: number,
+  current: number
+): number {
+  if (previous === 0) return current === 0 ? 0 : 100;
+  return ((current - previous) / previous) * 100;
+}
+
+export function formatPercentage(value: number): string {
+  return `${value >= 0 ? "+" : ""}${value.toFixed(1)}%`;
+}
+
+export const formatCurrency = (value: number) => {
+  return new Intl.NumberFormat("en-PH", {
+    style: "currency",
+    currency: "PHP",
+    minimumFractionDigits: 2,
+  }).format(value);
+};
+
+export const generateDynamicColors = (count: number) => {
+  // Base color palette (can be extended)
+  const baseColors = [
+    "hsl(var(--primary))",
+    "hsl(var(--secondary))",
+    "hsl(var(--destructive))",
+    "hsl(var(--success))",
+    "hsl(var(--warning))",
+    "hsl(var(--muted))",
+    "hsl(var(--accent))",
+  ];
+
+  // If we have more items than base colors, generate additional colors
+  if (count > baseColors.length) {
+    const additionalColors = [];
+    const hueStep = 360 / (count - baseColors.length);
+
+    for (let i = 0; i < count - baseColors.length; i++) {
+      const hue = Math.floor(i * hueStep);
+      additionalColors.push(`hsl(${hue}, 70%, 50%)`);
+    }
+
+    return [...baseColors, ...additionalColors];
+  }
+
+  return baseColors.slice(0, count);
+};
+
+export const procurementChartConfig = {
+  purchaseRequests: {
+    label: "Purchase Requests",
+    color: "hsl(var(--primary))",
+  },
+  approvedRequests: {
+    label: "Approved Requests",
+    color: "hsl(var(--chart-2))",
+  },
+  totalSpend: {
+    label: "Total Spend",
+    color: "hsl(var(--chart-3))",
+    fillOpacity: 0.6,
+  },
+  pendingDeliveries: {
+    label: "Pending Deliveries",
+    color: "hsl(var(--chart-4))",
+  },
+} as const;

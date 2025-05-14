@@ -1,18 +1,41 @@
 import React from "react";
-import { SectionCards } from "../_components/section-cards";
-import { ChartAreaInteractive } from "../_components/chat-area-interactive";
+import { useUser } from "@/hooks/use-user";
+import db from "@/lib/db";
+import HRDashboard from "./_components/hr-dashboard";
+import FinanceDashboard from "./_components/finance-dashboard";
+import OperationDashboard from "./_components/operation-dashboard";
+import ProcurementDashboard from "./_components/procurement-dashboard";
+import InventoryDashboard from "./_components/inventory-dashboard";
+import CRMDashboard from "./_components/crm-dashboard";
 
-const Page = () => {
-  return (
-    <div className="flex flex-1 flex-col">
-      <div className="@container/main flex flex-1 flex-col gap-2">
-        <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-          <SectionCards />
-          <ChartAreaInteractive />
-        </div>
+const Page = async () => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { user } = await useUser();
+  const department = await db.department.findFirst({
+    where: {
+      id: user?.Employee.departmentId,
+    },
+  });
+
+  if (department?.name === "Human Resource") {
+    return <HRDashboard />;
+  } else if (department?.name === "Finance") {
+    return <FinanceDashboard />;
+  } else if (department?.name === "Operation") {
+    return <OperationDashboard />;
+  } else if (department?.name === "Procurement") {
+    return <ProcurementDashboard />;
+  } else if (department?.name === "Inventory") {
+    return <InventoryDashboard />;
+  } else if (department?.name === "Customer Relationship") {
+    return <CRMDashboard />;
+  } else {
+    return (
+      <div className="flex flex-1 items-center justify-center">
+        No Dashboard Available
       </div>
-    </div>
-  );
+    );
+  }
 };
 
 export default Page;
