@@ -110,7 +110,7 @@ export function AppSidebar({
   const isVisibleNotification =
     user?.Employee.Department.name === "Operation" &&
     user?.Employee.JobTitle.name === "Head Department";
-  const branch = user?.Employee.branch;
+  const branch = user?.Employee.Branch?.name;
   return (
     <Sidebar variant="floating" {...props}>
       <SidebarHeader>
