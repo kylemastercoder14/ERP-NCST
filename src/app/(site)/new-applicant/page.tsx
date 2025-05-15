@@ -17,9 +17,15 @@ const Page = async () => {
       name: "asc",
     },
   });
+
+  const branches = await db.branch.findMany({
+    orderBy: {
+      name: "asc",
+    },
+  });
   return (
     <div className="px-10 py-5">
-      <Client jobTitles={jobTitles} departments={departments} />
+      <Client jobTitles={jobTitles} branches={branches} departments={departments} />
     </div>
   );
 };
