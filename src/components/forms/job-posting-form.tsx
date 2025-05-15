@@ -43,7 +43,7 @@ const JobPostingForm = ({
       financialStatus: initialData?.finacialStatus || "Pending",
       department: initialData?.departmentId || "",
       jobPosition: initialData?.jobTitleId || "",
-      branch: initialData?.branch || "",
+      branch: initialData?.branchId || "",
     },
   });
 
