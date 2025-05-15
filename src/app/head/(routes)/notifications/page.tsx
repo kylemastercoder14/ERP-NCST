@@ -11,7 +11,7 @@ const Page = async () => {
   const notifications = await db.accomplishmentReport.findMany({
     where: {
       Employee: {
-        branch: user?.Employee.branch,
+        branchId: user?.Employee.branchId,
       },
     },
     orderBy: {
@@ -25,7 +25,7 @@ const Page = async () => {
     where: {
       isViewed: false,
       Employee: {
-        branch: user?.Employee.branch,
+        branchId: user?.Employee.branchId,
       },
     },
     orderBy: {

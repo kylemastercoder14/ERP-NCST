@@ -11,7 +11,7 @@ const Page = async () => {
   const notifications = await db.accomplishmentReport.findMany({
     where: {
       Employee: {
-        branch: user?.Employee.branch,
+        branchId: user?.Employee.branchId,
       },
     },
     orderBy: {
@@ -25,7 +25,7 @@ const Page = async () => {
     where: {
       isViewed: false,
       Employee: {
-        branch: user?.Employee.branch,
+        branchId: user?.Employee.branchId,
       },
     },
     orderBy: {
@@ -41,7 +41,7 @@ const Page = async () => {
         title={`Notifications (${notifications.length})`}
         description="View all the accomplishment reports that you have received."
       />
-      <Tabs defaultValue="all" className='mt-4'>
+      <Tabs defaultValue="all" className="mt-4">
         <TabsList>
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="unread">Unread</TabsTrigger>

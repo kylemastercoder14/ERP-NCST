@@ -9,7 +9,7 @@ import {
   CharacterReferences,
 } from "@prisma/client";
 import { useRef } from "react";
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 
 export function EmployeeProfileView({
   employee,
@@ -73,13 +73,9 @@ export function EmployeeProfileView({
   };
   return (
     <div className="relative">
-		{/* Print Button - visible only on screen */}
-		<div className="no-print absolute top-0 right-0 p-4">
-        <Button
-          onClick={handlePrint}
-        >
-          Print Profile
-        </Button>
+      {/* Print Button - visible only on screen */}
+      <div className="no-print absolute top-0 right-0 p-4">
+        <Button onClick={handlePrint}>Print Profile</Button>
       </div>
       <div
         ref={printRef}
@@ -339,7 +335,8 @@ export function EmployeeProfileView({
                   {employee.languages.join(", ")}
                 </p>
                 <p>
-                  <span className="font-medium">Branch:</span> {employee.branch}
+                  <span className="font-medium">Branch:</span>{" "}
+                  {employee.branchId}
                 </p>
                 <p>
                   <span className="font-medium">Training Status:</span>{" "}

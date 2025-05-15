@@ -10,7 +10,7 @@ import { useUser } from "@/hooks/use-user";
 const Page = async () => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { user } = await useUser();
-  const branch = user?.Employee.branch;
+  const branch = user?.Employee.branchId;
   const departmentSession = user?.Employee.Department.name;
 
   let data;
@@ -18,7 +18,7 @@ const Page = async () => {
     data = await db.employee.findMany({
       where: {
         isNewEmployee: false,
-        branch,
+        branchId: branch,
         BaseSalary: {
           some: {
             amount: { gt: 0 },
@@ -41,7 +41,7 @@ const Page = async () => {
     data = await db.employee.findMany({
       where: {
         isNewEmployee: false,
-        branch,
+        branchId: branch,
         id: user?.employeeId,
         BaseSalary: {
           some: {

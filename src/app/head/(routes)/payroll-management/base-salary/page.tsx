@@ -12,14 +12,14 @@ import { useUser } from "@/hooks/use-user";
 const Page = async () => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { user } = await useUser();
-  const branch = user?.Employee.branch;
+  const branch = user?.Employee.branchId;
   const data = await db.baseSalary.findMany({
     orderBy: {
       createdAt: "desc",
     },
     where: {
       Employee: {
-        branch,
+        branchId: branch,
       },
     },
     include: {
