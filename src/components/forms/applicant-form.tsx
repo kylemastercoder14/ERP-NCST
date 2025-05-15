@@ -18,18 +18,20 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import CustomFieldArray from "@/components/global/custom-field-array";
 import { createApplicant, updateApplicant } from "@/actions";
-import { Department, JobTitle } from "@prisma/client";
+import { Branch, Department, JobTitle } from "@prisma/client";
 
 const ApplicantForm = ({
   initialData,
   jobTitles,
   departments,
   isNewApplicant = false,
+  branches
 }: {
   initialData: EmployeeWithProps | null;
   jobTitles: JobTitle[];
   departments: Department[];
   isNewApplicant?: boolean;
+  branches: Branch[]
 }) => {
   const action = initialData ? "Save Changes" : "Submit";
   const router = useRouter();
@@ -80,7 +82,7 @@ const ApplicantForm = ({
       philhealthNo: initialData?.philhealthNo || "",
       pagibigNo: initialData?.pagibigNo || "",
       signature: initialData?.signature || "",
-      branch: initialData?.branch || branch || "",
+      branch: initialData?.branchId || branch || "",
       isOnlyChild: true,
       isNewEmployee: initialData?.isNewEmployee || true,
       children:
@@ -347,9 +349,9 @@ const ApplicantForm = ({
                 fieldType={FormFieldType.SELECT}
                 isRequired={true}
                 name="branch"
-                dynamicOptions={["Cavite", "Batangas"].map((branch) => ({
-                  value: branch,
-                  label: branch,
+                dynamicOptions={branches.map((branch) => ({
+                  value: branch.id,
+                  label: branch.name,
                 }))}
                 disabled={isSubmitting || !!branch}
                 label="Branch"

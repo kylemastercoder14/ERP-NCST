@@ -50,11 +50,12 @@ model ApplicantList {
   lastName     String
   resume       String
   status       String      @default("Pending") // Pending, Interviewed, Hired, Rejected
-  branch       String      @default("Cavite")
   departmentId String?
   Department   Department? @relation(fields: [departmentId], references: [id])
   jobTitleId   String?
   JobTitle     JobTitle?   @relation(fields: [jobTitleId], references: [id])
+  branchId     String?
+  Branch       Branch?     @relation(fields: [branchId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -65,6 +66,7 @@ model ApplicantList {
   @@index([jobPostingId])
   @@index([departmentId])
   @@index([jobTitleId])
+  @@index([branchId])
 }
 
 model JobPosting {
@@ -74,11 +76,13 @@ model JobPosting {
   attachment     String
   status         String      @default("Open")
   finacialStatus String      @default("Pending")
+  adminApproval  String      @default("Pending")
   jobTitleId     String?
   JobTitle       JobTitle?   @relation(fields: [jobTitleId], references: [id])
   departmentId   String?
   department     Department? @relation(fields: [departmentId], references: [id])
-  branch         String?
+  branchId       String?
+  Branch         Branch?     @relation(fields: [branchId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -87,6 +91,7 @@ model JobPosting {
 
   @@index([departmentId])
   @@index([jobTitleId])
+  @@index([branchId])
 }
 
 model UserAccount {
@@ -131,6 +136,17 @@ model Department {
   Logs          Logs[]
 }
 
+model Branch {
+  id   String @id @default(cuid())
+  name String
+
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  Employee      Employee[]
+  ApplicantList ApplicantList[]
+  JobPosting    JobPosting[]
+}
+
 model Employee {
   id                String   @id @default(cuid())
   profilePicture    String?
@@ -163,7 +179,6 @@ model Employee {
   contactPerson     String
   contactAddress    String
   contactNumber     String
-  branch            String   @default("Cavite") // Cavite or Batangas
 
   tinNo        String
   sssNo        String
@@ -183,6 +198,9 @@ model Employee {
 
   departmentId String
   Department   Department @relation(fields: [departmentId], references: [id])
+
+  branchId String
+  Branch   Branch @relation(fields: [branchId], references: [id])
 
   clientId String?
   Client   Client? @relation(fields: [clientId], references: [id])
@@ -210,6 +228,7 @@ model Employee {
   @@index([jobTitleId])
   @@index([departmentId])
   @@index([clientId])
+  @@index([branchId])
 }
 
 model Children {

@@ -42,7 +42,7 @@ export function UserLogin() {
         toast.error(res.error);
       } else {
         toast.success("Successfully logged in your account");
-        router.push("/superadmin/dashboard");
+        router.push(`/superadmin/${res.branch?.id}/dashboard`);
       }
     } catch (error) {
       toast.error("An error occurred while logging in your account");

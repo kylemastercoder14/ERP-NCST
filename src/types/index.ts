@@ -20,6 +20,7 @@ import {
   Withdrawal,
   WithdrawalItem,
   EmployeeLeaveBalance,
+  Branch,
 } from "@prisma/client";
 
 export interface EmployeeWithProps extends Employee {
@@ -29,6 +30,7 @@ export interface EmployeeWithProps extends Employee {
   CharacterReferences: CharacterReferences[];
   JobTitle: JobTitle;
   Department: Department;
+  Branch: Branch;
   UserAccount?: UserAccount | null;
 }
 

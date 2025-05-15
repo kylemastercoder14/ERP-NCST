@@ -245,7 +245,10 @@ export const SIDEBAR_HEAD_CRM = [
             url: "/head/client-management",
           },
           { title: "Add Client", url: "/head/client-management/create" },
-          { title: "Applicant Request", url: "/head/client-management/applicant-request" },
+          {
+            title: "Applicant Request",
+            url: "/head/client-management/applicant-request",
+          },
         ],
       },
       {
@@ -472,10 +475,6 @@ export const SIDEBAR_SUPPLIER = [
     url: "#",
     items: [
       {
-        title: "Dashboard",
-        url: "/supplier/dashboard",
-      },
-      {
         title: "List of Purchase Orders",
         url: "/supplier/purchase-orders",
       },
@@ -488,10 +487,6 @@ export const SIDEBAR_CLIENT = [
     title: "General",
     url: "#",
     items: [
-      {
-        title: "Dashboard",
-        url: "/client/dashboard",
-      },
       {
         title: "Employee Management",
         url: "/client/employee-management",
@@ -541,14 +536,61 @@ export const SIDEBAR_REPORTING_MANAGER_PROCUREMENT = [
   },
 ];
 
+export const SIDEBAR_TRAINER = [
+  {
+    title: "General",
+    url: "#",
+    items: [
+      {
+        title: "Dashboard",
+        url: "/head/dashboard",
+      },
+      {
+        title: "Orientation",
+        url: "/head/orientation",
+      },
+      {
+        title: "Physical Training",
+        url: "/head/physical-training",
+      },
+      {
+        title: "Customer Service Training",
+        url: "/head/customer-service-training",
+      },
+    ],
+  },
+];
+
 export const SIDEBAR_SUPERADMIN = [
+  {
+    title: "General",
+    url: "#",
+    items: [
+      {
+        title: "Dashboard",
+        url: "/superadmin/dashboard",
+      },
+      {
+        title: "Job Posting Approval",
+        url: "/superadmin/job-posting",
+      },
+      {
+        title: "Site Settings",
+        url: "/superadmin/settings",
+      },
+      {
+        title: "Logs",
+        url: "/superadmin/logs",
+      },
+    ],
+  },
   {
     title: "Human Resource Management",
     url: "#",
     items: [
       {
         title: "Applicants List",
-        url: "/head/applicants-list",
+        url: "/superadmin/applicants-list",
       },
       {
         title: "Employee Management",
@@ -557,9 +599,12 @@ export const SIDEBAR_SUPERADMIN = [
           // show this in collapsible
           {
             title: "Employee List",
-            url: "/head/employee-management",
+            url: "/superadmin/employee-management",
           },
-          { title: "Add Employee", url: "/head/employee-management/create" },
+          {
+            title: "Add Employee",
+            url: "/superadmin/employee-management/create",
+          },
         ],
       },
       {
@@ -568,35 +613,35 @@ export const SIDEBAR_SUPERADMIN = [
         items: [
           {
             title: "Attendance Monitoring",
-            url: "/head/attendance-management",
+            url: "/superadmin/attendance-management",
           },
           {
             title: "Overtime Request",
-            url: "/head/attendance-management/overtime-undertime",
+            url: "/superadmin/attendance-management/overtime-undertime",
           },
         ],
       },
       {
         title: "Payroll Management",
-        url: "/head/payroll-management",
+        url: "/superadmin/payroll-management",
         items: [
           {
             title: "Base Salary",
-            url: "/head/payroll-management/base-salary",
+            url: "/superadmin/payroll-management/base-salary",
           },
           {
             title: "Payslip Generation",
-            url: "/head/payroll-management/payslip-generation",
+            url: "/superadmin/payroll-management/payslip-generation",
           },
         ],
       },
       {
         title: "Leave Management",
-        url: "/head/leave-management",
+        url: "/superadmin/leave-management",
       },
       {
         title: "Onboarding & Training",
-        url: "/head/onboarding-training",
+        url: "/superadmin/onboarding-training",
       },
     ],
   },
@@ -610,18 +655,18 @@ export const SIDEBAR_SUPERADMIN = [
         items: [
           {
             title: "Client List",
-            url: "/head/client-management",
+            url: "/superadmin/client-management",
           },
-          { title: "Add Client", url: "/head/client-management/create" },
+          { title: "Add Client", url: "/superadmin/client-management/create" },
         ],
       },
       {
         title: "Sales Monitoring",
-        url: "/head/sales-monitoring",
+        url: "/superadmin/sales-monitoring",
       },
       {
         title: "Ticket Management",
-        url: "/head/ticket-management",
+        url: "/superadmin/ticket-management",
       },
     ],
   },
@@ -636,21 +681,21 @@ export const SIDEBAR_SUPERADMIN = [
           // show this in collapsible
           {
             title: "Ledger",
-            url: "/head/sales-management",
+            url: "/superadmin/sales-management",
           },
           {
             title: "Accounts Payable",
-            url: "/head/sales-management/accounts-payable",
+            url: "/superadmin/sales-management/accounts-payable",
           },
           {
             title: "Accounts Receivable",
-            url: "/head/sales-management/accounts-receivable",
+            url: "/superadmin/sales-management/accounts-receivable",
           },
         ],
       },
       {
         title: "Client Payment Management",
-        url: "/head/client-payment-management",
+        url: "/superadmin/client-payment-management",
       },
     ],
   },
@@ -660,19 +705,19 @@ export const SIDEBAR_SUPERADMIN = [
     items: [
       {
         title: "Deployment Scheduling",
-        url: "/head/deployment-scheduling",
+        url: "/superadmin/deployment-scheduling",
       },
       {
         title: "Shift Monitoring",
-        url: "/head/shift-monitoring",
+        url: "/superadmin/shift-monitoring",
       },
       {
         title: "Onboarding & Training",
-        url: "/head/onboarding-training",
+        url: "/superadmin/onboarding-training",
       },
       {
         title: "Employee Evaluation",
-        url: "/head/employee-evaluation",
+        url: "/superadmin/employee-evaluation",
       },
     ],
   },
@@ -682,19 +727,19 @@ export const SIDEBAR_SUPERADMIN = [
     items: [
       {
         title: "Items List",
-        url: "/head/items-list",
+        url: "/superadmin/items-list",
       },
       {
         title: "Supplier Management",
-        url: "/head/supplier-management",
+        url: "/superadmin/supplier-management",
       },
       {
         title: "Purchase Request",
-        url: "/head/purchase-request",
+        url: "/superadmin/purchase-request",
       },
       {
         title: "Withdrawal Management",
-        url: "/head/withdrawal-management",
+        url: "/superadmin/withdrawal-management",
       },
     ],
   },
@@ -704,45 +749,19 @@ export const SIDEBAR_SUPERADMIN = [
     items: [
       {
         title: "Inventory Management",
-        url: "/head/inventory-management",
+        url: "/superadmin/inventory-management",
       },
       {
         title: "Withdrawal Management",
-        url: "/head/withdrawal-management",
+        url: "/superadmin/withdrawal-management",
       },
       {
         title: "List of Purchase Orders",
-        url: "/head/purchase-orders",
+        url: "/superadmin/purchase-orders",
       },
       {
         title: "Purchase Request",
-        url: "/head/purchase-request",
-      },
-    ],
-  },
-  {
-    title: "Others",
-    url: "#",
-    items: [
-      {
-        title: "Job Posting",
-        url: "/head/job-posting",
-      },
-      {
-        title: "Withdrawal Management",
-        url: "/head/withdrawal-management",
-      },
-      {
-        title: "Purchase Request",
-        url: "/head/purchase-request",
-      },
-      {
-        title: "Site Settings",
-        url: "/superadmin/settings",
-      },
-      {
-        title: "Logs",
-        url: "/head/logs",
+        url: "/superadmin/purchase-request",
       },
     ],
   },

@@ -13,6 +13,7 @@ import {
   SIDEBAR_SUPPLIER,
   SIDEBAR_CLIENT,
   SIDEBAR_SUPERADMIN,
+  SIDEBAR_TRAINER,
 } from "@/lib/constants";
 
 export function cn(...inputs: ClassValue[]) {
@@ -46,6 +47,8 @@ export const getSidebarItems = (department?: string, position?: string) => {
     return SIDEBAR_HEAD_HR;
   } else if (department === "Superadmin" && position === "Admin") {
     return SIDEBAR_SUPERADMIN;
+  } else if (department === "Operation" && position === "Trainer") {
+    return SIDEBAR_TRAINER;
   } else if (department === "Supplier" && position === "Staff") {
     return SIDEBAR_SUPPLIER;
   } else if (department === "Client" && position === "Staff") {

@@ -20,6 +20,7 @@ const Page = async (props: {
       JobTitle: true,
       Department: true,
       UserAccount: true,
+      Branch: true,
     },
   });
 
@@ -32,6 +33,12 @@ const Page = async (props: {
 
   // department Lists
   const departments = await db.department.findMany({
+    orderBy: {
+      name: "asc",
+    },
+  });
+
+  const branches = await db.branch.findMany({
     orderBy: {
       name: "asc",
     },
@@ -53,6 +60,7 @@ const Page = async (props: {
       <ApplicantForm
         jobTitles={jobTitles}
         departments={departments}
+        branches={branches}
         initialData={transformedApplicant}
       />
     </div>

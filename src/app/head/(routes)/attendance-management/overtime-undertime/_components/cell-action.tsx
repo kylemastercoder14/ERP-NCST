@@ -123,15 +123,17 @@ export const CellAction: React.FC<CellActionProps> = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          {(status === "Pending" &&
-            departmentSession === "Reporting Manager") && (
-            <DropdownMenuItem onClick={() => setApproveModal(true)}>
-              <Check className="w-4 h-4 mr-2" />
-              Approve
-            </DropdownMenuItem>
-          )}
           {status === "Pending" &&
-            departmentSession === "Reporting Manager" && (
+            (departmentSession === "Reporting Manager" ||
+              departmentSession === "Human Resource") && (
+              <DropdownMenuItem onClick={() => setApproveModal(true)}>
+                <Check className="w-4 h-4 mr-2" />
+                Approve
+              </DropdownMenuItem>
+            )}
+          {status === "Pending" &&
+            (departmentSession === "Reporting Manager" ||
+              departmentSession === "Human Resource") && (
               <DropdownMenuItem onClick={() => setRejectModal(true)}>
                 <X className="w-4 h-4 mr-2" />
                 Reject

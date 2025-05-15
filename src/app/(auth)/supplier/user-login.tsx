@@ -50,7 +50,7 @@ export function UserLogin() {
           return;
         }
 
-        router.push("/supplier/dashboard");
+        router.push("/supplier/purchase-orders");
       }
     } catch (error) {
       toast.error("An error occurred while logging in your account");

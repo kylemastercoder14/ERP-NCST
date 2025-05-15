@@ -51,7 +51,7 @@ export function UserLogin() {
           return;
         }
 
-        router.push("/client/dashboard");
+        router.push("/client/employee-management");
       }
     } catch (error) {
       toast.error("An error occurred while logging in your account");

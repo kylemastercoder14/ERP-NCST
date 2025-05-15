@@ -30,7 +30,7 @@ const Page = async () => {
         },
       },
     });
-  }else {
+  } else {
     data = await db.leaveManagement.findMany({
       where: {
         employeeId: user?.employeeId,
@@ -49,31 +49,32 @@ const Page = async () => {
     });
   }
 
-  const formattedData: LeaveManagementColumn[] =
-    data.map((item) => {
-      return {
-        id: item.id,
-        licenseNo: item.Employee.licenseNo || "N/A",
-        name: `${item.Employee.firstName} ${item.Employee.middleName || ""} ${item.Employee.lastName}`.trim(),
-        leaveType: item.leaveType,
-        startDate: format(new Date(item.startDate), "MMMM dd, yyyy"),
-        endDate: format(new Date(item.endDate), "MMMM dd, yyyy"),
-        status: item.status,
-        approvedBy: item.ApprovedBy
-          ? [
-              item.ApprovedBy.Employee.firstName,
-              item.ApprovedBy.Employee.middleName || "",
-              item.ApprovedBy.Employee.lastName,
-            ]
-              .filter(Boolean)
-              .join(" ")
-          : "N/A",
-        attachment: item.attachment || "",
-        reason: item.leaveReason,
-        createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),
-      };
-    }) || [];
+  const formattedData: LeaveManagementColumn[] = data.map((item) => {
+    let approvedByName = "N/A";
 
+    // Case 1: ApprovedBy relation exists
+    if (item.ApprovedBy?.Employee) {
+      approvedByName = `${item.ApprovedBy.Employee.firstName} ${item.ApprovedBy.Employee.middleName || ""} ${item.ApprovedBy.Employee.lastName}`.trim();
+    }
+    // Case 2: Self-approved (approvedById matches employeeId)
+    else if (item.approvedById && item.approvedById === item.employeeId) {
+      approvedByName = `${item.Employee.firstName} ${item.Employee.middleName || ""} ${item.Employee.lastName}`.trim();
+    }
+
+    return {
+      id: item.id,
+      licenseNo: item.Employee.licenseNo || "N/A",
+      name: `${item.Employee.firstName} ${item.Employee.middleName || ""} ${item.Employee.lastName}`.trim(),
+      leaveType: item.leaveType,
+      startDate: format(new Date(item.startDate), "MMMM dd, yyyy"),
+      endDate: format(new Date(item.endDate), "MMMM dd, yyyy"),
+      status: item.status,
+      approvedBy: approvedByName,
+      attachment: item.attachment || "",
+      reason: item.leaveReason,
+      createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),
+    };
+  });
   return (
     <div>
       <div className="flex items-center justify-between">

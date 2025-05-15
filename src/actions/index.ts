@@ -402,6 +402,8 @@ export const superAdminLoginAccount = async (
       return { error: "Invalid password" };
     }
 
+    const branch = await db.branch.findFirst({});
+
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const alg = "HS256";
 
@@ -422,7 +424,7 @@ export const superAdminLoginAccount = async (
       path: "/", // Adjust path as needed
     });
 
-    return { token: jwt, user: user };
+    return { token: jwt, user: user, branch: branch };
   } catch (error: any) {
     console.error("Error logging in user", error);
     return {
@@ -873,7 +875,7 @@ export const createApplicant = async (
         spouseOccupation,
         isNewEmployee,
         trainingStatus,
-        branch,
+        branchId: branch,
         Children: {
           createMany: {
             data:
@@ -1126,7 +1128,7 @@ export const updateApplicant = async (
         tinNo,
         spouseName,
         spouseOccupation,
-        branch,
+        branchId: branch,
         Children: {
           deleteMany: { employeeId: id },
           createMany: {
@@ -2860,7 +2862,7 @@ export const getAllNotificationsOperations = async (branch: string) => {
       where: {
         isViewed: false,
         Employee: {
-          branch,
+          branchId: branch,
         },
       },
       orderBy: {
@@ -3550,7 +3552,7 @@ export const createJobPost = async (
         description,
         attachment,
         jobTitleId: jobPosition,
-        branch,
+        branchId: branch,
         departmentId: department,
       },
     });
@@ -3603,7 +3605,7 @@ export const updateJobPost = async (
         attachment,
         finacialStatus: financialStatus,
         jobTitleId: jobPosition,
-        branch,
+        branchId: branch,
         departmentId: department,
       },
     });
@@ -3640,7 +3642,7 @@ export const submitApplication = async (
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
-        branch: data.branch,
+        branchId: data.branch,
         resume: data.resume,
         departmentId: data.department,
         jobTitleId: data.jobTitle,
@@ -4346,7 +4348,11 @@ export const assignToClient = async (
         employeeId,
       },
       include: {
-        Employee: true,
+        Employee: {
+          include: {
+            Branch: true,
+          },
+        },
       },
     });
 
@@ -4379,7 +4385,7 @@ export const assignToClient = async (
       }),
       time: "8:00 AM",
       location: "BAT Security Services INC. Office",
-      branch: userAccount?.Employee.branch,
+      branch: userAccount?.Employee.Branch.name,
       company: client?.name,
       remarks: "",
       failureReason: "",
@@ -4767,6 +4773,30 @@ export const updateTicketStatus = async (id: string, status: TicketStatus) => {
     console.error("Error updating ticket status", error);
     return {
       error: `Failed to update ticket status. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const createBranch = async (branch: string) => {
+  if (!branch) {
+    return { error: "Branch name is required" };
+  }
+
+  try {
+    const branchData = await db.branch.create({
+      data: {
+        name: branch,
+      },
+    });
+
+    return {
+      success: "Branch created successfully",
+      branchData: branchData.id,
+    };
+  } catch (error: any) {
+    console.error("Error creating branch", error);
+    return {
+      error: `Failed to create branch. Please try again. ${error.message || ""}`,
     };
   }
 };
