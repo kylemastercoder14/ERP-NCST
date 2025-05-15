@@ -64,7 +64,7 @@ const ApplyNowForm = ({
       firstName: "",
       lastName: "",
       email: "",
-      branch: jobPost.branch || "",
+      branch: jobPost.branchId || "",
       jobPosition: jobPost?.JobTitle?.id || "",
       department: jobPost?.department?.id || "",
       resume: null,
