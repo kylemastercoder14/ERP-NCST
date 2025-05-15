@@ -5,6 +5,7 @@ import BaseSalaryForm from "@/components/forms/base-salary-form";
 const Page = async (props: {
   params: Promise<{
     baseSalaryId: string;
+    branchId: string;
   }>;
 }) => {
   const params = await props.params;
@@ -24,9 +25,10 @@ const Page = async (props: {
     },
   });
 
+
   return (
     <div>
-      <BaseSalaryForm employees={employees} initialData={baseSalary} />
+      <BaseSalaryForm employees={employees} initialData={baseSalary} basePath={`/superadmin/${params.branchId}`} />
     </div>
   );
 };

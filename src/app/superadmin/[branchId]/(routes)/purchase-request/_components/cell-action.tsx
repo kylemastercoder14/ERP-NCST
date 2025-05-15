@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Edit, FolderOpen, MoreHorizontal, Printer, Trash } from "lucide-react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import AlertModal from "@/components/ui/alert-modal";
 import React from "react";
 import { deleteLeave } from "@/actions";
@@ -30,6 +30,7 @@ export const CellAction: React.FC<CellActionProps> = ({
   departmentSession,
 }) => {
   const router = useRouter();
+  const params = useParams();
   const [open, setOpen] = React.useState(false);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -93,7 +94,7 @@ export const CellAction: React.FC<CellActionProps> = ({
           )}
 
           <DropdownMenuItem
-            onClick={() => router.push(`/head/purchase-request/${id}`)}
+            onClick={() => router.push(`/superadmin/${params.branchId}/purchase-request/${id}`)}
             disabled={departmentSession === "Finance"}
           >
             <Edit className="w-4 h-4 mr-2" />

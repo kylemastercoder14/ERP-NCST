@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { FileText, MoreHorizontal } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import React from "react";
 
 interface CellActionProps {
@@ -19,6 +19,7 @@ interface CellActionProps {
 
 export const CellAction: React.FC<CellActionProps> = ({ assessmentId }) => {
   const router = useRouter();
+  const params = useParams();
   return (
     <>
       <DropdownMenu>
@@ -32,7 +33,7 @@ export const CellAction: React.FC<CellActionProps> = ({ assessmentId }) => {
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuItem
             onClick={() =>
-              router.push(`/head/employee-evaluation/${assessmentId}`)
+              router.push(`/superadmin/${params.branchId}/employee-evaluation/${assessmentId}`)
             }
           >
             <FileText className="w-4 h-4 mr-2" />

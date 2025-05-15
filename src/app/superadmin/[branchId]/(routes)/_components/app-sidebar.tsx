@@ -45,6 +45,10 @@ export const SIDEBAR_SUPERADMIN = [
         url: "/superadmin/[branchId]/settings",
       },
       {
+        title: "Onboarding & Training",
+        url: "/superadmin/[branchId]/onboarding-training",
+      },
+      {
         title: "Logs",
         url: "/superadmin/[branchId]/logs",
       },
@@ -104,10 +108,6 @@ export const SIDEBAR_SUPERADMIN = [
         title: "Leave Management",
         url: "/superadmin/[branchId]/leave-management",
       },
-      {
-        title: "Onboarding & Training",
-        url: "/superadmin/[branchId]/onboarding-training",
-      },
     ],
   },
   {
@@ -127,10 +127,6 @@ export const SIDEBAR_SUPERADMIN = [
             url: "/superadmin/[branchId]/client-management/create",
           },
         ],
-      },
-      {
-        title: "Sales Monitoring",
-        url: "/superadmin/[branchId]/sales-monitoring",
       },
       {
         title: "Ticket Management",
@@ -160,10 +156,6 @@ export const SIDEBAR_SUPERADMIN = [
           },
         ],
       },
-      {
-        title: "Client Payment Management",
-        url: "/superadmin/[branchId]/client-payment-management",
-      },
     ],
   },
   {
@@ -177,10 +169,6 @@ export const SIDEBAR_SUPERADMIN = [
       {
         title: "Shift Monitoring",
         url: "/superadmin/[branchId]/shift-monitoring",
-      },
-      {
-        title: "Onboarding & Training",
-        url: "/superadmin/[branchId]/onboarding-training",
       },
       {
         title: "Employee Evaluation",
@@ -204,10 +192,6 @@ export const SIDEBAR_SUPERADMIN = [
         title: "Purchase Request",
         url: "/superadmin/[branchId]/purchase-request",
       },
-      {
-        title: "Withdrawal Management",
-        url: "/superadmin/[branchId]/withdrawal-management",
-      },
     ],
   },
   {
@@ -225,10 +209,6 @@ export const SIDEBAR_SUPERADMIN = [
       {
         title: "List of Purchase Orders",
         url: "/superadmin/[branchId]/purchase-orders",
-      },
-      {
-        title: "Purchase Request",
-        url: "/superadmin/[branchId]/purchase-request",
       },
     ],
   },

@@ -22,17 +22,25 @@ const Page = async () => {
 
   const formattedData: ItemColumn[] =
     data.map((item) => {
-      let status = "In stock"; // default
+      console.log(
+        `Item: ${item.Item.name}, Quantity: ${item.quantity}, Threshold: ${item.treshold}`
+      );
+      console.log(
+        `Type of quantity: ${typeof item.quantity}, Type of threshold: ${typeof item.treshold}`
+      );
 
-      if (item.Item.isSmallItem) {
-        if (item.quantity === 0) {
-          status = "Out of Stock";
-        } else if (item.quantity < 10) {
-          status = "Running Out";
-        }
-      }else {
-        status = "In stock";
+      const quantity = Number(item.quantity);
+      const threshold = Number(item.treshold);
+
+      let status = "In stock";
+
+      if (quantity === 0) {
+        status = "Out of Stock";
+      } else if (!isNaN(threshold) && quantity <= threshold) {
+        status = "Low Stock";
       }
+
+      console.log(`Calculated Status: ${status}`);
 
       return {
         id: item.id,
@@ -40,9 +48,9 @@ const Page = async () => {
         description: item.Item.description || "No description provided",
         unitPrice: `₱${item.Item.unitPrice.toFixed(2)}`,
         supplier: item.Item.Supplier.name,
-        quantity: item.quantity,
-        status,
-        treshold: item.treshold || 0,
+        quantity: quantity,
+        inventoryStatus: status,
+        treshold: isNaN(threshold) ? 0 : threshold,
         createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),
       };
     }) || [];

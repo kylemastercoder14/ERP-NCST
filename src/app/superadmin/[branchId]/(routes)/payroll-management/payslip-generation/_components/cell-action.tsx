@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { FilePen, MoreHorizontal } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import React from "react";
 
 interface CellActionProps {
@@ -19,6 +19,7 @@ interface CellActionProps {
 
 export const CellAction: React.FC<CellActionProps> = ({ id }) => {
   const router = useRouter();
+  const params = useParams();
   return (
     <>
       <DropdownMenu>
@@ -31,7 +32,7 @@ export const CellAction: React.FC<CellActionProps> = ({ id }) => {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuItem
-            onClick={() => router.push(`/head/payroll-management/payslip-generation/${id}`)}
+            onClick={() => router.push(`/superadmin/${params.branchId}/payroll-management/payslip-generation/${id}`)}
           >
             <FilePen className="w-4 h-4 mr-2" />
             Generate Payslip

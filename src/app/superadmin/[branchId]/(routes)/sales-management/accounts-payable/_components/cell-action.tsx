@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { CheckCircle, Edit, MoreHorizontal, Trash } from "lucide-react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import AlertModal from "@/components/ui/alert-modal";
 import React from "react";
 import { deleteLeave, markAsPaid } from "@/actions";
@@ -26,6 +26,7 @@ export const CellAction: React.FC<CellActionProps> = ({
   status
 }) => {
   const router = useRouter();
+  const params = useParams();
   const [open, setOpen] = React.useState(false);
   const [paidModal, setPaidModal] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -102,7 +103,7 @@ export const CellAction: React.FC<CellActionProps> = ({
           )}
 
           <DropdownMenuItem
-            onClick={() => router.push(`/head/sales-management/accounts-payable/${id}`)}
+            onClick={() => router.push(`/superadmin/${params.branchId}/sales-management/accounts-payable/${id}`)}
           >
             <Edit className="w-4 h-4 mr-2" />
             Edit

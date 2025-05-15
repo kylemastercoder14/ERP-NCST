@@ -822,17 +822,6 @@ export const createApplicant = async (
   } = validatedField.data;
 
   try {
-    const existingApplicant = await db.employee.findFirst({
-      where: {
-        licenseNo,
-        expiryDate,
-      },
-    });
-
-    if (existingApplicant) {
-      return { error: "Employee with a license no. already exist" };
-    }
-
     const trainingStatus = isNewEmployee ? "Initial Interview" : "";
 
     const res = await db.employee.create({
@@ -936,8 +925,11 @@ export const createApplicant = async (
 
     const fullName = res.firstName + " " + res.lastName;
 
-    // send automatic account in email
-    await sendAccountToEmail(email, userAccount.password, fullName);
+    if (!isNewEmployee) {
+      // send automatic account in email
+      await sendAccountToEmail(email, userAccount.password, fullName);
+    }
+
     return { success: "Employee created successfully" };
   } catch (error: any) {
     console.error("Error creating employee", error);
@@ -1204,6 +1196,10 @@ export const deleteApplicant = async (id: string) => {
   try {
     await db.employee.delete({
       where: { id },
+    });
+
+    await db.userAccount.deleteMany({
+      where: { employeeId: id },
     });
 
     await createDepartmentLog(
@@ -1501,7 +1497,8 @@ export const sendReasonForRejection = async (
 };
 
 export const createBaseSalary = async (
-  values: z.infer<typeof BaseSalaryValidators>
+  values: z.infer<typeof BaseSalaryValidators>,
+  role?: string
 ) => {
   const validatedField = BaseSalaryValidators.safeParse(values);
 
@@ -1521,10 +1518,12 @@ export const createBaseSalary = async (
       },
     });
 
-    await createDepartmentLog(
-      "Human Resource",
-      `Created a base salary for employee ID ${employee}`
-    );
+    if (role !== "superadmin") {
+      await createDepartmentLog(
+        "Human Resource",
+        `Created a base salary for employee ID ${employee}`
+      );
+    }
 
     return { success: "Base salary created successfully" };
   } catch (error: any) {
@@ -1537,7 +1536,8 @@ export const createBaseSalary = async (
 
 export const updateBaseSalary = async (
   values: z.infer<typeof BaseSalaryValidators>,
-  id: string
+  id: string,
+  role?: string
 ) => {
   if (!id) {
     return { error: "Base salary ID is required" };
@@ -1562,10 +1562,12 @@ export const updateBaseSalary = async (
       },
     });
 
-    await createDepartmentLog(
-      "Human Resource",
-      `Updated base salary for employee ID ${employee}`
-    );
+    if (role !== "superadmin") {
+      await createDepartmentLog(
+        "Human Resource",
+        `Updated base salary for employee ID ${employee}`
+      );
+    }
 
     return { success: "Base salary updated successfully" };
   } catch (error: any) {

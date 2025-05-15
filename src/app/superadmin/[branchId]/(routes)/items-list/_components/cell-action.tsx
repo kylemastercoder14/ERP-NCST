@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Edit, FolderOpen, MoreHorizontal, Trash } from "lucide-react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import AlertModal from "@/components/ui/alert-modal";
 import React from "react";
 import { deleteItem } from "@/actions";
@@ -24,6 +24,7 @@ interface CellActionProps {
 
 export const CellAction: React.FC<CellActionProps> = ({ id }) => {
   const router = useRouter();
+  const params = useParams();
   const [open, setOpen] = React.useState(false);
   const [viewModal, setViewModal] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -77,7 +78,7 @@ export const CellAction: React.FC<CellActionProps> = ({ id }) => {
             View Details
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => router.push(`/head/items-list/${id}`)}
+            onClick={() => router.push(`/superadmin/${params.branchId}/items-list/${id}`)}
           >
             <Edit className="w-4 h-4 mr-2" />
             Edit

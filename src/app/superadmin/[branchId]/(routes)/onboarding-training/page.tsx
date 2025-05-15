@@ -62,50 +62,34 @@ const Page = async () => {
         />
       </div>
       <Separator className="my-5" />
-      <Tabs defaultValue={`${departmentSession === "Human Resource" ? "initial" : "orientation"}`}>
+      <Tabs defaultValue={"initial"}>
         <TabsList>
-          {departmentSession === "Human Resource" ? (
-            <>
-              <TabsTrigger value="initial">Initial Interview</TabsTrigger>
-              <TabsTrigger value="final">Final Interview</TabsTrigger>
-            </>
-          ) : (
-            <>
-              <TabsTrigger value="orientation">Orientation</TabsTrigger>
-              <TabsTrigger value="physical-training">
-                Physical Training
-              </TabsTrigger>
-              <TabsTrigger value="customer-service-training">
-                Customer Service Training
-              </TabsTrigger>
-            </>
-          )}
+          <TabsTrigger value="initial">Initial Interview</TabsTrigger>
+          <TabsTrigger value="final">Final Interview</TabsTrigger>
+          <TabsTrigger value="orientation">Orientation</TabsTrigger>
+          <TabsTrigger value="physical-training">Physical Training</TabsTrigger>
+          <TabsTrigger value="customer-service-training">
+            Customer Service Training
+          </TabsTrigger>
         </TabsList>
-        {departmentSession === "Human Resource" ? (
-          <>
-            <TabsContent value="initial">
-              <ApplicantClient data={formatData("Initial Interview")} />
-            </TabsContent>
-            <TabsContent value="final">
-              <ApplicantClient data={formatData("Final Interview")} />
-            </TabsContent>
-          </>
-        ) : (
-          <>
-            <TabsContent value="orientation">
-              <ApplicantClient data={formatData("Orientation")} />
-            </TabsContent>
-            <TabsContent value="physical-training">
-              <ApplicantClient data={formatData("Physical Training")} />
-            </TabsContent>
-            <TabsContent value="mental-training">
-              <ApplicantClient data={formatData("Mental Training")} />
-            </TabsContent>
-            <TabsContent value="customer-service-training">
-              <ApplicantClient data={formatData("Customer Service Training")} />
-            </TabsContent>
-          </>
-        )}
+        <TabsContent value="initial">
+          <ApplicantClient data={formatData("Initial Interview")} />
+        </TabsContent>
+        <TabsContent value="final">
+          <ApplicantClient data={formatData("Final Interview")} />
+        </TabsContent>
+        <TabsContent value="orientation">
+          <ApplicantClient data={formatData("Orientation")} />
+        </TabsContent>
+        <TabsContent value="physical-training">
+          <ApplicantClient data={formatData("Physical Training")} />
+        </TabsContent>
+        <TabsContent value="mental-training">
+          <ApplicantClient data={formatData("Mental Training")} />
+        </TabsContent>
+        <TabsContent value="customer-service-training">
+          <ApplicantClient data={formatData("Customer Service Training")} />
+        </TabsContent>
       </Tabs>
     </div>
   );

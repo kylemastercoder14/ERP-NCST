@@ -127,7 +127,7 @@ const ChangeAccountForm = ({
       );
 
       toast.success("Account updated successfully!");
-      router.push("/client/dashboard");
+      router.push("/supplier/purchase-orders");
     } catch (error) {
       console.error("Error updating account:", error);
       toast.error("Error updating account");

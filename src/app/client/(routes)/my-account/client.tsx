@@ -123,7 +123,7 @@ const ChangeAccountForm = ({ initialData }: { initialData: Client | null }) => {
       );
 
       toast.success("Account updated successfully!");
-      router.push("/client/dashboard");
+      router.push("/client/employee-management");
     } catch (error) {
       console.error("Error updating account:", error);
       toast.error("Error updating account");

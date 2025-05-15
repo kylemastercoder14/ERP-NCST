@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Edit, MoreHorizontal, Undo2Icon } from "lucide-react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import React from "react";
 import { addTreshold } from "@/actions";
 import { Modal } from "@/components/ui/modal";
@@ -28,6 +28,7 @@ export const CellAction: React.FC<CellActionProps> = ({
   stock,
 }) => {
   const router = useRouter();
+  const params = useParams();
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [threshold, setThreshold] = React.useState<number | null>(null);
@@ -103,7 +104,7 @@ export const CellAction: React.FC<CellActionProps> = ({
 
           {treshold > stock && (
             <DropdownMenuItem
-            onClick={() => router.push("/head/purchase-request/create")}
+            onClick={() => router.push(`superadmin/${params.branchId}/purchase-request/create`)}
             >
               <Undo2Icon className="w-4 h-4 mr-2" />
               Re-order Item

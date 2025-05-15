@@ -61,6 +61,20 @@ const ChangeApplicantStatusForm = ({
     }
   };
 
+  let statusesOptions;
+
+  if (trainingStatus === "Orientation") {
+    statusesOptions = [
+      { label: "Attended", value: "Passed" },
+      { label: "Not Attended", value: "Failed" },
+    ];
+  } else {
+    statusesOptions = [
+      { label: "Passed", value: "Passed" },
+      { label: "Failed", value: "Failed" },
+    ];
+  }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -70,10 +84,7 @@ const ChangeApplicantStatusForm = ({
           name="status"
           label="Status"
           placeholder="Select status"
-          dynamicOptions={[
-            { label: "Passed", value: "Passed" },
-            { label: "Failed", value: "Failed" },
-          ]}
+          dynamicOptions={statusesOptions}
         />
 
         {form.watch("status") === "Failed" && (

@@ -31,7 +31,7 @@ const Page = async (props: {
         Evaluations for {employee.firstName} {employee.lastName}
       </h1>
 
-      <EvaluationList evaluations={evaluations} />
+      <EvaluationList evaluations={evaluations} employeeId={params.employeeId as string} />
     </div>
   );
 };

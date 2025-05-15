@@ -18,8 +18,10 @@ type EvaluationWithRatings = Evaluation & {
 
 export function EvaluationList({
   evaluations,
+  employeeId
 }: {
   evaluations: EvaluationWithRatings[];
+  employeeId: string;
 }) {
   if (evaluations.length === 0) {
     return (
@@ -27,7 +29,7 @@ export function EvaluationList({
         <p className="text-gray-500">No evaluations found</p>
         <Button className="mt-4" asChild>
           <Link
-            href={`/client/employee-management/${evaluations[0]?.employeeId}/assessment/create`}
+            href={`/client/employee-management/${employeeId}/assessment/create`}
           >
             Create First Evaluation
           </Link>

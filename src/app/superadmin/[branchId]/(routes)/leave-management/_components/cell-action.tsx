@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Check, Edit, MoreHorizontal, Trash, X } from "lucide-react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import AlertModal from "@/components/ui/alert-modal";
 import React from "react";
 import { approveLeave, deleteLeave } from "@/actions";
@@ -25,6 +25,7 @@ interface CellActionProps {
 
 export const CellAction: React.FC<CellActionProps> = ({ id, status }) => {
   const router = useRouter();
+  const params = useParams();
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [approveModal, setApproveModal] = React.useState(false);
@@ -112,7 +113,7 @@ export const CellAction: React.FC<CellActionProps> = ({ id, status }) => {
             </DropdownMenuItem>
           )}
           <DropdownMenuItem
-            onClick={() => router.push(`/head/purchase-request/${id}`)}
+            onClick={() => router.push(`/superadmin/${params.branchId}/purchase-request/${id}`)}
           >
             <Edit className="w-4 h-4 mr-2" />
             Edit

@@ -11,7 +11,7 @@ export type ItemColumn = {
   description: string;
   supplier: string;
   quantity: number;
-  status: string;
+  inventoryStatus: string;
   treshold: number;
   createdAt: string;
 };
@@ -123,19 +123,21 @@ export const columns: ColumnDef<ItemColumn>[] = [
       );
     },
     cell: ({ row }) => {
-      const quantity = row.original.quantity;
-      let status = "";
+      const status = row.original.inventoryStatus;
       let color = "";
 
-      if (quantity > 10) {
-        status = "In Stock";
-        color = "bg-green-600/20 border-green-600 text-green-800";
-      } else if (quantity > 0) {
-        status = "Running out of stock";
-        color = "bg-yellow-500/20 border-yellow-500 text-yellow-800";
-      } else {
-        status = "Out of stock";
-        color = "bg-red-600/20 border-red-600 text-red-800";
+      switch (status) {
+        case "In stock":
+          color = "bg-green-600/20 border-green-600 text-green-800";
+          break;
+        case "Low Stock":
+          color = "bg-yellow-500/20 border-yellow-500 text-yellow-800";
+          break;
+        case "Out of Stock":
+          color = "bg-red-600/20 border-red-600 text-red-800";
+          break;
+        default:
+          color = "bg-gray-100 border-gray-300";
       }
 
       return (
@@ -165,6 +167,12 @@ export const columns: ColumnDef<ItemColumn>[] = [
   {
     accessorKey: "actions",
     header: "",
-    cell: ({ row }) => <CellAction id={row.original.id} treshold={row.original.treshold} stock={row.original.quantity} />,
+    cell: ({ row }) => (
+      <CellAction
+        id={row.original.id}
+        treshold={row.original.treshold}
+        stock={row.original.quantity}
+      />
+    ),
   },
 ];
