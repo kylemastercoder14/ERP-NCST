@@ -145,6 +145,7 @@ model Branch {
   Employee      Employee[]
   ApplicantList ApplicantList[]
   JobPosting    JobPosting[]
+  Transaction   Transaction[]
 }
 
 model Employee {
@@ -278,11 +279,11 @@ model CharacterReferences {
 }
 
 model EmploymentRecord {
-  id          String @id @default(cuid())
-  companyName String
-  position    String
-  dateFrom    String
-  dateTo      String
+  id          String  @id @default(cuid())
+  companyName String?
+  position    String?
+  dateFrom    String?
+  dateTo      String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -615,12 +616,15 @@ model Transaction {
   clientId       String?
   Client         Client?         @relation(fields: [clientId], references: [id])
   description    String?
+  branchId       String?
+  Branch         Branch?         @relation(fields: [branchId], references: [id])
   status         String          @default("Unpaid")
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 
   @@index([supplierId])
   @@index([clientId])
+  @@index([branchId])
 }
 
 model Logs {

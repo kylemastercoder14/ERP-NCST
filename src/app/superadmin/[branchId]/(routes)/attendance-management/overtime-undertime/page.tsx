@@ -6,13 +6,23 @@ import { ExtraShiftColumn } from "./_components/column";
 import { format } from "date-fns";
 import ExtraShiftClient from "./_components/client";
 
-const Page = async () => {
+const Page = async (props: {
+  params: Promise<{
+    branchId: string;
+  }>;
+}) => {
+  const params = await props.params;
   const data = await db.extraShift.findMany({
     orderBy: {
       createdAt: "desc",
     },
     include: {
       Employee: true,
+    },
+    where: {
+      Employee: {
+        branchId: params.branchId,
+      },
     },
   });
 

@@ -38,7 +38,7 @@ const formatChartData = (data: {
   };
 };
 
-const ProcurementDashboard = async () => {
+const ProcurementDashboard = async ({ branchId }: { branchId: string }) => {
   // Date ranges
   const currentMonthStart = startOfMonth(new Date());
   const currentMonthEnd = endOfMonth(new Date());
@@ -281,6 +281,11 @@ const ProcurementDashboard = async () => {
         department: {
           name: "Procurement",
         },
+        User: {
+          Employee: {
+            branchId,
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",
@@ -380,7 +385,7 @@ const ProcurementDashboard = async () => {
             <RecentDatatableActions
               title="Recent Procurement Activities"
               description="All the recent procurement activities will be displayed here."
-			  data={formattedRecentLogs}
+              data={formattedRecentLogs}
             />
           </div>
         </div>

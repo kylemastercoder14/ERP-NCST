@@ -111,7 +111,12 @@ const ApplicantForm = ({
             ],
       employment:
         initialData?.EmploymentRecord && initialData.EmploymentRecord.length > 0
-          ? initialData.EmploymentRecord
+          ? initialData.EmploymentRecord.map((record) => ({
+              from: record.dateFrom ?? "",
+              to: record.dateTo ?? "",
+              position: record.position ?? "",
+              company: record.companyName ?? "",
+            }))
           : [{ from: "", to: "", position: "", company: "" }],
       characterReferences:
         initialData?.CharacterReferences &&

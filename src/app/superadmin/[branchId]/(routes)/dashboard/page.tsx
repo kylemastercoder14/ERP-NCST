@@ -42,13 +42,13 @@ export default async function DashboardPage({
   const renderDashboard = () => {
     switch (department) {
       case "Human Resource":
-        return <HRDashboard />;
+        return <HRDashboard branchId={branchId} />;
       case "Finance":
-        return <FinanceDashboard />;
+        return <FinanceDashboard branchId={branchId} />;
       case "Operation":
-        return <OperationDashboard />;
+        return <OperationDashboard branchId={branchId} />;
       case "Procurement":
-        return <ProcurementDashboard />;
+        return <ProcurementDashboard branchId={branchId} />;
       case "Inventory":
         return <InventoryDashboard />;
       case "Customer Relationship":

@@ -3,7 +3,7 @@ import { useUser } from "@/hooks/use-user";
 import db from "@/lib/db";
 import HRDashboard from "./_components/hr-dashboard";
 import FinanceDashboard from "./_components/finance-dashboard";
-import OperationDashboard from "./_components/operation-dashboard";
+import OperationsDashboard from "./_components/operation-dashboard";
 import ProcurementDashboard from "./_components/procurement-dashboard";
 import InventoryDashboard from "./_components/inventory-dashboard";
 import CRMDashboard from "./_components/crm-dashboard";
@@ -17,14 +17,16 @@ const Page = async () => {
     },
   });
 
+  const branchId = user?.Employee.branchId || "";
+
   if (department?.name === "Human Resource") {
-    return <HRDashboard />;
+    return <HRDashboard branchId={branchId} />;
   } else if (department?.name === "Finance") {
-    return <FinanceDashboard />;
+    return <FinanceDashboard branchId={branchId} />;
   } else if (department?.name === "Operation") {
-    return <OperationDashboard />;
+    return <OperationsDashboard branchId={branchId} />;
   } else if (department?.name === "Procurement") {
-    return <ProcurementDashboard />;
+    return <ProcurementDashboard branchId={branchId} />;
   } else if (department?.name === "Inventory") {
     return <InventoryDashboard />;
   } else if (department?.name === "Customer Relationship") {

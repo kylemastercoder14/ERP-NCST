@@ -42,7 +42,7 @@ const generateDynamicColors = (count: number) => {
   return baseColors.slice(0, count);
 };
 
-const FinanceDashboard = async () => {
+const FinanceDashboard = async ({ branchId }: { branchId: string }) => {
   // Date ranges
   const currentMonthStart = startOfMonth(new Date());
   const currentMonthEnd = endOfMonth(new Date());
@@ -68,6 +68,7 @@ const FinanceDashboard = async () => {
           _sum: { amount: true },
           where: {
             type: "CREDIT",
+            branchId,
             accountType: "INCOME",
             createdAt: { gte: currentMonthStart, lte: currentMonthEnd },
           },
@@ -76,6 +77,7 @@ const FinanceDashboard = async () => {
           _sum: { amount: true },
           where: {
             type: "CREDIT",
+            branchId,
             accountType: "INCOME",
             createdAt: { gte: lastMonthStart, lte: lastMonthEnd },
           },
@@ -88,6 +90,7 @@ const FinanceDashboard = async () => {
           _sum: { amount: true },
           where: {
             type: "DEBIT",
+            branchId,
             accountType: "EXPENSE",
             createdAt: { gte: currentMonthStart, lte: currentMonthEnd },
           },
@@ -96,6 +99,7 @@ const FinanceDashboard = async () => {
           _sum: { amount: true },
           where: {
             type: "DEBIT",
+            branchId,
             accountType: "EXPENSE",
             createdAt: { gte: lastMonthStart, lte: lastMonthEnd },
           },
@@ -107,20 +111,20 @@ const FinanceDashboard = async () => {
         // Assets (DEBIT - CREDIT)
         db.transaction.aggregate({
           _sum: { amount: true },
-          where: { accountType: "ASSET", type: "DEBIT" },
+          where: { accountType: "ASSET", branchId, type: "DEBIT" },
         }),
         db.transaction.aggregate({
           _sum: { amount: true },
-          where: { accountType: "ASSET", type: "CREDIT" },
+          where: { accountType: "ASSET", branchId, type: "CREDIT" },
         }),
         // Liabilities (CREDIT - DEBIT)
         db.transaction.aggregate({
           _sum: { amount: true },
-          where: { accountType: "LIABILITY", type: "CREDIT" },
+          where: { accountType: "LIABILITY", branchId, type: "CREDIT" },
         }),
         db.transaction.aggregate({
           _sum: { amount: true },
-          where: { accountType: "LIABILITY", type: "DEBIT" },
+          where: { accountType: "LIABILITY", branchId, type: "DEBIT" },
         }),
       ]),
 
@@ -131,6 +135,7 @@ const FinanceDashboard = async () => {
           amount: true,
         },
         where: {
+          branchId,
           createdAt: { gte: currentMonthStart, lte: currentMonthEnd },
         },
       }),
@@ -140,6 +145,7 @@ const FinanceDashboard = async () => {
         db.transaction.count({
           where: {
             status: "Unpaid",
+            branchId,
             clientId: { not: null },
           },
         }),
@@ -147,12 +153,14 @@ const FinanceDashboard = async () => {
           _sum: { amount: true },
           where: {
             status: "Unpaid",
+            branchId,
             clientId: { not: null },
           },
         }),
         db.transaction.count({
           where: {
             status: "Unpaid",
+            branchId,
             supplierId: { not: null },
           },
         }),
@@ -160,6 +168,7 @@ const FinanceDashboard = async () => {
           _sum: { amount: true },
           where: {
             status: "Unpaid",
+            branchId,
             supplierId: { not: null },
           },
         }),
@@ -172,6 +181,7 @@ const FinanceDashboard = async () => {
           amount: true,
         },
         where: {
+          branchId,
           createdAt: { gte: currentMonthStart, lte: currentMonthEnd },
         },
       }),
@@ -179,6 +189,9 @@ const FinanceDashboard = async () => {
       // Recent Transactions
       db.transaction.findMany({
         take: 5,
+        where: {
+          branchId,
+        },
         orderBy: {
           createdAt: "desc",
         },
@@ -200,6 +213,7 @@ const FinanceDashboard = async () => {
         },
         where: {
           accountType: "EXPENSE",
+          branchId,
           createdAt: { gte: currentMonthStart, lte: currentMonthEnd },
         },
       }),
@@ -212,6 +226,7 @@ const FinanceDashboard = async () => {
         },
         where: {
           accountType: "INCOME",
+          branchId,
           createdAt: { gte: currentMonthStart, lte: currentMonthEnd },
         },
       }),
@@ -309,6 +324,7 @@ const FinanceDashboard = async () => {
               _sum: { amount: true },
               where: {
                 type: "CREDIT",
+                branchId,
                 accountType: "INCOME",
                 createdAt: { gte: monthStart, lte: monthEnd },
               },
@@ -317,6 +333,7 @@ const FinanceDashboard = async () => {
               _sum: { amount: true },
               where: {
                 type: "DEBIT",
+                branchId,
                 accountType: "EXPENSE",
                 createdAt: { gte: monthStart, lte: monthEnd },
               },
@@ -341,6 +358,11 @@ const FinanceDashboard = async () => {
       where: {
         department: {
           name: "Finance",
+        },
+        User: {
+          Employee: {
+            branchId,
+          },
         },
       },
       orderBy: {

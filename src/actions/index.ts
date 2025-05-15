@@ -921,7 +921,7 @@ export const createApplicant = async (
       },
     });
 
-    await db.userAccount.create({
+    const userAccount = await db.userAccount.create({
       data: {
         email,
         employeeId: res.id,
@@ -934,6 +934,10 @@ export const createApplicant = async (
       `Created an employee with ID ${res.id}`
     );
 
+    const fullName = res.firstName + " " + res.lastName;
+
+    // send automatic account in email
+    await sendAccountToEmail(email, userAccount.password, fullName);
     return { success: "Employee created successfully" };
   } catch (error: any) {
     console.error("Error creating employee", error);
@@ -2040,11 +2044,14 @@ export const savePayslipToPdf = async (
     }
 
     // Create payslip record
-    await db.paySlip.create({
+    const employeePayslip = await db.paySlip.create({
       data: {
         file: fileName,
         date: monthToday,
         employeeId,
+      },
+      include: {
+        Employee: true,
       },
     });
 
@@ -2081,6 +2088,7 @@ export const savePayslipToPdf = async (
             accountType: "LIABILITY",
             amount: batDeduction,
             type: "CREDIT",
+            branchId: employeePayslip.Employee.branchId,
             description: `BAT withheld from ${employeeName} salary for ${monthToday}`,
             journalEntryId: nextJournalEntryNumber,
             subAccountType: "PAYROLL_TAXES_PAYABLE",
@@ -2095,6 +2103,7 @@ export const savePayslipToPdf = async (
             accountType: "EXPENSE",
             amount: salary,
             type: "DEBIT",
+            branchId: employeePayslip.Employee.branchId,
             description: `Salary paid to ${employeeName} for ${monthToday}`,
             journalEntryId: nextJournalEntryNumber,
             subAccountType: "WAGES_EXPENSE",
@@ -2382,6 +2391,7 @@ export const updatePurchaseRequestStatus = async (
             },
           },
         },
+        requestedBy: true,
       },
     });
 
@@ -2458,6 +2468,7 @@ export const updatePurchaseRequestStatus = async (
             supplierId: supplier.supplierId,
             name: `Purchase Request - ${supplier.supplierName}`,
             amount: supplier.totalAmount,
+            branchId: purchaseRequest.requestedBy.branchId,
             description: `Items: ${supplier.itemNames.join(", ")}`,
             journalEntryId: nextJournalEntryNumber,
             subAccountType: "SUPPLIES_EXPENSE",
@@ -2578,6 +2589,9 @@ export const createClient = async (
       `Created a new client: ${name}`
     );
 
+    // send automatic account in email
+    await sendAccountToEmail(email, password, name);
+
     return { success: "Client created successfully" };
   } catch (error: any) {
     console.error("Error creating client", error);
@@ -2689,6 +2703,9 @@ export const createSupplier = async (
     });
 
     await createDepartmentLog("Procurement", `Created a new supplier: ${name}`);
+
+    // send automatic account in email
+    await sendAccountToEmail(email, password, name);
 
     return { success: "Supplier created successfully" };
   } catch (error: any) {
@@ -3013,6 +3030,7 @@ export const deleteItem = async (id: string) => {
 export const createAccountPayable = async (
   values: z.infer<typeof AccountPayableValidators>
 ) => {
+  const { user } = await useUser();
   const validatedField = AccountPayableValidators.safeParse(values);
 
   if (!validatedField.success) {
@@ -3052,6 +3070,7 @@ export const createAccountPayable = async (
         accountType,
         amount,
         type: "CREDIT",
+        branchId: user?.Employee.branchId,
         description,
         journalEntryId: nextJournalEntryNumber,
         subAccountType,
@@ -3077,6 +3096,8 @@ export const updateAccountPayable = async (
   values: z.infer<typeof AccountPayableValidators>,
   id: string
 ) => {
+  const { user } = await useUser();
+
   if (!id) {
     return { error: "Account payable ID is required" };
   }
@@ -3131,6 +3152,7 @@ export const updateAccountPayable = async (
         amount,
         type: "CREDIT",
         description,
+        branchId: user?.Employee.branchId,
         journalEntryId: journalEntryNumber,
         subAccountType,
         attachment,
@@ -3154,6 +3176,7 @@ export const updateAccountPayable = async (
 export const createAccountReceivable = async (
   values: z.infer<typeof AccountReceivableValidators>
 ) => {
+  const { user } = await useUser();
   const validatedField = AccountReceivableValidators.safeParse(values);
 
   if (!validatedField.success) {
@@ -3193,6 +3216,7 @@ export const createAccountReceivable = async (
         accountType,
         amount,
         type: "DEBIT",
+        branchId: user?.Employee.branchId,
         description,
         journalEntryId: nextJournalEntryNumber,
         subAccountType,
@@ -3218,6 +3242,7 @@ export const updateAccountReceivable = async (
   values: z.infer<typeof AccountReceivableValidators>,
   id: string
 ) => {
+  const { user } = await useUser();
   if (!id) {
     return { error: "Account Receivable ID is required" };
   }
@@ -3271,6 +3296,7 @@ export const updateAccountReceivable = async (
         accountType,
         amount,
         type: "DEBIT",
+        branchId: user?.Employee.branchId,
         description,
         journalEntryId: journalEntryNumber,
         attachment,
@@ -3322,6 +3348,8 @@ export const markAsPaid = async (id: string) => {
 export const createTransaction = async (
   values: z.infer<typeof TransactionValidators>
 ) => {
+  const { user } = await useUser();
+
   const validatedField = TransactionValidators.safeParse(values);
 
   if (!validatedField.success) {
@@ -3370,6 +3398,7 @@ export const createTransaction = async (
           accountType,
           amount,
           type,
+          branchId: user?.Employee.branchId,
           description,
           subAccountType,
           attachment,
@@ -3397,6 +3426,8 @@ export const updateTransaction = async (
   values: z.infer<typeof TransactionValidators>,
   id: string
 ) => {
+  const { user } = await useUser();
+
   if (!id) {
     return { error: "Transaction ID is required" };
   }
@@ -3460,6 +3491,7 @@ export const updateTransaction = async (
           amount,
           type,
           description,
+          branchId: user?.Employee.branchId,
           subAccountType,
           attachment,
           journalEntryId: journalEntryNumber,

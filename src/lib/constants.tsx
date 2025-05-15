@@ -149,6 +149,10 @@ export const SIDEBAR_HEAD_HR = [
         url: "/head/applicants-list",
       },
       {
+        title: "Applicant Request",
+        url: "/head/client-management/applicant-request",
+      },
+      {
         title: "Employee Management",
         url: "#",
         items: [
@@ -579,6 +583,10 @@ export const SIDEBAR_SUPERADMIN = [
         url: "/superadmin/settings",
       },
       {
+        title: "Onboarding & Training",
+        url: "/superadmin/onboarding-training",
+      },
+      {
         title: "Logs",
         url: "/superadmin/logs",
       },
@@ -639,10 +647,6 @@ export const SIDEBAR_SUPERADMIN = [
         title: "Leave Management",
         url: "/superadmin/leave-management",
       },
-      {
-        title: "Onboarding & Training",
-        url: "/superadmin/onboarding-training",
-      },
     ],
   },
   {
@@ -659,10 +663,6 @@ export const SIDEBAR_SUPERADMIN = [
           },
           { title: "Add Client", url: "/superadmin/client-management/create" },
         ],
-      },
-      {
-        title: "Sales Monitoring",
-        url: "/superadmin/sales-monitoring",
       },
       {
         title: "Ticket Management",
@@ -693,10 +693,6 @@ export const SIDEBAR_SUPERADMIN = [
           },
         ],
       },
-      {
-        title: "Client Payment Management",
-        url: "/superadmin/client-payment-management",
-      },
     ],
   },
   {
@@ -710,10 +706,6 @@ export const SIDEBAR_SUPERADMIN = [
       {
         title: "Shift Monitoring",
         url: "/superadmin/shift-monitoring",
-      },
-      {
-        title: "Onboarding & Training",
-        url: "/superadmin/onboarding-training",
       },
       {
         title: "Employee Evaluation",
@@ -752,16 +744,8 @@ export const SIDEBAR_SUPERADMIN = [
         url: "/superadmin/inventory-management",
       },
       {
-        title: "Withdrawal Management",
-        url: "/superadmin/withdrawal-management",
-      },
-      {
         title: "List of Purchase Orders",
         url: "/superadmin/purchase-orders",
-      },
-      {
-        title: "Purchase Request",
-        url: "/superadmin/purchase-request",
       },
     ],
   },

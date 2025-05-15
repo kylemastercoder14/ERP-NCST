@@ -14,7 +14,7 @@ import RecentDatatableActions, {
   Column,
 } from "@/components/global/recent-datatable-actions";
 
-const HRDashboard = async () => {
+const HRDashboard = async ({ branchId }: { branchId: string }) => {
   // Date ranges
   const currentMonthStart = startOfMonth(new Date());
   const currentMonthEnd = endOfMonth(new Date());
@@ -33,12 +33,15 @@ const HRDashboard = async () => {
     ] = await Promise.all([
       // Total Employees Count
       Promise.all([
-        db.employee.count(),
-        db.employee.count({ where: { createdAt: { lte: lastMonthEnd } } }),
+        db.employee.count({ where: { branchId } }),
+        db.employee.count({
+          where: { createdAt: { lte: lastMonthEnd }, branchId },
+        }),
       ]),
 
       // Gender Distribution
       db.employee.groupBy({
+        where: { branchId },
         by: ["sex"],
         _count: {
           _all: true,
@@ -47,6 +50,7 @@ const HRDashboard = async () => {
 
       // Department Distribution
       db.employee.groupBy({
+        where: { branchId },
         by: ["departmentId"],
         _count: {
           _all: true,
@@ -60,6 +64,7 @@ const HRDashboard = async () => {
       Promise.all([
         db.leaveManagement.count({
           where: {
+            Employee: { branchId },
             status: "Pending",
             createdAt: { gte: currentMonthStart, lte: currentMonthEnd },
           },
@@ -67,12 +72,14 @@ const HRDashboard = async () => {
         db.leaveManagement.count({
           where: {
             status: "Approved",
+            Employee: { branchId },
             createdAt: { gte: currentMonthStart, lte: currentMonthEnd },
           },
         }),
         db.leaveManagement.count({
           where: {
             status: "Pending",
+            Employee: { branchId },
             createdAt: { gte: lastMonthStart, lte: lastMonthEnd },
           },
         }),
@@ -83,11 +90,13 @@ const HRDashboard = async () => {
         db.employee.count({
           where: {
             isNewEmployee: true,
+            branchId,
             createdAt: { gte: currentMonthStart, lte: currentMonthEnd },
           },
         }),
         db.employee.count({
           where: {
+            branchId,
             isNewEmployee: true,
             createdAt: { gte: lastMonthStart, lte: lastMonthEnd },
           },
@@ -99,6 +108,7 @@ const HRDashboard = async () => {
         db.attendance.count({
           where: {
             status: "Late",
+            Employee: { branchId },
             date: {
               gte: format(currentMonthStart, "MMMM dd, yyyy"),
               lte: format(currentMonthEnd, "MMMM dd, yyyy"),
@@ -108,6 +118,7 @@ const HRDashboard = async () => {
         db.attendance.count({
           where: {
             status: "Absent",
+            Employee: { branchId },
             date: {
               gte: format(currentMonthStart, "MMMM dd, yyyy"),
               lte: format(currentMonthEnd, "MMMM dd, yyyy"),
@@ -117,6 +128,7 @@ const HRDashboard = async () => {
         db.attendance.count({
           where: {
             status: "Late",
+            Employee: { branchId },
             date: {
               gte: format(lastMonthStart, "MMMM dd, yyyy"),
               lte: format(lastMonthEnd, "MMMM dd, yyyy"),
@@ -208,12 +220,14 @@ const HRDashboard = async () => {
           const [pending, approved] = await Promise.all([
             db.leaveManagement.count({
               where: {
+                Employee: { branchId },
                 status: "Pending",
                 createdAt: { gte: monthStart, lte: monthEnd },
               },
             }),
             db.leaveManagement.count({
               where: {
+                Employee: { branchId },
                 status: "Approved",
                 createdAt: { gte: monthStart, lte: monthEnd },
               },
@@ -237,6 +251,7 @@ const HRDashboard = async () => {
     // Recent HR activities
     const recentLogs = await db.logs.findMany({
       where: {
+        User: { Employee: { branchId } },
         department: {
           name: "HR",
         },

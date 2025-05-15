@@ -12,15 +12,20 @@ const Page = async (props: {
   }>;
 }) => {
   const params = await props.params;
-  const data = await db.applicantList.findMany({
+  const data = await db.logs.findMany({
     orderBy: {
       createdAt: "desc",
     },
     where: {
-      branchId: params.branchId,
+      User: {
+        Employee: {
+          branchId: params.branchId,
+        },
+      },
     },
     include: {
-      Branch: true,
+      department: true,
+      User: { include: { Employee: true } },
     },
   });
 
@@ -28,10 +33,9 @@ const Page = async (props: {
     data.map((item) => {
       return {
         id: item.id,
-        name: item.firstName + " " + item.lastName,
-        email: item.email,
-        resume: item.resume,
-        branch: item.Branch?.name || "N/A",
+        action: item.action,
+        department: item.department.name,
+        user: item.User.Employee.firstName + " " + item.User.Employee.lastName,
         createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),
       };
     }) || [];
@@ -39,10 +43,7 @@ const Page = async (props: {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <Heading
-          title="List of Applicants"
-          description="Manage all the applicants here."
-        />
+        <Heading title="Logs" description="Manage all the logs here." />
       </div>
       <Separator className="my-5" />
       <Client data={formattedData} />

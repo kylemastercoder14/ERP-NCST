@@ -45,7 +45,7 @@ const generateDynamicColors = (count: number) => {
   return baseColors.slice(0, count);
 };
 
-const OperationsDashboard = async () => {
+const OperationsDashboard = async ({ branchId }: { branchId: string }) => {
   // Date ranges
   const currentMonthStart = startOfMonth(new Date());
   const currentMonthEnd = endOfMonth(new Date());
@@ -66,6 +66,7 @@ const OperationsDashboard = async () => {
       Promise.all([
         db.employee.count({
           where: {
+            branchId,
             Department: {
               name: "Operation",
             },
@@ -73,6 +74,7 @@ const OperationsDashboard = async () => {
         }),
         db.employee.count({
           where: {
+            branchId,
             createdAt: { lte: lastMonthEnd },
             Department: {
               name: "Operation",
@@ -85,6 +87,7 @@ const OperationsDashboard = async () => {
       db.employee.groupBy({
         by: ["clientId"],
         where: {
+          branchId,
           Department: {
             name: "Operation",
           },
@@ -103,6 +106,9 @@ const OperationsDashboard = async () => {
               lte: currentMonthEnd.toISOString(),
             },
             status: "Approved",
+            Employee: {
+              branchId,
+            },
           },
         }),
         db.extraShift.count({
@@ -112,6 +118,9 @@ const OperationsDashboard = async () => {
               lte: lastMonthEnd.toISOString(),
             },
             status: "Approved",
+            Employee: {
+              branchId,
+            },
           },
         }),
       ]),
@@ -126,6 +135,9 @@ const OperationsDashboard = async () => {
                 rating: { gte: 4 },
               },
             },
+            employee: {
+              branchId,
+            },
           },
         }),
         db.evaluation.count({
@@ -135,6 +147,9 @@ const OperationsDashboard = async () => {
               some: {
                 rating: { gte: 4 },
               },
+            },
+            employee: {
+              branchId,
             },
           },
         }),
@@ -153,6 +168,7 @@ const OperationsDashboard = async () => {
               Department: {
                 name: "Operation",
               },
+              branchId,
             },
           },
         }),
@@ -167,6 +183,7 @@ const OperationsDashboard = async () => {
               Department: {
                 name: "Operation",
               },
+              branchId,
             },
           },
         }),
@@ -300,11 +317,17 @@ const OperationsDashboard = async () => {
                     rating: { gte: 4 },
                   },
                 },
+                employee: {
+                  branchId,
+                },
               },
             }),
             db.evaluation.count({
               where: {
                 createdAt: { gte: monthStart, lte: monthEnd },
+                employee: {
+                  branchId,
+                },
               },
             }),
           ]);
@@ -328,6 +351,11 @@ const OperationsDashboard = async () => {
       where: {
         department: {
           name: "Operations",
+        },
+        User: {
+          Employee: {
+            branchId,
+          },
         },
       },
       orderBy: {

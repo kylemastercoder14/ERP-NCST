@@ -8,7 +8,12 @@ import { BaseSalaryColumn } from "./_components/column";
 import { format } from "date-fns";
 import BaseSalaryClient from "./_components/client";
 
-const Page = async () => {
+const Page = async (props: {
+  params: Promise<{
+    branchId: string;
+  }>;
+}) => {
+  const params = await props.params;
   const data = await db.baseSalary.findMany({
     orderBy: {
       createdAt: "desc",
@@ -19,6 +24,11 @@ const Page = async () => {
           Department: true,
           JobTitle: true,
         },
+      },
+    },
+    where: {
+      Employee: {
+        branchId: params.branchId,
       },
     },
   });
@@ -45,7 +55,9 @@ const Page = async () => {
           description="Manage all the base salary here. This will help the system in computing the employee's salary."
         />
         <Button size="sm">
-          <Link href={`/head/payroll-management/base-salary/create`}>+ Add Base Salary</Link>
+          <Link href={`/head/payroll-management/base-salary/create`}>
+            + Add Base Salary
+          </Link>
         </Button>
       </div>
       <Separator className="my-5" />

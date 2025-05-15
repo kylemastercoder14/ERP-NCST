@@ -8,10 +8,20 @@ import { LeaveManagementColumn } from "./_components/column";
 import { format } from "date-fns";
 import ApplicantClient from "./_components/client";
 
-const Page = async () => {
+const Page = async (props: {
+  params: Promise<{
+    branchId: string;
+  }>;
+}) => {
+  const params = await props.params;
   const data = await db.leaveManagement.findMany({
     orderBy: {
       createdAt: "desc",
+    },
+    where: {
+      Employee: {
+        branchId: params.branchId,
+      },
     },
     include: {
       Employee: true,

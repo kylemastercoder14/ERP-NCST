@@ -6,10 +6,16 @@ import { PayslipGenerationColumn } from "./_components/column";
 import { format } from "date-fns";
 import PayslipGenerationClient from "./_components/client";
 
-const Page = async () => {
+const Page = async (props: {
+  params: Promise<{
+    branchId: string;
+  }>;
+}) => {
+  const params = await props.params;
   const data = await db.employee.findMany({
     where: {
       isNewEmployee: false,
+      branchId: params.branchId,
       BaseSalary: {
         some: {
           amount: { gt: 0 },

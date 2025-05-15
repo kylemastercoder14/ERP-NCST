@@ -118,10 +118,10 @@ export const ApplicantValidators = z.object({
   employment: z
     .array(
       z.object({
-        from: z.string().min(1, { message: "Date started is required" }),
-        to: z.string().min(1, { message: "Date ended is required" }),
-        position: z.string().min(1, { message: "Position is required" }),
-        company: z.string().min(1, { message: "Company is required" }),
+        from: z.string().optional(),
+        to: z.string().optional(),
+        position: z.string().optional(),
+        company: z.string().optional(),
       })
     )
     .optional(),
