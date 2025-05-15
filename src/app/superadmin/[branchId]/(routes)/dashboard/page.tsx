@@ -9,13 +9,15 @@ import CRMDashboard from "./_components/crm-dashboard";
 import { DepartmentSelector } from "./_components/department-selector";
 import { DashboardWrapper } from "./_components/dashboard-wrapper";
 
-export default async function DashboardPage({
-  searchParams,
-  params
-}: {
+interface DashboardPageProps {
   searchParams: { department?: string };
   params: { branchId: string };
-}) {
+}
+
+export default function DashboardPage({
+  searchParams,
+  params
+}: DashboardPageProps) {
   const validDepartments = [
     "Human Resource",
     "Finance",

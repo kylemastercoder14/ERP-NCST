@@ -13,16 +13,19 @@ import {
 export function DepartmentSelector({ defaultValue }: { defaultValue: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const parameters = useParams();
+  const params = useParams<{ branchId: string }>();
   const [isChanging, setIsChanging] = useState(false);
 
   const handleChange = (value: string) => {
     setIsChanging(true);
 
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("department", value);
+    const newParams = new URLSearchParams(searchParams.toString());
+    newParams.set("department", value);
 
-    router.push(`/superadmin/${parameters.branchId}/dashboard?${params.toString()}`, { scroll: false });
+    router.push(
+      `/superadmin/${params.branchId}/dashboard?${newParams.toString()}`,
+      { scroll: false }
+    );
 
     setTimeout(() => {
       setIsChanging(false);
