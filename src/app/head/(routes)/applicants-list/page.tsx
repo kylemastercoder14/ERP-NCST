@@ -14,6 +14,7 @@ const Page = async () => {
     include: {
       Department: true,
       JobTitle: true,
+      Branch: true,
     },
   });
 
@@ -24,7 +25,7 @@ const Page = async () => {
         name: item.firstName + " " + item.lastName,
         email: item.email,
         resume: item.resume,
-        branch: item.branch,
+        branch: item.Branch?.name || "N/A",
         department: item.Department?.name || "N/A",
         jobTitle: item.JobTitle?.name || "N/A",
         departmentId: item.departmentId || "",

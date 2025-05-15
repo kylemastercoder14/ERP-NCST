@@ -11,6 +11,9 @@ const Page = async () => {
     orderBy: {
       createdAt: "desc",
     },
+    include: {
+      Branch: true,
+    }
   });
 
   const formattedData: Column[] =
@@ -20,7 +23,7 @@ const Page = async () => {
         name: item.firstName + " " + item.lastName,
         email: item.email,
         resume: item.resume,
-        branch: item.branch,
+        branch: item.Branch?.name || "N/A",
         createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),
       };
     }) || [];
