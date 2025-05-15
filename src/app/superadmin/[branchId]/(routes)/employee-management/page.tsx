@@ -9,9 +9,14 @@ import { format } from "date-fns";
 import ApplicantClient from "./_components/client";
 import { useUser } from "@/hooks/use-user";
 
-const Page = async () => {
+const Page = async (props: {
+  params: Promise<{
+    branchId: string;
+  }>;
+}) => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { user } = await useUser();
+  const params = await props.params;
   const data = await db.employee.findMany({
     where: {
       isNewEmployee: false,
@@ -49,7 +54,7 @@ const Page = async () => {
           description="Manage all the employees information here."
         />
         <Button size="sm">
-          <Link href={`/head/employee-management/create`}>+ Add Employee</Link>
+          <Link href={`/superadmin/${params.branchId}/employee-management/create`}>+ Add Employee</Link>
         </Button>
       </div>
       <Separator className="my-5" />
