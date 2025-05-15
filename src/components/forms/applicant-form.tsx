@@ -25,13 +25,15 @@ const ApplicantForm = ({
   jobTitles,
   departments,
   isNewApplicant = false,
-  branches
+  branches,
+  initialBranch,
 }: {
   initialData: EmployeeWithProps | null;
   jobTitles: JobTitle[];
   departments: Department[];
   isNewApplicant?: boolean;
-  branches: Branch[]
+  branches: Branch[];
+  initialBranch?: string;
 }) => {
   const action = initialData ? "Save Changes" : "Submit";
   const router = useRouter();
@@ -82,7 +84,7 @@ const ApplicantForm = ({
       philhealthNo: initialData?.philhealthNo || "",
       pagibigNo: initialData?.pagibigNo || "",
       signature: initialData?.signature || "",
-      branch: initialData?.branchId || branch || "",
+      branch: initialData?.branchId || branch || initialBranch || "",
       isOnlyChild: true,
       isNewEmployee: initialData?.isNewEmployee || true,
       children:
@@ -260,6 +262,16 @@ const ApplicantForm = ({
   const presentAddress = form.watch("presentAddress");
   const isOnlyChild = form.watch("isOnlyChild");
 
+  // Watch the positionDesired field value
+  const selectedJobTitleId = form.watch("positionDesired");
+
+  // Filter department based on job position department
+  const filteredDepartment = selectedJobTitleId
+    ? jobTitles.find((d) => d.id === selectedJobTitleId)?.name === "Trainer"
+      ? departments.filter((department) => department.name === "Operation")
+      : departments
+    : departments;
+
   useEffect(() => {
     if (isSameWithPresent) {
       form.setValue("provincialAddress", presentAddress);
@@ -274,7 +286,10 @@ const ApplicantForm = ({
         const res = await updateApplicant(initialData.id, values);
         if (res.success) {
           toast.success(res.success);
-          router.push("/head/employee-management");
+          setTimeout(() => {
+            window.location.reload();
+            router.refresh();
+          }, 2000);
         } else {
           toast.error(res.error);
         }
@@ -282,7 +297,10 @@ const ApplicantForm = ({
         const res = await createApplicant(values);
         if (res.success) {
           toast.success(res.success);
-          router.push("/head/employee-management");
+          setTimeout(() => {
+            window.location.reload();
+            router.refresh();
+          }, 2000);
         } else {
           toast.error(res.error);
         }
@@ -336,7 +354,7 @@ const ApplicantForm = ({
                 fieldType={FormFieldType.SELECT}
                 isRequired={true}
                 name="department"
-                dynamicOptions={departments.map((department) => ({
+                dynamicOptions={filteredDepartment.map((department) => ({
                   value: department.id,
                   label: department.name,
                 }))}
@@ -353,7 +371,7 @@ const ApplicantForm = ({
                   value: branch.id,
                   label: branch.name,
                 }))}
-                disabled={isSubmitting || !!branch}
+                disabled={isSubmitting || !!branch || !!initialBranch}
                 label="Branch"
                 placeholder="Select branch"
               />
@@ -365,7 +383,9 @@ const ApplicantForm = ({
                 isRequired={true}
                 name="email"
                 disabled={
-                  !!initialData?.UserAccount?.email?.trim() || isSubmitting || !!email
+                  !!initialData?.UserAccount?.email?.trim() ||
+                  isSubmitting ||
+                  !!email
                 }
                 label="Email Address"
                 placeholder="Enter email address"

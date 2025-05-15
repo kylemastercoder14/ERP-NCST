@@ -27,7 +27,7 @@ const WithdrawalSlipClient = ({ data }: { data: WithdrawalWithProps }) => {
             size: A5 landscape; /* A5 size, landscape orientation */
             margin: 10mm;
           }
-            body { font-family: Arial, sans-serif; padding: 10px; }
+            body { font-family: Arial, sans-serif; padding: 10px; color: black; }
             table { width: 100%; border-collapse: collapse; }
             th, td { border: 1px solid #000; padding: 8px; text-align: left; }
             .withdrawal-slip-container {

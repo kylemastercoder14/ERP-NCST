@@ -151,7 +151,7 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
                     switch (field.name) {
                       case "sssNo":
                         value = value
-                          .slice(0, 11)
+                          .slice(0, 10)
                           .replace(/^(\d{2})(\d{7})(\d{0,1})$/, "$1-$2-$3");
                         break;
                       case "pagibigNo":

@@ -51,7 +51,7 @@ const PrintInvoiceClient = ({ data }: { data: PrintInvoiceClientProps }) => {
         <head>
           <title>Invoice ${invoiceNumber} - ${supplierInfo?.Item?.Supplier?.name || "Invoice"}</title>
           <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
+            body { font-family: Arial, sans-serif; padding: 20px; color: black; }
             table { width: 100%; border-collapse: collapse; margin: 15px 0; }
             th, td { border: 1px solid #ddd; padding: 12px 8px; text-align: left; }
             th { background-color: #f2f2f2; }

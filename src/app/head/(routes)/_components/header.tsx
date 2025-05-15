@@ -29,7 +29,7 @@ const Header = ({user}: {user: UserWithProps}) => {
     );
   }
 
-  const department = `${user.Employee.Branch?.name} | ${user?.Employee.Department.name} Department (${user?.Employee.JobTitle.name})`;
+  const department = `${user?.Employee.Branch?.name ?? ""} | ${user?.Employee.Department?.name ?? ""} Department (${user?.Employee.JobTitle?.name ?? ""})`;
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 px-4">

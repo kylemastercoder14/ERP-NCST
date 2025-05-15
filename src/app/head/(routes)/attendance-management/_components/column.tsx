@@ -12,6 +12,7 @@ export type AttendanceColumn = {
   timeIn: string;
   timeOut: string;
   attendanceStatus: string;
+  hasOvertime: boolean;
   createdAt: string;
 };
 
@@ -112,6 +113,23 @@ export const columns: ColumnDef<AttendanceColumn>[] = [
             {row.original.attendanceStatus}
           </div>
         </div>
+      );
+    },
+  },
+  {
+    accessorKey: "hasOvertime",
+    header: "Overtime",
+    cell: ({ row }) => {
+      return row.original.hasOvertime ? (
+        <div className="flex items-center">
+          <span className="relative flex h-2 w-2 mr-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+          </span>
+          <span className="text-xs">Overtime</span>
+        </div>
+      ) : (
+        <span className="text-xs text-muted-foreground">No</span>
       );
     },
   },

@@ -5,6 +5,7 @@ import ApplicantForm from "@/components/forms/applicant-form";
 const Page = async (props: {
   params: Promise<{
     applicantId: string;
+    branchId: string;
   }>;
 }) => {
   const params = await props.params;
@@ -62,6 +63,7 @@ const Page = async (props: {
         departments={departments}
         branches={branches}
         initialData={transformedApplicant}
+        initialBranch={params.branchId}
       />
     </div>
   );

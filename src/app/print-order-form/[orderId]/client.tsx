@@ -43,7 +43,7 @@ const PrintOrderFormClient = ({
         <head>
           <title>Order Form</title>
           <style>
-            body { font-family: Arial, sans-serif; padding: 10px; }
+            body { font-family: Arial, sans-serif; padding: 10px; color: black; }
             table { width: 100%; border-collapse: collapse; }
             th, td { border: 1px solid #000; padding: 8px; text-align: left; }
             .order-form-container {

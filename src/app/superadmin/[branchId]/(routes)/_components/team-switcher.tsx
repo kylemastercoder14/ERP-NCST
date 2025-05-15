@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/sidebar";
 import Image from "next/image";
 import { Branch } from "@prisma/client";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useParams } from "next/navigation";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -32,7 +32,11 @@ export function TeamSwitcher({ branches }: { branches: Branch[] }) {
   const { isMobile } = useSidebar();
   const router = useRouter();
   const pathname = usePathname();
-  const currentBranchId = pathname.split("/")[2];
+  const params = useParams();
+
+  // Get current branchId from params instead of parsing pathname
+  const currentBranchId = params.branchId as string;
+
   const [open, setOpen] = React.useState(false);
   const [branch, setBranch] = React.useState("");
   const [loading, setLoading] = React.useState(false);
@@ -45,7 +49,7 @@ export function TeamSwitcher({ branches }: { branches: Branch[] }) {
       const res = await createBranch(branch);
       if (res.branchData) {
         toast.success("Branch created successfully");
-        router.push(`/superadmin/${res.branchData}/dashboard`);
+        router.replace(`/superadmin/${res.branchData}/dashboard`);
       } else {
         toast.error(res.error);
       }
@@ -135,7 +139,13 @@ export function TeamSwitcher({ branches }: { branches: Branch[] }) {
                 <DropdownMenuItem
                   key={team.id}
                   onClick={() => {
-                    router.push(`/superadmin/${team.id}/dashboard`);
+                    // Construct the new path with the selected branchId
+                    const newPath = pathname.replace(
+                      /\/superadmin\/[^/]+/,
+                      `/superadmin/${team.id}`
+                    );
+                    // Use replace instead of push
+                    router.replace(newPath);
                   }}
                   className={cn(
                     "gap-2 p-2",

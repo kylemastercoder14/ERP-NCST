@@ -35,6 +35,7 @@ export const useUser = async () => {
             EducationRecord: true,
             EmploymentRecord: true,
             CharacterReferences: true,
+            Branch: true,
           },
         },
       },

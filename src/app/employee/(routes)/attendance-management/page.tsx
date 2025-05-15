@@ -18,12 +18,27 @@ const Page = async () => {
 
   const user = await db.userAccount.findUnique({
     where: { id: userId },
-    select: { employeeId: true },
+    select: {
+      employeeId: true,
+      Employee: {
+        select: {
+          firstName: true,
+          middleName: true,
+          lastName: true,
+          licenseNo: true,
+          Department: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+    },
   });
 
   if (!user?.employeeId) {
-	console.log("⚠️ No employeeId found for this user");
-	return;
+    console.log("⚠️ No employeeId found for this user");
+    return;
   }
 
   const data = await db.attendance.findMany({
@@ -38,17 +53,39 @@ const Page = async () => {
     },
   });
 
-  const formattedData: AttendanceColumn[] =
-    data.map((item) => {
-      return {
-        id: item.id,
-        timeIn: item.timeIn || "--",
-        timeOut: item.timeOut || "--",
-        attendanceStatus: item.status,
-        date: item.date,
-        createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),
-      };
-    }) || [];
+  const overtimeData = await db.extraShift.findMany({
+    where: {
+      employeeId: user.employeeId,
+      status: "Approved",
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  const formatDateForComparison = (dateString: string) => {
+    return format(new Date(dateString), "yyyy-MM-dd");
+  };
+
+  const formattedData: AttendanceColumn[] = data.map((item) => {
+    // Check if there's approved overtime for this attendance date
+    const hasOvertime = overtimeData.some(
+      (ot) =>
+        formatDateForComparison(ot.date) === formatDateForComparison(item.date)
+    );
+
+    return {
+      id: item.id,
+      licenseNo: item.Employee.licenseNo || "N/A",
+      name: `${item.Employee.firstName} ${item.Employee.middleName || ""} ${item.Employee.lastName}`.trim(),
+      timeIn: item.timeIn || "--",
+      timeOut: item.timeOut || "--",
+      attendanceStatus: item.status,
+      date: item.date,
+      createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),
+      hasOvertime: hasOvertime,
+    };
+  });
 
   return (
     <div>

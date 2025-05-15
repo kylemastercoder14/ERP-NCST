@@ -38,6 +38,16 @@ const Page = async () => {
     });
   }
 
+  const overtimeData = await db.extraShift.findMany({
+    where: {
+      employeeId: user?.employeeId,
+      status: "Approved",
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
   const formattedData: AttendanceColumn[] = data.map((item) => {
     // Helper function to safely format dates
     const safeFormat = (
@@ -53,6 +63,17 @@ const Page = async () => {
       }
     };
 
+    // Format both dates to the same format for comparison
+    const formatDateForComparison = (dateString: string) => {
+      return format(new Date(dateString), "yyyy-MM-dd");
+    };
+
+    // Check if there's approved overtime for this attendance date
+    const hasOvertime = overtimeData.some(
+      (ot) =>
+        formatDateForComparison(ot.date) === formatDateForComparison(item.date)
+    );
+
     return {
       id: item.id,
       licenseNo: item.Employee.licenseNo || "N/A",
@@ -62,6 +83,7 @@ const Page = async () => {
       attendanceStatus: item.status,
       date: item.date,
       createdAt: safeFormat(item.createdAt, "MMMM dd, yyyy"),
+      hasOvertime: hasOvertime,
     };
   });
 
