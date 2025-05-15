@@ -9,15 +9,19 @@ import CRMDashboard from "./_components/crm-dashboard";
 import { DepartmentSelector } from "./_components/department-selector";
 import { DashboardWrapper } from "./_components/dashboard-wrapper";
 
-interface DashboardPageProps {
+interface PageProps {
   searchParams: { department?: string };
-  params: { branchId: string };
+  params: Promise<{ branchId: string }>;
 }
 
-export default function DashboardPage({
+export default async function DashboardPage({
   searchParams,
-  params
-}: DashboardPageProps) {
+  params: paramsPromise,
+}: PageProps) {
+  // Await the params promise
+  const params = await paramsPromise;
+  const { branchId } = params;
+
   const validDepartments = [
     "Human Resource",
     "Finance",
@@ -32,7 +36,7 @@ export default function DashboardPage({
 
   if (!validDepartments.includes(department)) {
     department = "Human Resource";
-    redirect(`/superadmin/${params.branchId}/dashboard?department=Human+Resource`);
+    redirect(`/superadmin/${branchId}/dashboard?department=Human+Resource`);
   }
 
   const renderDashboard = () => {
@@ -58,9 +62,7 @@ export default function DashboardPage({
     <DashboardWrapper>
       <div className="flex items-center justify-between mb-3">
         <Heading title="Dashboard Overview" description="" />
-        <DepartmentSelector
-          defaultValue={department}
-        />
+        <DepartmentSelector defaultValue={department} branchId={branchId} />
       </div>
       {renderDashboard()}
     </DashboardWrapper>

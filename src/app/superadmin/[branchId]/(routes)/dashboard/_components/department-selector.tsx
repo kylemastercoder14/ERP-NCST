@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Select,
   SelectContent,
@@ -10,22 +10,28 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export function DepartmentSelector({ defaultValue }: { defaultValue: string }) {
+interface DepartmentSelectorProps {
+  defaultValue: string;
+  branchId: string;
+}
+
+export function DepartmentSelector({
+  defaultValue,
+  branchId,
+}: DepartmentSelectorProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const params = useParams<{ branchId: string }>();
   const [isChanging, setIsChanging] = useState(false);
 
   const handleChange = (value: string) => {
     setIsChanging(true);
 
-    const newParams = new URLSearchParams(searchParams.toString());
-    newParams.set("department", value);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("department", value);
 
-    router.push(
-      `/superadmin/${params.branchId}/dashboard?${newParams.toString()}`,
-      { scroll: false }
-    );
+    router.push(`/superadmin/${branchId}/dashboard?${params.toString()}`, {
+      scroll: false,
+    });
 
     setTimeout(() => {
       setIsChanging(false);
