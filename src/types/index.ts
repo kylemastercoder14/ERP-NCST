@@ -30,7 +30,7 @@ export interface EmployeeWithProps extends Employee {
   CharacterReferences: CharacterReferences[];
   JobTitle: JobTitle;
   Department: Department;
-  Branch: Branch;
+  Branch?: Branch;
   UserAccount?: UserAccount | null;
 }
 
