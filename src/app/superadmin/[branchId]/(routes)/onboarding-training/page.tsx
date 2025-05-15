@@ -21,6 +21,7 @@ const Page = async () => {
     include: {
       JobTitle: true,
       Department: true,
+      Branch: true,
     },
   });
 
@@ -42,7 +43,7 @@ const Page = async () => {
           gender: item.sex,
           civilStatus: item.civilStatus,
           departmentSession: departmentSession || "",
-          branch: item.branch,
+          branch: item.Branch?.name || "N/A",
           assessor: assessor,
           createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),
           updatedAt: format(
