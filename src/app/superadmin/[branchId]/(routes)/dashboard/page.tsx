@@ -11,8 +11,10 @@ import { DashboardWrapper } from "./_components/dashboard-wrapper";
 
 export default async function DashboardPage({
   searchParams,
+  params
 }: {
   searchParams: { department?: string };
+  params: { branchId: string };
 }) {
   const validDepartments = [
     "Human Resource",
@@ -28,7 +30,7 @@ export default async function DashboardPage({
 
   if (!validDepartments.includes(department)) {
     department = "Human Resource";
-    redirect("/superadmin/dashboard?department=Human+Resource");
+    redirect(`/superadmin/${params.branchId}/dashboard?department=Human+Resource`);
   }
 
   const renderDashboard = () => {
