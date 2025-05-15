@@ -9,18 +9,22 @@ import CRMDashboard from "./_components/crm-dashboard";
 import { DepartmentSelector } from "./_components/department-selector";
 import { DashboardWrapper } from "./_components/dashboard-wrapper";
 
-interface PageProps {
-  searchParams: { department?: string };
-  params: Promise<{ branchId: string }>;
-}
-
 export default async function DashboardPage({
   searchParams,
-  params: paramsPromise,
-}: PageProps) {
-  // Await the params promise
-  const params = await paramsPromise;
-  const { branchId } = params;
+  params,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+  params: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  // Await both promises
+  const [resolvedSearchParams, resolvedParams] = await Promise.all([
+    searchParams,
+    params,
+  ]);
+
+  const department =
+    resolvedSearchParams.department?.toString() || "Human Resource";
+  const branchId = resolvedParams.branchId?.toString() || "";
 
   const validDepartments = [
     "Human Resource",
@@ -31,11 +35,7 @@ export default async function DashboardPage({
     "Customer Relationship",
   ];
 
-  // Get and validate department
-  let department = searchParams.department || "Human Resource";
-
   if (!validDepartments.includes(department)) {
-    department = "Human Resource";
     redirect(`/superadmin/${branchId}/dashboard?department=Human+Resource`);
   }
 
