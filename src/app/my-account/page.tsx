@@ -12,12 +12,13 @@ const Page = async () => {
     },
     include: {
       UserAccount: true,
+      JobTitle: true,
     },
   });
 
   return (
     <div className='h-screen flex items-center justify-center'>
-      <ChangeAccount initialData={employee} />
+      <ChangeAccount initialData={employee} jobTitle={employee?.JobTitle.name as string} />
     </div>
   );
 };

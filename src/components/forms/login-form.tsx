@@ -55,7 +55,7 @@ export function LoginForm() {
         // If password is already hashed, proceed with normal role-based routing
         if (res.user?.Employee.JobTitle.name === "Regular Employee") {
           setTimeout(() => {
-            router.push("/employee/dashboard");
+            router.push("/employee/attendance-management");
           }, 1000);
         } else if (res.user?.Employee.JobTitle.name === "Head Department") {
           setTimeout(() => {

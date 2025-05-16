@@ -53,8 +53,10 @@ interface ChangeAccountFormProps extends Employee {
 
 const ChangeAccountForm = ({
   initialData,
+  jobTitle,
 }: {
   initialData: ChangeAccountFormProps | null;
+  jobTitle: string;
 }) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -118,7 +120,13 @@ const ChangeAccountForm = ({
       );
 
       toast.success("Account updated successfully!");
-      router.push("/head/dashboard");
+      if (jobTitle === "Head Department") {
+        router.push("/head/dashboard");
+      } else if (jobTitle === "Regular Employee") {
+        router.push("/employee/attendance-management");
+      } else {
+        router.push("/sign-in");
+      }
     } catch (error) {
       console.error("Error updating account:", error);
       toast.error("Error updating account");
