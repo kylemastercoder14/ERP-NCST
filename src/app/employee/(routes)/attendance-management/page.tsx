@@ -46,7 +46,7 @@ const Page = async () => {
       employeeId: user.employeeId,
     },
     orderBy: {
-      createdAt: "desc",
+      date: "desc",
     },
     include: {
       Employee: true,
