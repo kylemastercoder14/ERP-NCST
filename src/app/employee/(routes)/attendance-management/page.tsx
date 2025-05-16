@@ -8,11 +8,18 @@ import AttendanceClient from "./_components/client";
 import { useUser } from "@/hooks/use-user";
 import ClockInOut from "./_components/clock-in-out";
 
+const getLocalTime = (timezone: string = "Asia/Manila") => {
+  return new Date(
+    new Date().toLocaleString("en-US", { timeZone: timezone })
+  );
+};
+
 const Page = async () => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { userId } = await useUser();
 
-  const now = new Date();
+  const userTimezone = "Asia/Manila";
+  const now = getLocalTime(userTimezone); // 👈 Use the corrected local time
   const todayDate = format(now, "MMMM dd, yyyy");
   const currentTime = format(now, "hh:mm:ss a");
 
@@ -68,7 +75,6 @@ const Page = async () => {
   };
 
   const formattedData: AttendanceColumn[] = data.map((item) => {
-    // Check if there's approved overtime for this attendance date
     const hasOvertime = overtimeData.some(
       (ot) =>
         formatDateForComparison(ot.date) === formatDateForComparison(item.date)
