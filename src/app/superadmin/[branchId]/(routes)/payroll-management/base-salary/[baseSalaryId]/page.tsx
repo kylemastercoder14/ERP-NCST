@@ -28,7 +28,7 @@ const Page = async (props: {
 
   return (
     <div>
-      <BaseSalaryForm employees={employees} initialData={baseSalary} basePath={`/superadmin/${params.branchId}`} />
+      <BaseSalaryForm employees={employees} initialData={baseSalary} />
     </div>
   );
 };

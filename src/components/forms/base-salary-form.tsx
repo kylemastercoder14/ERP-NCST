@@ -20,11 +20,9 @@ import { BaseSalaryWithProps } from "@/types";
 const BaseSalaryForm = ({
   initialData,
   employees,
-  basePath,
 }: {
   initialData: BaseSalaryWithProps | null;
   employees: Employee[];
-  basePath?: string;
 }) => {
   const router = useRouter();
   const title = initialData ? "Edit Base Salary" : "Create Base Salary";
@@ -43,8 +41,6 @@ const BaseSalaryForm = ({
 
   const { isSubmitting } = form.formState;
 
-  const redirectPath = `${basePath}/payroll-management/base-salary`;
-
   const onSubmit = async (values: z.infer<typeof BaseSalaryValidators>) => {
     try {
       if (initialData) {
@@ -55,7 +51,7 @@ const BaseSalaryForm = ({
         );
         if (res.success) {
           toast.success(res.success);
-          router.push(redirectPath);
+          router.push("head/payroll-management/base-salary");
         } else {
           toast.error(res.error);
         }
@@ -63,7 +59,7 @@ const BaseSalaryForm = ({
         const res = await createBaseSalary(values, "superadmin");
         if (res.success) {
           toast.success(res.success);
-          router.push(redirectPath);
+          router.push("head/payroll-management/base-salary");
         } else {
           toast.error(res.error);
         }
