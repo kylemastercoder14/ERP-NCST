@@ -417,10 +417,6 @@ export const SIDEBAR_EMPLOYEE = [
     url: "#",
     items: [
       {
-        title: "Dashboard",
-        url: "/employee/dashboard",
-      },
-      {
         title: "Attendance Management",
         url: "/employee/attendance-management",
       },
