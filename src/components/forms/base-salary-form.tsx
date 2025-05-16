@@ -51,7 +51,7 @@ const BaseSalaryForm = ({
         );
         if (res.success) {
           toast.success(res.success);
-          router.push("head/payroll-management/base-salary");
+          router.push("/head/payroll-management/base-salary");
         } else {
           toast.error(res.error);
         }
@@ -59,7 +59,7 @@ const BaseSalaryForm = ({
         const res = await createBaseSalary(values, "superadmin");
         if (res.success) {
           toast.success(res.success);
-          router.push("head/payroll-management/base-salary");
+          router.push("/head/payroll-management/base-salary");
         } else {
           toast.error(res.error);
         }

@@ -25,7 +25,6 @@ const Page = async (props: {
     },
   });
 
-
   return (
     <div>
       <BaseSalaryForm employees={employees} initialData={baseSalary} />
