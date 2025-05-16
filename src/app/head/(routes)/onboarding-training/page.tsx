@@ -14,6 +14,7 @@ const Page = async () => {
   const data = await db.employee.findMany({
     where: {
       isNewEmployee: true,
+      branchId: user?.Employee.branchId,
     },
     orderBy: {
       createdAt: "desc",
