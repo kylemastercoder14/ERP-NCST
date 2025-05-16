@@ -100,7 +100,7 @@ model UserAccount {
   password String
 
   employeeId String
-  Employee   Employee @relation(fields: [employeeId], references: [id])
+  Employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
