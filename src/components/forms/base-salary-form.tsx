@@ -20,7 +20,7 @@ import { BaseSalaryWithProps } from "@/types";
 const BaseSalaryForm = ({
   initialData,
   employees,
-  basePath
+  basePath,
 }: {
   initialData: BaseSalaryWithProps | null;
   employees: Employee[];
@@ -48,10 +48,14 @@ const BaseSalaryForm = ({
   const onSubmit = async (values: z.infer<typeof BaseSalaryValidators>) => {
     try {
       if (initialData) {
-        const res = await updateBaseSalary(values, initialData?.id as string, "superadmin");
+        const res = await updateBaseSalary(
+          values,
+          initialData?.id as string,
+          "superadmin"
+        );
         if (res.success) {
           toast.success(res.success);
-          router.push(redirectPath);router.push(redirectPath);
+          router.push(redirectPath);
         } else {
           toast.error(res.error);
         }
