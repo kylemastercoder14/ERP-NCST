@@ -59,9 +59,9 @@ export const civil_status = ["Single", "Married", "Separated", "Widowed"];
 export const sex = ["Male", "Female"];
 
 export const education_levels = [
-  "Elementary",
-  "High School",
   "College",
   "Vocational",
-  "Special Skills",
+  "Senior High School",
+  "Junior High School",
+  "Elementary",
 ];

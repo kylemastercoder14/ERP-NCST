@@ -1,7 +1,7 @@
 import React from "react";
 import db from "@/lib/db";
 import ApplicantForm from "@/components/forms/applicant-form";
-import { useUser } from "../../../../../hooks/use-user";
+import { useUser } from "@/hooks/use-user";
 
 const Page = async (props: {
   params: Promise<{

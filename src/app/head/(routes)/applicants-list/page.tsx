@@ -26,6 +26,7 @@ const Page = async () => {
         email: item.email,
         resume: item.resume,
         branch: item.Branch?.name || "N/A",
+        branchId: item.branchId || "",
         department: item.Department?.name || "N/A",
         jobTitle: item.JobTitle?.name || "N/A",
         departmentId: item.departmentId || "",

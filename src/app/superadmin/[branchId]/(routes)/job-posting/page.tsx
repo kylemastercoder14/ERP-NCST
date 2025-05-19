@@ -16,6 +16,10 @@ const Page = async (props: {
   const { user } = await useUser();
   const params = await props.params;
   const data = await db.jobPosting.findMany({
+    where: {
+      branchId: params.branchId,
+      adminApproval: "Pending",
+    },
     orderBy: {
       createdAt: "desc",
     },
@@ -40,7 +44,15 @@ const Page = async (props: {
         </Button>
       </div>
       <Separator className="my-5" />
-      <JobPosting data={data} department={department as string} />
+      {data.length === 0 ? (
+        <div className="flex items-center justify-center w-full h-full">
+          <p className="text-muted-foreground">
+            No job postings available at the moment.
+          </p>
+        </div>
+      ) : (
+        <JobPosting data={data} department={department as string} />
+      )}
     </div>
   );
 };

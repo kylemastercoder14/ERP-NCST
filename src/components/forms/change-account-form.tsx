@@ -120,9 +120,9 @@ const ChangeAccountForm = ({
       );
 
       toast.success("Account updated successfully!");
-      if (jobTitle === "Head Department") {
+      if (jobTitle === "Head Department" || jobTitle === "Trainer") {
         router.push("/head/dashboard");
-      } else if (jobTitle === "Regular Employee") {
+      } else if (jobTitle === "Regular Employee" || jobTitle === "Reporting Manager") {
         router.push("/employee/attendance-management");
       } else {
         router.push("/sign-in");

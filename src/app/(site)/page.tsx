@@ -16,10 +16,12 @@ export default async function Home() {
     },
     where: {
       finacialStatus: "Approved",
+      adminApproval: "Approved",
     },
     include: {
       department: true,
       JobTitle: true,
+      Branch: true,
     }
   });
   return (

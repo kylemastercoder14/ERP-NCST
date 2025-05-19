@@ -4,7 +4,7 @@ import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { JobPostValidators } from "@/validators";
 import { toast } from "sonner";
 
@@ -21,13 +21,16 @@ const JobPostingForm = ({
   department,
   departments,
   jobPositions,
+  session,
 }: {
   initialData: JobPosting | null;
   department: string | null;
   departments: Department[];
   jobPositions: JobTitle[];
+  session?: string;
 }) => {
   const router = useRouter();
+  const params = useParams();
   const title = initialData ? "Edit Job Post" : "Create Job Post";
   const description = initialData
     ? "Please fill all the information to update the job post."
@@ -41,9 +44,9 @@ const JobPostingForm = ({
       description: initialData?.description || "",
       attachment: initialData?.attachment || "",
       financialStatus: initialData?.finacialStatus || "Pending",
+      adminApproval: initialData?.adminApproval || "Pending",
       department: initialData?.departmentId || "",
       jobPosition: initialData?.jobTitleId || "",
-      branch: initialData?.branchId || "",
     },
   });
 
@@ -66,7 +69,11 @@ const JobPostingForm = ({
         const res = await updateJobPost(values, initialData?.id as string);
         if (res.success) {
           toast.success(res.success);
-          router.push("/head/job-posting");
+          if (session === "superadmin") {
+            router.push(`/superadmin/${params.branchId}/job-posting`);
+          } else {
+            router.push("/head/job-posting");
+          }
         } else {
           toast.error(res.error);
         }
@@ -74,7 +81,11 @@ const JobPostingForm = ({
         const res = await createJobPost(values);
         if (res.success) {
           toast.success(res.success);
-          router.push("/head/job-posting");
+          if (session === "superadmin") {
+            router.push(`/superadmin/${params.branchId}/job-posting`);
+          } else {
+            router.push("/head/job-posting");
+          }
         } else {
           toast.error(res.error);
         }
@@ -148,20 +159,7 @@ const JobPostingForm = ({
               }))}
             />
           </div>
-          <CustomFormField
-            control={form.control}
-            fieldType={FormFieldType.SELECT}
-            isRequired={true}
-            name="branch"
-            disabled={isSubmitting}
-            label="Branch"
-            placeholder="Select the branch of the job post"
-            dynamicOptions={[
-              { value: "Cavite", label: "Cavite" },
-              { value: "Batangas", label: "Batangas" },
-            ]}
-          />
-          {department === "Finance" && (
+          {department === "Finance" && session !== "superadmin" && (
             <CustomFormField
               control={form.control}
               fieldType={FormFieldType.SELECT}
@@ -170,6 +168,22 @@ const JobPostingForm = ({
               disabled={isSubmitting}
               label="Finacial Status"
               placeholder="Select the finacial status of the job post"
+              dynamicOptions={[
+                { value: "Pending", label: "Pending" },
+                { value: "Approved", label: "Approved" },
+                { value: "Rejected", label: "Rejected" },
+              ]}
+            />
+          )}
+          {session === "superadmin" && (
+            <CustomFormField
+              control={form.control}
+              fieldType={FormFieldType.SELECT}
+              isRequired={true}
+              name="adminApproval"
+              disabled={isSubmitting}
+              label="Admin Approval"
+              placeholder="Select the admin approval of the job post"
               dynamicOptions={[
                 { value: "Pending", label: "Pending" },
                 { value: "Approved", label: "Approved" },

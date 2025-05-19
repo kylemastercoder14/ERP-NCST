@@ -60,7 +60,27 @@ export const ApplicantValidators = z.object({
   isSameWithPresent: z.boolean().default(false),
   telNo: z.string().optional(),
   celNo: z.string().min(1, { message: "Cellphone number is required" }),
-  dateOfBirth: z.string().min(1, { message: "Date of birth is required" }),
+  dateOfBirth: z
+    .string()
+    .min(1, { message: "Date of birth is required" })
+    .refine(
+      (dob) => {
+        const birthDate = new Date(dob);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+
+        if (
+          monthDiff < 0 ||
+          (monthDiff === 0 && today.getDate() < birthDate.getDate())
+        ) {
+          age--;
+        }
+
+        return age >= 18;
+      },
+      { message: "Employee must be 18 years old or above" }
+    ),
   placeOfBirth: z.string().min(1, { message: "Place of birth is required" }),
   civilStatus: z.string().min(1, { message: "Civil status is required" }),
   citizenship: z.string().min(1, { message: "Citizenship is required" }),
@@ -279,9 +299,9 @@ export const JobPostValidators = z.object({
   attachment: z.string().min(1, { message: "Attachment is required" }),
   description: z.string().min(1, { message: "Description is required" }),
   financialStatus: z.string().optional(),
+  adminApproval: z.string().optional(),
   department: z.string().min(1, { message: "Department is required" }),
   jobPosition: z.string().min(1, { message: "Job position is required" }),
-  branch: z.string().min(1, { message: "Branch is required" }),
 });
 
 export const SupplierManagementValidators = z.object({

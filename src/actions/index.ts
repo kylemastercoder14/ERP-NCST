@@ -54,6 +54,7 @@ import { ForgotPasswordEmailHTML } from "@/components/email-templates/forgot-pas
 import { InquiryEmailHTML } from "@/components/email-templates/contact";
 import { TicketStatus } from "@prisma/client";
 import { useDepartmentLog } from "@/hooks/use-department-log";
+import { ContractEmailHTML } from "../components/email-templates/client-contract";
 
 const { createDepartmentLog } = useDepartmentLog();
 
@@ -518,20 +519,36 @@ export const sendInitialInterviewEmployee = async (
 
   const { date, time, location } = validatedField.data;
 
-  // Format date normally
-  const formattedDate = new Date(date).toLocaleDateString("en-US", {
+  // Create date object in UTC
+  const dateObj = new Date(date);
+  const timeObj = new Date(time);
+
+  // Combine date and time in UTC
+  const combinedDateTime = new Date(
+    dateObj.getFullYear(),
+    dateObj.getMonth(),
+    dateObj.getDate(),
+    timeObj.getHours(),
+    timeObj.getMinutes()
+  );
+
+  // Format for display in Asia/Manila timezone
+  const formattedDate = combinedDateTime.toLocaleDateString("en-US", {
+    timeZone: "Asia/Manila",
     month: "long",
     day: "numeric",
     year: "numeric",
   });
 
-  // Format time manually
-  const rawTime = new Date(time); // if time is a Date
-  const formattedTime = rawTime.toLocaleTimeString("en-US", {
+  const formattedTime = combinedDateTime.toLocaleTimeString("en-US", {
+    timeZone: "Asia/Manila",
     hour: "2-digit",
     minute: "2-digit",
     hour12: true,
   });
+
+  // For database storage, store as ISO string or UTC timestamp
+  const dbTimestamp = combinedDateTime.toISOString(); // UTC format
 
   const htmlContent = await InitialInterviewDetailsHTML({
     email: email,
@@ -560,7 +577,7 @@ export const sendInitialInterviewEmployee = async (
 Congratulations! You are invited for an Initial Interview at BAT Security Services INC.
 
 Date: ${formattedDate}
-Time: ${formattedTime}
+Time: ${formattedTime} (Philippine Time)
 Location: ${location}
 
 Please arrive 10-15 minutes before your scheduled time and bring a valid ID and supporting documents.
@@ -571,9 +588,10 @@ Thank you and we look forward to meeting you!`,
 
   try {
     await transporter.sendMail(message);
+
     await createDepartmentLog(
       "Human Resource",
-      `Sent an email to ${email} for Initial Interview`
+      `Sent an email to ${email} for Initial Interview at ${dbTimestamp}`
     );
 
     return { success: "Email has been sent." };
@@ -766,7 +784,8 @@ export const sendAccountToEmail = async (
 };
 
 export const createApplicant = async (
-  values: z.infer<typeof ApplicantValidators>
+  values: z.infer<typeof ApplicantValidators>,
+  newApplicant?: boolean
 ) => {
   const validatedField = ApplicantValidators.safeParse(values);
 
@@ -918,15 +937,9 @@ export const createApplicant = async (
       },
     });
 
-    await createDepartmentLog(
-      "Human Resource",
-      `Created an employee with ID ${res.id}`
-    );
-
     const fullName = res.firstName + " " + res.lastName;
 
-    if (!isNewEmployee) {
-      // send automatic account in email
+    if (!isNewEmployee || newApplicant) {
       await sendAccountToEmail(email, userAccount.password, fullName);
     }
 
@@ -2566,6 +2579,7 @@ export const updateWithdrawalStatus = async (
 export const createClient = async (
   values: z.infer<typeof ClientManagementValidators>
 ) => {
+  const { user } = await useUser();
   const validatedField = ClientManagementValidators.safeParse(values);
 
   if (!validatedField.success) {
@@ -2583,6 +2597,7 @@ export const createClient = async (
         password,
         address: "",
         contactNo: "",
+        branchId: user?.Employee.branchId,
       },
     });
 
@@ -3569,6 +3584,7 @@ export const getItemById = async (id: string) => {
 export const createJobPost = async (
   values: z.infer<typeof JobPostValidators>
 ) => {
+  const { user } = await useUser();
   const validatedField = JobPostValidators.safeParse(values);
 
   if (!validatedField.success) {
@@ -3576,7 +3592,7 @@ export const createJobPost = async (
     return { error: `Validation Error: ${errors.join(", ")}` };
   }
 
-  const { title, description, attachment, jobPosition, department, branch } =
+  const { title, description, attachment, jobPosition, department } =
     validatedField.data;
 
   try {
@@ -3586,7 +3602,7 @@ export const createJobPost = async (
         description,
         attachment,
         jobTitleId: jobPosition,
-        branchId: branch,
+        branchId: user?.Employee.branchId,
         departmentId: department,
       },
     });
@@ -3625,9 +3641,9 @@ export const updateJobPost = async (
     description,
     attachment,
     financialStatus,
+    adminApproval,
     jobPosition,
     department,
-    branch,
   } = validatedField.data;
 
   try {
@@ -3638,16 +3654,11 @@ export const updateJobPost = async (
         description,
         attachment,
         finacialStatus: financialStatus,
+        adminApproval,
         jobTitleId: jobPosition,
-        branchId: branch,
         departmentId: department,
       },
     });
-
-    await createDepartmentLog(
-      "Human Resource",
-      `Updated job post information for ${title}`
-    );
 
     return { success: "Job post updated successfully" };
   } catch (error: any) {
@@ -4831,6 +4842,88 @@ export const createBranch = async (branch: string) => {
     console.error("Error creating branch", error);
     return {
       error: `Failed to create branch. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const sendContractToEmployee = async (
+  file: string,
+  employeeId: string,
+  email: string,
+  name: string
+) => {
+  if (!file || !employeeId || !email) {
+    return { error: "File, employee ID, and email are required" };
+  }
+
+  const signUrl = `https://bat-security-services-inc.vercel.app/contract-signing?employeeId=${employeeId}&file=${file}`;
+
+  const htmlContent = await ContractEmailHTML({
+    name,
+    file,
+    signUrl,
+  });
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: "bats3curity.9395@gmail.com",
+      pass: "wfffyihhttplludl",
+    },
+  });
+
+  const message = {
+    from: "bats3curity.9395@gmail.com",
+    to: email,
+    subject: `Action Required: Please Sign Your Employment Contract - BAT Security Services INC.`,
+    text: `Dear ${name},\n\nPlease review and sign your employment contract by clicking the link below:\n\n${signUrl}\n\nThis contract must be signed within 24 hours of receipt. If you have any questions about the terms, please contact HR before signing.\n\nBest regards,\nBAT Security Services INC.`,
+    html: htmlContent,
+  };
+
+  try {
+    await transporter.sendMail(message);
+
+    return { success: "Email has been sent." };
+  } catch (error) {
+    console.error("Error sending notification", error);
+    return { message: "An error occurred. Please try again." };
+  }
+};
+
+export const employeeContractSigning = async (
+  agreed: boolean,
+  signature: string,
+  employeeId: string
+) => {
+  if (!employeeId) {
+    return { error: "Employee ID is required" };
+  }
+
+  try {
+    if (agreed) {
+      await db.employee.update({
+        where: { id: employeeId },
+        data: {
+          isSignedContract: agreed,
+          signedContract: signature,
+        },
+      });
+    } else {
+      await db.employee.update({
+        where: { id: employeeId },
+        data: {
+          isSignedContract: false,
+          signedContract: null,
+          clientId: null,
+        },
+      });
+    }
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error signing contract", error);
+    return {
+      error: `Failed to sign contract. Please try again. ${error.message || ""}`,
     };
   }
 };

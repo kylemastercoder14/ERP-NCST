@@ -10,6 +10,7 @@ export type Column = {
   email: string;
   resume: string;
   branch: string;
+  branchId: string;
   department: string;
   jobTitle: string;
   jobTitleId: string;
@@ -138,7 +139,7 @@ export const columns: ColumnDef<Column>[] = [
         email={row.original.email}
         departmentId={row.original.departmentId}
         jobTitleId={row.original.jobTitleId}
-        branch={row.original.branch}
+        branchId={row.original.branchId}
       />
     ),
   },

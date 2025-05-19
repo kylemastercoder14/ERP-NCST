@@ -1,6 +1,6 @@
 "use client";
 
-import { Department, JobPosting, JobTitle } from "@prisma/client";
+import { Branch, Department, JobPosting, JobTitle } from "@prisma/client";
 import { format } from "date-fns";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller } from "react-hook-form";
 import * as z from "zod";
 import { toast } from "sonner";
 import { submitApplication } from "@/actions";
@@ -26,6 +25,7 @@ import { uploadFile } from "@/lib/upload";
 type JobPostingWithDepartment = JobPosting & {
   department: Department | null;
   JobTitle: JobTitle | null;
+  Branch: Branch | null;
 };
 
 // Form validation schema
@@ -33,7 +33,7 @@ const applyFormSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
-  branch: z.string().min(1, "Branch is required"),
+  branch: z.string().optional(),
   department: z.string().optional(),
   jobPosition: z.string().optional(),
   resume: z.any().refine((files) => files.length > 0, "Resume is required"),
@@ -55,7 +55,6 @@ const ApplyNowForm = ({
   const {
     register,
     handleSubmit,
-    control,
     formState: { errors },
     reset,
   } = useForm<ApplyFormValues>({
@@ -65,8 +64,8 @@ const ApplyNowForm = ({
       lastName: "",
       email: "",
       branch: jobPost.branchId || "",
-      jobPosition: jobPost?.JobTitle?.id || "",
-      department: jobPost?.department?.id || "",
+      jobPosition: jobPost?.jobTitleId || "",
+      department: jobPost?.departmentId || "",
       resume: null,
     },
   });
@@ -96,9 +95,9 @@ const ApplyNowForm = ({
           firstName: data.firstName,
           lastName: data.lastName,
           email: data.email,
-          branch: data.branch,
-          jobTitle: jobPost.JobTitle?.id ?? "",
-          department: jobPost.department?.id ?? "",
+          branch: jobPost.branchId || "",
+          jobTitle: jobPost.jobTitleId ?? "",
+          department: jobPost.departmentId ?? "",
           resume: uploadedUrl.url,
         },
         jobPostId
@@ -241,22 +240,12 @@ const ApplyNowForm = ({
         </div>
         <div>
           <Label htmlFor="branch">Branch</Label>
-          <Controller
-            name="branch"
-            control={control}
-            render={({ field }) => (
-              <Input
-                id="branch"
-                {...field}
-                placeholder="Enter branch"
-                className="mt-1"
-                disabled
-              />
-            )}
-          />
-          {errors.branch && (
-            <p className="mt-1 text-sm text-red-600">{errors.branch.message}</p>
-          )}
+          <Input
+              id="branch"
+              value={jobPost.Branch?.name || ""}
+              disabled
+              className="mt-1"
+            />
         </div>
 
         <div>

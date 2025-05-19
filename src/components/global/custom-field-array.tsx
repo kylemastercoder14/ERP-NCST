@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import CustomFormField from "@/components/global/custom-formfield";
-import { FormFieldType } from '@/lib/constants';
+import { FormFieldType } from "@/lib/constants";
 
 interface Column {
   label: string;
@@ -33,6 +33,7 @@ interface CustomFieldArrayProps {
   columns: Column[];
   disabled?: boolean;
   isRequired?: boolean;
+  sortFn?: (a: any, b: any) => number;
 }
 
 const CustomFieldArray: React.FC<CustomFieldArrayProps> = ({
@@ -43,49 +44,65 @@ const CustomFieldArray: React.FC<CustomFieldArrayProps> = ({
   remove,
   columns,
   disabled = false,
-  isRequired
+  isRequired,
+  sortFn,
 }) => {
+  const sortedFields = React.useMemo(() => {
+    if (!sortFn) return fields;
+    return [...fields].sort(sortFn);
+  }, [fields, sortFn]);
   return (
     <div className="space-y-1">
       <Table>
         <TableHeader>
           <TableRow>
             {columns.map((col) => (
-              <TableHead key={col.fieldName}>{col.label} {isRequired ? <span className='text-red-600'>*</span> : <span className='text-muted-foreground'>(optional)</span>}</TableHead>
+              <TableHead key={col.fieldName}>
+                {col.label}{" "}
+                {isRequired ? (
+                  <span className="text-red-600">*</span>
+                ) : (
+                  <span className="text-muted-foreground">(optional)</span>
+                )}
+              </TableHead>
             ))}
             <TableHead>Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {fields.map((field, index) => (
-            <TableRow key={field.id}>
-              {columns.map((col) => (
-                <TableCell key={col.fieldName}>
-                  <CustomFormField
-                    control={control}
-                    fieldType={col.fieldType}
-                    isRequired={col.isRequired}
-                    name={`${name}.${index}.${col.fieldName}`}
-                    disabled={disabled}
-                    placeholder={`Enter ${col.label.toLowerCase()}`}
-                    dynamicOptions={col.dynamicOptions}
-                  />
+          {sortedFields.map((field) => {
+            // Find the original index to handle remove correctly
+            const originalIndex = fields.findIndex((f) => f.id === field.id);
+            return (
+              <TableRow key={field.id}>
+                {columns.map((col) => (
+                  <TableCell key={col.fieldName}>
+                    <CustomFormField
+                      control={control}
+                      fieldType={col.fieldType}
+                      isRequired={col.isRequired}
+                      name={`${name}.${originalIndex}.${col.fieldName}`}
+                      disabled={disabled}
+                      placeholder={`Enter ${col.label.toLowerCase()}`}
+                      dynamicOptions={col.dynamicOptions}
+                    />
+                  </TableCell>
+                ))}
+                <TableCell>
+                  {originalIndex > 0 && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => remove(originalIndex)}
+                    >
+                      Delete
+                    </Button>
+                  )}
                 </TableCell>
-              ))}
-              <TableCell>
-                {index > 0 && (
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => remove(index)}
-                  >
-                    Delete
-                  </Button>
-                )}
-              </TableCell>
-            </TableRow>
-          ))}
+              </TableRow>
+            );
+          })}
         </TableBody>
         <TableFooter>
           <TableRow>

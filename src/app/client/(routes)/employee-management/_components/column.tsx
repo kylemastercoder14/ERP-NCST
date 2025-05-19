@@ -7,6 +7,7 @@ import { CellAction } from "./cell-action";
 export type ApplicantColumn = {
   id: string;
   licenseNo: string;
+  email: string;
   name: string;
   phoneNumber: string;
   address: string;
@@ -148,7 +149,7 @@ export const columns: ColumnDef<ApplicantColumn>[] = [
     accessorKey: "actions",
     header: "",
     cell: ({ row }) => (
-      <CellAction id={row.original.id} name={row.original.name} />
+      <CellAction id={row.original.id} name={row.original.name} email={row.original.email} />
     ),
   },
 ];

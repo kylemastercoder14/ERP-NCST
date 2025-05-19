@@ -7,9 +7,15 @@ import db from "@/lib/db";
 import { ClientColumn } from "./_components/column";
 import { format } from "date-fns";
 import CompanyClient from "./_components/client";
+import { useUser } from "@/hooks/use-user";
 
 const Page = async () => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { user } = await useUser();
   const data = await db.client.findMany({
+    where: {
+      branchId: user?.Employee.branchId,
+    },
     orderBy: {
       createdAt: "desc",
     },
@@ -25,7 +31,8 @@ const Page = async () => {
         name: item.name,
         logo: item.logo || "",
         email: item.email,
-        contactNo: item.contactNo === "" ? "No contact number provided" : item.contactNo,
+        contactNo:
+          item.contactNo === "" ? "No contact number provided" : item.contactNo,
         address: item.address === "" ? "No address provided" : item.address,
         employeeCount: item.Employee.length,
         createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),

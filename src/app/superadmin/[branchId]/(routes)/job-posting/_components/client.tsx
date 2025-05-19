@@ -28,8 +28,8 @@ const JobPostingClient = ({
                 />
               </div>
               <div className="p-4 mt-3">
-                <div className="flex">
-                  <h3 className="font-semibold text-xl">{job.title}</h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-xl line-clamp-1">{job.title}</h3>
                   <CellAction
                     id={job.id}
                     departmentSession={department as string}

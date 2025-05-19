@@ -20,16 +20,17 @@ const Header = ({user}: {user: UserWithProps}) => {
   // Split the path into segments and remove the first one ('head')
   const segments = pathname.split("/").filter(Boolean).slice(1);
 
-  // If the path is just "/head/dashboard", hide the breadcrumb
+  const department = `${user?.Employee.Branch?.name ?? ""} | ${user?.Employee.Department?.name ?? ""} Department (${user?.Employee.JobTitle?.name ?? ""})`;
+
+  // If the path is just "/head/dashboard", show simplified header with department
   if (segments.length === 1 && segments[0] === "dashboard") {
     return (
       <header className="flex h-16 shrink-0 items-center gap-2 px-4">
         <SidebarTrigger className="-ml-1" />
+        <p className='ml-auto text-sm'>{department}</p>
       </header>
     );
   }
-
-  const department = `${user?.Employee.Branch?.name ?? ""} | ${user?.Employee.Department?.name ?? ""} Department (${user?.Employee.JobTitle?.name ?? ""})`;
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 px-4">

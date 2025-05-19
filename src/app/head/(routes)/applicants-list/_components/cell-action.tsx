@@ -24,7 +24,7 @@ interface CellActionProps {
   email: string;
   departmentId?: string;
   jobTitleId?: string;
-  branch?: string;
+  branchId?: string;
 }
 
 export const CellAction: React.FC<CellActionProps> = ({
@@ -32,7 +32,7 @@ export const CellAction: React.FC<CellActionProps> = ({
   email,
   departmentId,
   jobTitleId,
-  branch,
+  branchId
 }) => {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
@@ -70,7 +70,7 @@ export const CellAction: React.FC<CellActionProps> = ({
         <SendEmailForm
           departmentId={departmentId}
           jobTitleId={jobTitleId}
-          branch={branch}
+          branch={branchId}
           email={email}
           onClose={() => setEmailModalOpen(false)}
         />

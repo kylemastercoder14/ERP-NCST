@@ -10,7 +10,7 @@ const ManagerLayout = async ({ children }: { children: React.ReactNode }) => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { user } = await useClient();
   if (!user) {
-	return redirect("/supplier/sign-in");
+	return redirect("/client/sign-in");
   }
   return (
 	<ThemeProvider

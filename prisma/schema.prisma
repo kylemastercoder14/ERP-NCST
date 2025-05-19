@@ -146,6 +146,8 @@ model Branch {
   ApplicantList ApplicantList[]
   JobPosting    JobPosting[]
   Transaction   Transaction[]
+  Client        Client[]
+  Supplier      Supplier[]
 }
 
 model Employee {
@@ -205,6 +207,9 @@ model Employee {
 
   clientId String?
   Client   Client? @relation(fields: [clientId], references: [id])
+
+  isSignedContract Boolean @default(false)
+  signedContract   String?
 
   Children              Children[]
   EducationRecord       EducationRecord[]
@@ -562,6 +567,9 @@ model Client {
   address   String
   contactNo String
 
+  branchId String?
+  Branch   Branch? @relation(fields: [branchId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -570,6 +578,8 @@ model Client {
   Evaluation       Evaluation[]
   Ticket           Ticket[]
   ApplicantRequest ApplicantRequest[]
+
+  @@index([branchId])
 }
 
 model Supplier {
@@ -581,12 +591,17 @@ model Supplier {
   address   String
   contactNo String
 
+  branchId String?
+  Branch   Branch? @relation(fields: [branchId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   Transaction Transaction[]
   Items       Items[]
   Inventory   Inventory[]
+
+  @@index([branchId])
 }
 
 enum AccountType {

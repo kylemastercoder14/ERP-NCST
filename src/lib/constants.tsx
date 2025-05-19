@@ -90,10 +90,6 @@ export const SIDEBAR_HEAD_OPERATION = [
         url: "/head/shift-monitoring",
       },
       {
-        title: "Onboarding & Training",
-        url: "/head/onboarding-training",
-      },
-      {
         title: "Employee Evaluation",
         url: "/head/employee-evaluation",
       },

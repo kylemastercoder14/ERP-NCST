@@ -5,15 +5,23 @@ import db from "@/lib/db";
 import { Column } from "./_components/column";
 import { format } from "date-fns";
 import Client from "./_components/client";
+import { useUser } from "@/hooks/use-user";
 
 const Page = async () => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { user } = await useUser();
   const data = await db.applicantRequest.findMany({
+    where: {
+      Client: {
+        branchId: user?.Employee.branchId,
+      },
+    },
     orderBy: {
       createdAt: "desc",
     },
     include: {
       genderRequirements: true,
-      Client: true
+      Client: true,
     },
   });
 

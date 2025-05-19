@@ -1,4 +1,3 @@
-// middleware.ts
 import { NextResponse } from "next/server";
 
 export async function middleware(request: Request) {
@@ -9,7 +8,8 @@ export async function middleware(request: Request) {
     url.pathname.startsWith("/maintenance") ||
     url.pathname.startsWith("/api") ||
     url.pathname.startsWith("/_next") ||
-    url.pathname.startsWith("/superadmin")
+    url.pathname.startsWith("/superadmin") ||
+    url.pathname.startsWith("/new-applicant")
   ) {
     return NextResponse.next();
   }

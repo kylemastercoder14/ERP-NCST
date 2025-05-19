@@ -23,7 +23,7 @@ const Page = async () => {
     return <HRDashboard branchId={branchId} />;
   } else if (department?.name === "Finance") {
     return <FinanceDashboard branchId={branchId} />;
-  } else if (department?.name === "Operation") {
+  } else if (department?.name === "Operation" || department?.name === "Trainer") {
     return <OperationsDashboard branchId={branchId} />;
   } else if (department?.name === "Procurement") {
     return <ProcurementDashboard branchId={branchId} />;

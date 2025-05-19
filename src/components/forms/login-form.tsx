@@ -61,11 +61,9 @@ export function LoginForm() {
           setTimeout(() => {
             router.push("/head/dashboard");
           }, 1000);
-        } else if (
-          res.user?.Employee.JobTitle.name === "Assistant Supervisor"
-        ) {
+        } else if (res.user?.Employee.JobTitle.name === "Trainer") {
           setTimeout(() => {
-            router.push("/assistant/dashboard");
+            router.push("/head/orientation");
           }, 1000);
         } else {
           setTimeout(() => {

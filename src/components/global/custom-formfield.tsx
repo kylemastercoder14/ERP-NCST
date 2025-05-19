@@ -63,7 +63,7 @@ import {
 } from "@/components/ui/tooltip";
 import SignatureInput from "@/components/ui/signature-input";
 import { TimePicker } from "@/components/ui/time-picker";
-import MultipleImageUpload from "../ui/multiple-images-upload";
+import MultipleImageUpload from "@/components/ui/multiple-images-upload";
 import RichTextEditor from "./richtext-editor";
 import { Switch } from "@/components/ui/switch";
 

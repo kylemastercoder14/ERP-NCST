@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useEffect } from "react";
@@ -219,13 +220,13 @@ const ApplicantForm = ({
     {
       label: "From",
       fieldName: "from",
-      fieldType: FormFieldType.INPUT,
+      fieldType: FormFieldType.DATE_PICKER,
       isRequired: true,
     },
     {
       label: "To",
       fieldName: "to",
-      fieldType: FormFieldType.INPUT,
+      fieldType: FormFieldType.DATE_PICKER,
       isRequired: true,
     },
     {
@@ -286,6 +287,7 @@ const ApplicantForm = ({
   }, [form, isSameWithPresent, presentAddress]);
 
   const onSubmit = async (values: z.infer<typeof ApplicantValidators>) => {
+    console.log("Submitted values:", values);
     try {
       if (initialData) {
         const res = await updateApplicant(initialData.id, values);
@@ -302,10 +304,14 @@ const ApplicantForm = ({
         const res = await createApplicant(values);
         if (res.success) {
           toast.success(res.success);
-          setTimeout(() => {
-            window.location.reload();
-            router.refresh();
-          }, 2000);
+          if (isNewApplicant) {
+            router.push("/");
+          } else {
+            setTimeout(() => {
+              window.location.reload();
+              router.refresh();
+            }, 2000);
+          }
         } else {
           toast.error(res.error);
         }
@@ -314,6 +320,35 @@ const ApplicantForm = ({
       console.error(error);
       toast.error("An error occurred while creating the employee.");
     }
+  };
+
+  // reorder educational record
+  const educationLevelOrder: Record<string, number> = {
+    College: 1,
+    Vocational: 2,
+    "Senior High School": 3,
+    "Junior High School": 3,
+    Elementary: 4,
+  };
+
+  const educationSortFn = (a: any, b: any) => {
+    const levelA = a.level || "";
+    const levelB = b.level || "";
+    return (
+      (educationLevelOrder[levelA] || 0) - (educationLevelOrder[levelB] || 0)
+    );
+  };
+
+  // reorder employment record
+  const employmentSortFn = (a: any, b: any) => {
+    // Handle missing dates by putting them at the end
+    if (!a.from && !b.from) return 0;
+    if (!a.from) return 1;
+    if (!b.from) return -1;
+
+    const dateA = new Date(a.from);
+    const dateB = new Date(b.from);
+    return dateB.getTime() - dateA.getTime(); // Descending order
   };
 
   return (
@@ -745,6 +780,7 @@ const ApplicantForm = ({
               remove={removeEducation}
               columns={educationColumns}
               disabled={isSubmitting}
+              sortFn={educationSortFn}
             />
             <div className="relative text-center after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
               <span className="relative z-10 bg-background px-2 font-semibold">
@@ -760,6 +796,7 @@ const ApplicantForm = ({
               remove={removeEmployment}
               columns={employmentColumns}
               disabled={isSubmitting}
+              sortFn={employmentSortFn}
             />
             <div className="relative text-center after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
               <span className="relative z-10 bg-background px-2 font-semibold">
@@ -841,13 +878,16 @@ const ApplicantForm = ({
               />
             )}
             <div className="flex items-center justify-start">
-              <Button
-                onClick={() => router.back()}
-                type="button"
-                variant="ghost"
-              >
-                Cancel
-              </Button>
+              {!isNewApplicant && (
+                <Button
+                  onClick={() => router.back()}
+                  type="button"
+                  variant="ghost"
+                >
+                  Cancel
+                </Button>
+              )}
+
               <Button disabled={isSubmitting} type="submit">
                 {action}
               </Button>
