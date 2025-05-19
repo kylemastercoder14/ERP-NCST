@@ -2,12 +2,17 @@ import { redirect } from "next/navigation";
 import db from "@/lib/db";
 import ContractViewer from "./client";
 
-export interface PageProps {
-  params: { [key: string]: string | undefined };
-  searchParams: { [key: string]: string | string[] | undefined };
+interface SearchParams {
+  employeeId?: string | string[];
+  file?: string | string[];
 }
 
-const Page = async ({ searchParams }: PageProps) => {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  // Normalize the search params (handle array cases)
   const employeeId = Array.isArray(searchParams.employeeId)
     ? searchParams.employeeId[0]
     : searchParams.employeeId;
@@ -39,6 +44,4 @@ const Page = async ({ searchParams }: PageProps) => {
       />
     </div>
   );
-};
-
-export default Page;
+}
