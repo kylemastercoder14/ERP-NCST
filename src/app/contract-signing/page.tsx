@@ -2,19 +2,25 @@ import { redirect } from "next/navigation";
 import db from "@/lib/db";
 import ContractViewer from "./client";
 
-interface PageProps {
-  searchParams: Record<string, string | string[] | undefined>;
+export interface PageProps {
+  params: { [key: string]: string | undefined };
+  searchParams: { [key: string]: string | string[] | undefined };
 }
 
 const Page = async ({ searchParams }: PageProps) => {
-  const { employeeId, file } = searchParams;
+  const employeeId = Array.isArray(searchParams.employeeId)
+    ? searchParams.employeeId[0]
+    : searchParams.employeeId;
+  const file = Array.isArray(searchParams.file)
+    ? searchParams.file[0]
+    : searchParams.file;
 
   if (!employeeId || !file) {
     return <p>Missing required query parameters.</p>;
   }
 
   const employee = await db.employee.findUnique({
-    where: { id: employeeId as string },
+    where: { id: employeeId },
   });
 
   if (!employee) {
@@ -27,8 +33,8 @@ const Page = async ({ searchParams }: PageProps) => {
         Contract Signing for {employee.firstName} {employee.lastName}
       </h1>
       <ContractViewer
-        fileUrl={file as string}
-        employeeId={employeeId as string}
+        fileUrl={file}
+        employeeId={employeeId}
         initialSignature={employee.signature}
       />
     </div>
