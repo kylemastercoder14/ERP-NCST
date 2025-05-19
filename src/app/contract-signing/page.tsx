@@ -2,20 +2,11 @@ import { redirect } from "next/navigation";
 import db from "@/lib/db";
 import ContractViewer from "./client";
 
-type PageProps = {
-  params: { slug: string };
-  searchParams: { [key: string]: string | string[] | undefined };
-};
-
-export default async function Page({ searchParams }: PageProps) {
-  // Extract and normalize parameters
-  const employeeId = Array.isArray(searchParams.employeeId)
-    ? searchParams.employeeId[0]
-    : searchParams.employeeId;
-
-  const file = Array.isArray(searchParams.file)
-    ? searchParams.file[0]
-    : searchParams.file;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default async function Page(props: any) {
+  const searchParams = props.searchParams || {};
+  const employeeId = searchParams.employeeId;
+  const file = searchParams.file;
 
   if (!employeeId || !file) {
     return <p>Missing required query parameters.</p>;
