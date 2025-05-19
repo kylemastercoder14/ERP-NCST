@@ -2,23 +2,15 @@ import { redirect } from "next/navigation";
 import db from "@/lib/db";
 import ContractViewer from "./client";
 
-interface SearchParams {
-  employeeId?: string | string[];
-  file?: string | string[];
-}
-
 export default async function Page({
   searchParams,
 }: {
-  searchParams: SearchParams;
+  searchParams: {
+    employeeId?: string;
+    file?: string;
+  };
 }) {
-  // Normalize the search params (handle array cases)
-  const employeeId = Array.isArray(searchParams.employeeId)
-    ? searchParams.employeeId[0]
-    : searchParams.employeeId;
-  const file = Array.isArray(searchParams.file)
-    ? searchParams.file[0]
-    : searchParams.file;
+  const { employeeId, file } = searchParams;
 
   if (!employeeId || !file) {
     return <p>Missing required query parameters.</p>;
