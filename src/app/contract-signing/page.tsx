@@ -2,15 +2,20 @@ import { redirect } from "next/navigation";
 import db from "@/lib/db";
 import ContractViewer from "./client";
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: {
-    employeeId?: string;
-    file?: string;
-  };
-}) {
-  const { employeeId, file } = searchParams;
+type PageProps = {
+  params: { slug: string };
+  searchParams: { [key: string]: string | string[] | undefined };
+};
+
+export default async function Page({ searchParams }: PageProps) {
+  // Extract and normalize parameters
+  const employeeId = Array.isArray(searchParams.employeeId)
+    ? searchParams.employeeId[0]
+    : searchParams.employeeId;
+
+  const file = Array.isArray(searchParams.file)
+    ? searchParams.file[0]
+    : searchParams.file;
 
   if (!employeeId || !file) {
     return <p>Missing required query parameters.</p>;
