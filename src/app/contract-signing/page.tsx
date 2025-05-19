@@ -2,14 +2,11 @@ import { redirect } from "next/navigation";
 import db from "@/lib/db";
 import ContractViewer from "./client";
 
-interface Props {
-  searchParams: {
-    employeeId?: string;
-    file?: string;
-  };
+interface PageProps {
+  searchParams: Record<string, string | string[] | undefined>;
 }
 
-const Page = async ({ searchParams }: Props) => {
+const Page = async ({ searchParams }: PageProps) => {
   const { employeeId, file } = searchParams;
 
   if (!employeeId || !file) {
@@ -17,7 +14,7 @@ const Page = async ({ searchParams }: Props) => {
   }
 
   const employee = await db.employee.findUnique({
-    where: { id: employeeId },
+    where: { id: employeeId as string },
   });
 
   if (!employee) {
@@ -29,7 +26,11 @@ const Page = async ({ searchParams }: Props) => {
       <h1 className="text-xl font-bold mb-4">
         Contract Signing for {employee.firstName} {employee.lastName}
       </h1>
-      <ContractViewer fileUrl={file} employeeId={employeeId} initialSignature={employee.signature} />
+      <ContractViewer
+        fileUrl={file as string}
+        employeeId={employeeId as string}
+        initialSignature={employee.signature}
+      />
     </div>
   );
 };
