@@ -44,6 +44,7 @@ interface CellActionProps {
   branch: string;
   jobTitle: string;
   assessor: string;
+  branchId: string;
 }
 
 const getStatusFlow = (jobTitle: string): TrainingStatus[] => {
@@ -73,6 +74,7 @@ export const CellAction: React.FC<CellActionProps> = ({
   branch,
   jobTitle,
   assessor,
+  branchId,
 }) => {
   const router = useRouter();
   const statusFlow = getStatusFlow(jobTitle);
@@ -90,11 +92,11 @@ export const CellAction: React.FC<CellActionProps> = ({
 
   React.useEffect(() => {
     const loadClients = async () => {
-      const res = await getAllClients();
+      const res = await getAllClients(branchId);
       if (res.data) setClients(res.data);
     };
     loadClients();
-  }, []);
+  }, [branchId]);
 
   const handleDeploy = async () => {
     if (!selectedClient) {

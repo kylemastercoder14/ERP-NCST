@@ -14,6 +14,7 @@ export type ApplicantColumn = {
   trainingStatus: string;
   gender: string;
   civilStatus: string;
+  branchId: string;
   positionDesired: string;
   departmentSession: string;
   branch: string;
@@ -165,6 +166,7 @@ export const columns: ColumnDef<ApplicantColumn>[] = [
         departmentSession={row.original.departmentSession}
         jobTitle={row.original.positionDesired}
         assessor={row.original.assessor}
+        branchId={row.original.branchId}
       />
     ),
   },

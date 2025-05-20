@@ -18,7 +18,7 @@ import {
   SendIcon,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import React from "react";
 import { getAllClients, sendEmployeeStatus } from "@/actions";
 import { Modal } from "@/components/ui/modal";
@@ -56,6 +56,7 @@ export const CellAction: React.FC<CellActionProps> = ({
   assessor,
 }) => {
   const router = useRouter();
+  const params = useParams();
   const [loading, setLoading] = React.useState(false);
   const [statusModalOpen, setStatusModalOpen] = React.useState(false);
   const [physicalTrainingModalOpen, setPhysicalTrainingModalOpen] =
@@ -70,11 +71,11 @@ export const CellAction: React.FC<CellActionProps> = ({
 
   React.useEffect(() => {
     const loadClients = async () => {
-      const res = await getAllClients();
+      const res = await getAllClients(params.branchId as string);
       if (res.data) setClients(res.data);
     };
     loadClients();
-  }, []);
+  }, [params.branchId]);
 
   const handleDeploy = async () => {
     if (!selectedClient) {
