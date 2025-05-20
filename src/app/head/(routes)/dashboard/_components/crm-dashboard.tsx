@@ -13,7 +13,7 @@ import { PieChartComponent } from "@/components/global/pie-chart";
 import RecentDatatableActions, {
   Column,
 } from "@/components/global/recent-datatable-actions";
-import DashboardSkeleton from '@/components/global/dashboard-skeleton';
+import DashboardSkeleton from "@/components/global/dashboard-skeleton";
 
 const generateDynamicColors = (count: number) => {
   const baseColors = [
@@ -41,7 +41,7 @@ const generateDynamicColors = (count: number) => {
   return baseColors.slice(0, count);
 };
 
-const CRMDashboard = async () => {
+const CRMDashboard = async ({ branchId }: { branchId: string }) => {
   // Date ranges
   const currentMonthStart = startOfMonth(new Date());
   const currentMonthEnd = endOfMonth(new Date());
@@ -64,10 +64,15 @@ const CRMDashboard = async () => {
     ] = await Promise.all([
       // Client Counts
       Promise.all([
-        db.client.count(),
+        db.client.count({
+          where: {
+            branchId,
+          },
+        }),
         db.client.count({
           where: {
             createdAt: { lte: lastMonthEnd },
+            branchId,
           },
         }),
       ]),
@@ -77,11 +82,17 @@ const CRMDashboard = async () => {
         db.ticket.count({
           where: {
             createdAt: { gte: currentMonthStart, lte: currentMonthEnd },
+            client: {
+              branchId,
+            },
           },
         }),
         db.ticket.count({
           where: {
             createdAt: { gte: lastMonthStart, lte: lastMonthEnd },
+            client: {
+              branchId,
+            },
           },
         }),
       ]),
@@ -94,11 +105,17 @@ const CRMDashboard = async () => {
         },
         where: {
           createdAt: { gte: currentMonthStart, lte: currentMonthEnd },
+          client: {
+            branchId,
+          },
         },
       }),
 
       // Client Activity
       db.client.findMany({
+        where: {
+          branchId,
+        },
         take: 5,
         orderBy: {
           Ticket: {
@@ -126,6 +143,7 @@ const CRMDashboard = async () => {
               priority: "high",
             },
           },
+          branchId,
         },
         include: {
           _count: {
@@ -140,12 +158,18 @@ const CRMDashboard = async () => {
           where: {
             status: "Closed",
             createdAt: { gte: currentMonthStart, lte: currentMonthEnd },
+            client: {
+              branchId,
+            },
           },
         }),
         db.ticket.count({
           where: {
             status: "Closed",
             createdAt: { gte: lastMonthStart, lte: lastMonthEnd },
+            client: {
+              branchId,
+            },
           },
         }),
       ]),
@@ -156,11 +180,13 @@ const CRMDashboard = async () => {
           where: {
             createdAt: { lte: lastMonthStart },
             updatedAt: { gte: currentMonthStart },
+            branchId,
           },
         }),
         db.client.count({
           where: {
             createdAt: { lte: lastMonthStart },
+            branchId,
           },
         }),
       ]),
@@ -170,11 +196,13 @@ const CRMDashboard = async () => {
         db.client.count({
           where: {
             createdAt: { gte: currentMonthStart, lte: currentMonthEnd },
+            branchId,
           },
         }),
         db.client.count({
           where: {
             createdAt: { gte: lastMonthStart, lte: lastMonthEnd },
+            branchId,
           },
         }),
       ]),
@@ -184,12 +212,18 @@ const CRMDashboard = async () => {
         db.ticket.count({
           where: {
             status: "Open",
+            client: {
+              branchId,
+            },
           },
         }),
         db.ticket.count({
           where: {
             status: "Open",
             createdAt: { lte: lastMonthEnd },
+            client: {
+              branchId,
+            },
           },
         }),
       ]),
@@ -202,6 +236,9 @@ const CRMDashboard = async () => {
         },
         where: {
           createdAt: { gte: currentMonthStart, lte: currentMonthEnd },
+          client: {
+            branchId,
+          },
         },
       }),
     ]);
@@ -209,7 +246,8 @@ const CRMDashboard = async () => {
     // Destructure results
     const [currentClients, lastMonthClients] = clientCounts;
     const [currentMonthTickets, lastMonthTickets] = ticketData;
-    const [resolvedTicketsCurrentMonth, resolvedTicketsLastMonth] = ticketResolutionData;
+    const [resolvedTicketsCurrentMonth, resolvedTicketsLastMonth] =
+      ticketResolutionData;
     const [activeClients, totalExistingClients] = clientRetentionData;
     const [newClientsCurrentMonth, newClientsLastMonth] = newClientsData;
     const [currentOpenTickets, lastMonthOpenTickets] = openTicketsData;
@@ -352,12 +390,18 @@ const CRMDashboard = async () => {
             db.ticket.count({
               where: {
                 createdAt: { gte: monthStart, lte: monthEnd },
+                client: {
+                  branchId,
+                },
               },
             }),
             db.ticket.count({
               where: {
                 status: "Closed",
                 updatedAt: { gte: monthStart, lte: monthEnd },
+                client: {
+                  branchId,
+                },
               },
             }),
           ]);
@@ -381,6 +425,11 @@ const CRMDashboard = async () => {
       where: {
         department: {
           name: "Customer Relationship",
+        },
+        User: {
+          Employee: {
+            branchId,
+          },
         },
       },
       orderBy: {
@@ -495,9 +544,7 @@ const CRMDashboard = async () => {
     );
   } catch (error) {
     console.error("Error loading CRM dashboard:", error);
-    return (
-      <DashboardSkeleton />
-    );
+    return <DashboardSkeleton />;
   }
 };
 

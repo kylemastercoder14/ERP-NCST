@@ -10,14 +10,15 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Clock } from "lucide-react"; // Clock icon
+import { Clock } from "lucide-react";
 
 export type TimePickerProps = {
-  value?: Date | string; // Accept Date or string
+  value?: Date | string;
   onChangeAction: (date: Date) => void;
   placeholder?: string;
   className?: string;
   disabled?: boolean;
+  bookedTimes?: { start: Date; end: Date }[];
 };
 
 export function TimePicker({
@@ -25,11 +26,24 @@ export function TimePicker({
   onChangeAction,
   placeholder = "Select a time",
   className,
-  disabled
+  disabled,
+  bookedTimes = []
 }: TimePickerProps) {
-  // Ensure `value` is always a Date object
-  const safeValue =
-    value instanceof Date ? value : value ? new Date(value) : null;
+  const safeValue = value instanceof Date ? value : value ? new Date(value) : null;
+
+  function isTimeBooked(hour: number, minute: number, ampm: string): boolean {
+    if (!bookedTimes.length) return false;
+
+    const selectedHour = ampm === "PM" && hour !== 12 ? hour + 12 : ampm === "AM" && hour === 12 ? 0 : hour;
+    const selectedDate = new Date();
+    selectedDate.setHours(selectedHour, minute, 0, 0);
+
+    return bookedTimes.some(booked => {
+      const start = new Date(booked.start);
+      const end = new Date(booked.end);
+      return selectedDate >= start && selectedDate < end;
+    });
+  }
 
   function handleTimeChange(type: "hour" | "minute" | "ampm", val: string) {
     const newDate = safeValue ? new Date(safeValue) : new Date();
@@ -62,7 +76,7 @@ export function TimePicker({
     <Popover>
       <PopoverTrigger asChild>
         <Button
-        disabled={disabled}
+          disabled={disabled}
           variant="outline"
           className={cn(
             "w-full pl-3 pr-3 text-left font-normal flex justify-between items-center",
@@ -108,21 +122,27 @@ export function TimePicker({
           {/* Hours */}
           <ScrollArea className="w-24">
             <div className="flex flex-col p-2">
-              {Array.from({ length: 12 }, (_, i) => i + 1).map((hour) => (
-                <Button
-                  key={hour}
-                  size="icon"
-                  variant={
-                    safeValue && safeValue.getHours() % 12 === hour % 12
-                      ? "default"
-                      : "ghost"
-                  }
-                  className="w-full"
-                  onClick={() => handleTimeChange("hour", hour.toString())}
-                >
-                  {hour}
-                </Button>
-              ))}
+              {Array.from({ length: 12 }, (_, i) => i + 1).map((hour) => {
+                const isBooked = isTimeBooked(hour, safeValue?.getMinutes() || 0,
+                  (safeValue ? safeValue.getHours() : 0) >= 12 ? "PM" : "AM");
+
+                return (
+                  <Button
+                    key={hour}
+                    size="icon"
+                    variant={
+                      safeValue && safeValue.getHours() % 12 === hour % 12
+                        ? "default"
+                        : "ghost"
+                    }
+                    className="w-full"
+                    onClick={() => handleTimeChange("hour", hour.toString())}
+                    disabled={isBooked}
+                  >
+                    {hour}
+                  </Button>
+                );
+              })}
             </div>
             <ScrollBar orientation="vertical" />
           </ScrollArea>
@@ -130,19 +150,28 @@ export function TimePicker({
           {/* Minutes */}
           <ScrollArea className="w-24">
             <div className="flex flex-col p-2">
-              {Array.from({ length: 12 }, (_, i) => i * 5).map((minute) => (
-                <Button
-                  key={minute}
-                  size="icon"
-                  variant={
-                    safeValue?.getMinutes() === minute ? "default" : "ghost"
-                  }
-                  className="w-full"
-                  onClick={() => handleTimeChange("minute", minute.toString())}
-                >
-                  {minute.toString().padStart(2, "0")}
-                </Button>
-              ))}
+              {Array.from({ length: 12 }, (_, i) => i * 5).map((minute) => {
+                const isBooked = isTimeBooked(
+                  (safeValue ? safeValue.getHours() : 0) % 12 || 12,
+                  minute,
+                  (safeValue ? safeValue.getHours() : 0) >= 12 ? "PM" : "AM"
+                );
+
+                return (
+                  <Button
+                    key={minute}
+                    size="icon"
+                    variant={
+                      safeValue?.getMinutes() === minute ? "default" : "ghost"
+                    }
+                    className="w-full"
+                    onClick={() => handleTimeChange("minute", minute.toString())}
+                    disabled={isBooked}
+                  >
+                    {minute.toString().padStart(2, "0")}
+                  </Button>
+                );
+              })}
             </div>
             <ScrollBar orientation="vertical" />
           </ScrollArea>
@@ -150,23 +179,32 @@ export function TimePicker({
           {/* AM/PM */}
           <ScrollArea className="w-24">
             <div className="flex flex-col p-2">
-              {["AM", "PM"].map((ampm) => (
-                <Button
-                  key={ampm}
-                  size="icon"
-                  variant={
-                    safeValue &&
-                    ((ampm === "AM" && safeValue.getHours() < 12) ||
-                      (ampm === "PM" && safeValue.getHours() >= 12))
-                      ? "default"
-                      : "ghost"
-                  }
-                  className="w-full"
-                  onClick={() => handleTimeChange("ampm", ampm)}
-                >
-                  {ampm}
-                </Button>
-              ))}
+              {["AM", "PM"].map((ampm) => {
+                const isBooked = isTimeBooked(
+                  (safeValue ? safeValue.getHours() : 0) % 12 || 12,
+                  safeValue?.getMinutes() || 0,
+                  ampm
+                );
+
+                return (
+                  <Button
+                    key={ampm}
+                    size="icon"
+                    variant={
+                      safeValue &&
+                      ((ampm === "AM" && safeValue.getHours() < 12) ||
+                        (ampm === "PM" && safeValue.getHours() >= 12))
+                        ? "default"
+                        : "ghost"
+                    }
+                    className="w-full"
+                    onClick={() => handleTimeChange("ampm", ampm)}
+                    disabled={isBooked}
+                  >
+                    {ampm}
+                  </Button>
+                );
+              })}
             </div>
           </ScrollArea>
         </div>

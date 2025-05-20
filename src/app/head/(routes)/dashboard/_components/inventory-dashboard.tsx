@@ -18,7 +18,7 @@ const formatNumber = (value: number) => {
   return new Intl.NumberFormat("en-US").format(value);
 };
 
-const InventoryDashboard = async () => {
+const InventoryDashboard = async ({ branchId }: { branchId: string }) => {
   // Date ranges
   const currentMonthStart = startOfMonth(new Date());
   const currentMonthEnd = endOfMonth(new Date());
@@ -31,8 +31,14 @@ const InventoryDashboard = async () => {
       await Promise.all([
         // Total Inventory Count
         Promise.all([
-          db.inventory.count(),
-          db.inventory.count({ where: { createdAt: { lte: lastMonthEnd } } }),
+          db.inventory.count({
+            where: {
+              Supplier: { branchId },
+            },
+          }),
+          db.inventory.count({
+            where: { createdAt: { lte: lastMonthEnd }, Supplier: { branchId } },
+          }),
         ]),
 
         // Critical Items Count
@@ -40,6 +46,7 @@ const InventoryDashboard = async () => {
           db.inventory.count({
             where: {
               quantity: { lt: db.inventory.fields.treshold },
+              Supplier: { branchId },
               createdAt: { gte: currentMonthStart, lte: currentMonthEnd },
             },
           }),
@@ -47,6 +54,7 @@ const InventoryDashboard = async () => {
             where: {
               quantity: { lt: db.inventory.fields.treshold },
               createdAt: { gte: lastMonthStart, lte: lastMonthEnd },
+              Supplier: { branchId },
             },
           }),
         ]),
@@ -57,6 +65,9 @@ const InventoryDashboard = async () => {
           _count: {
             _all: true,
           },
+          where: {
+            Supplier: { branchId },
+          },
         }),
 
         // Inventory Movement
@@ -65,6 +76,9 @@ const InventoryDashboard = async () => {
             _sum: { quantity: true },
             where: {
               createdAt: { gte: currentMonthStart, lte: currentMonthEnd },
+              Item: {
+                Supplier: { branchId },
+              },
             },
           }),
           db.purchaseRequestItem.aggregate({
@@ -72,12 +86,18 @@ const InventoryDashboard = async () => {
             where: {
               inventoryItemStatus: "Received",
               createdAt: { gte: currentMonthStart, lte: currentMonthEnd },
+              Item: {
+                Supplier: { branchId },
+              },
             },
           }),
           db.withdrawalItem.aggregate({
             _sum: { quantity: true },
             where: {
               createdAt: { gte: lastMonthStart, lte: lastMonthEnd },
+              Item: {
+                Supplier: { branchId },
+              },
             },
           }),
           db.purchaseRequestItem.aggregate({
@@ -85,6 +105,9 @@ const InventoryDashboard = async () => {
             where: {
               inventoryItemStatus: "Received",
               createdAt: { gte: lastMonthStart, lte: lastMonthEnd },
+              Item: {
+                Supplier: { branchId },
+              },
             },
           }),
         ]),
@@ -174,6 +197,9 @@ const InventoryDashboard = async () => {
               _sum: { quantity: true },
               where: {
                 createdAt: { gte: monthStart, lte: monthEnd },
+                Item: {
+                  Supplier: { branchId },
+                },
               },
             }),
             db.purchaseRequestItem.aggregate({
@@ -181,6 +207,9 @@ const InventoryDashboard = async () => {
               where: {
                 inventoryItemStatus: "Received",
                 createdAt: { gte: monthStart, lte: monthEnd },
+                Item: {
+                  Supplier: { branchId },
+                },
               },
             }),
           ]);
@@ -213,6 +242,11 @@ const InventoryDashboard = async () => {
       where: {
         department: {
           name: "Inventory",
+        },
+        User: {
+          Employee: {
+            branchId,
+          },
         },
       },
       orderBy: {

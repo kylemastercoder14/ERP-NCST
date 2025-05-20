@@ -9,13 +9,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { FileText, MoreHorizontal, Send, User } from "lucide-react";
+import { Clock, FileText, MoreHorizontal, Send, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { Modal } from "@/components/ui/modal";
 import FileInput from "@/components/ui/file-input";
-import { toast } from 'sonner';
-import { sendContractToEmployee } from '@/actions';
+import { toast } from "sonner";
+import { assignShiftEmployee, sendContractToEmployee } from "@/actions";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 interface CellActionProps {
   id: string;
@@ -26,7 +34,9 @@ interface CellActionProps {
 export const CellAction: React.FC<CellActionProps> = ({ id, name, email }) => {
   const router = useRouter();
   const [sendModalOpen, setsendModalOpen] = React.useState(false);
+  const [shiftModalOpen, setshiftModalOpen] = React.useState(false);
   const [file, setFile] = React.useState<string | null>(null);
+  const [shift, setShift] = React.useState("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,7 +48,7 @@ export const CellAction: React.FC<CellActionProps> = ({ id, name, email }) => {
         return;
       }
       const response = await sendContractToEmployee(file, id, email, name);
-      if(response.success) {
+      if (response.success) {
         toast.success("Contract sent successfully!");
       } else {
         toast.error("Failed to send contract.");
@@ -49,9 +59,64 @@ export const CellAction: React.FC<CellActionProps> = ({ id, name, email }) => {
       setIsSubmitting(false);
       setsendModalOpen(false);
     }
-  }
+  };
+
+  const handleShiftSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      if (!shift) {
+        toast.warning("Please select a shift.");
+        return;
+      }
+      const res = await assignShiftEmployee(id, shift);
+      if (res.success) {
+        toast.success("Shift assigned successfully!");
+      } else {
+        toast.error("Failed to assign shift.");
+      }
+    } catch (error) {
+      console.error("Error assigning shift:", error);
+    } finally {
+      setIsSubmitting(false);
+      setshiftModalOpen(false);
+    }
+  };
   return (
     <>
+      <Modal
+        title="Assign Shift"
+        description={`Assign shift to ${name}`}
+        isOpen={shiftModalOpen}
+        onClose={() => setshiftModalOpen(false)}
+      >
+        <form className="space-y-4">
+          <div className="space-y-2">
+            <Label>Shift</Label>
+            <Select defaultValue={shift} onValueChange={setShift}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select shift" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Day Shift">Day Shift</SelectItem>
+                <SelectItem value="Night Shift">Night Shift</SelectItem>
+              </SelectContent>
+            </Select>
+            <span className="text-xs text-muted-foreground">
+              Day shift is from 6:00 AM to 6:00 PM and Night shift is from
+              6:00 PM to 6:00 AM.
+            </span>
+          </div>
+          <Button
+            onClick={handleShiftSubmit}
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full"
+          >
+            Submit
+          </Button>
+        </form>
+      </Modal>
       <Modal
         title="Send Contract"
         description={`Send contract to ${name}`}
@@ -66,7 +131,12 @@ export const CellAction: React.FC<CellActionProps> = ({ id, name, email }) => {
             defaultValue={file || ""}
             onFileUpload={(url) => setFile(url)}
           />
-          <Button onClick={handleSubmit} type="submit" disabled={isSubmitting} className="w-full">
+          <Button
+            onClick={handleSubmit}
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full"
+          >
             Submit
           </Button>
         </form>
@@ -97,6 +167,10 @@ export const CellAction: React.FC<CellActionProps> = ({ id, name, email }) => {
           <DropdownMenuItem onClick={() => setsendModalOpen(true)}>
             <Send className="w-4 h-4 mr-2" />
             Send Contract
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setshiftModalOpen(true)}>
+            <Clock className="w-4 h-4 mr-2" />
+            Shift
           </DropdownMenuItem>
           <DropdownMenuSeparator />
         </DropdownMenuContent>

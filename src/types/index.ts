@@ -39,7 +39,9 @@ export interface UserWithProps extends UserAccount {
 }
 
 export interface LeaveManagementWithProps extends LeaveManagement {
-  Employee: Employee;
+  Employee: Employee & {
+    EmployeeLeaveBalance: EmployeeLeaveBalance[];
+  };
   ApprovedBy: UserAccount | null;
 }
 

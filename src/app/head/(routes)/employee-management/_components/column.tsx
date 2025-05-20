@@ -14,6 +14,9 @@ export type ApplicantColumn = {
   civilStatus: string;
   positionDesired: string;
   department: string;
+  email: string;
+  clientId: string;
+  branchId: string;
   createdAt: string;
 };
 
@@ -148,7 +151,14 @@ export const columns: ColumnDef<ApplicantColumn>[] = [
     accessorKey: "actions",
     header: "",
     cell: ({ row }) => (
-      <CellAction id={row.original.id} name={row.original.name} />
+      <CellAction
+        id={row.original.id}
+        name={row.original.name}
+        clientId={row.original.clientId}
+        position={row.original.positionDesired}
+        branchId={row.original.branchId}
+        email={row.original.email}
+      />
     ),
   },
 ];

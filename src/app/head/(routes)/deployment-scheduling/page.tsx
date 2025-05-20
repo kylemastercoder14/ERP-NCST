@@ -42,6 +42,7 @@ const Page = async () => {
 		  gender: item.sex,
 		  civilStatus: item.civilStatus,
 		  departmentSession: departmentSession || "",
+		  branchId: item.branchId,
 		  createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),
 		  updatedAt: format(
 			new Date(item.updatedAt),

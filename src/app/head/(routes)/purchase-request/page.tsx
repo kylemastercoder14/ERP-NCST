@@ -13,6 +13,11 @@ const Page = async () => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { user } = await useUser();
   const data = await db.purchaseRequest.findMany({
+    where: {
+      requestedBy: {
+        branchId: user?.Employee.branchId,
+      },
+    },
     orderBy: {
       createdAt: "desc",
     },

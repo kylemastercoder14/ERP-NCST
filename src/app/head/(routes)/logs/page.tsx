@@ -18,6 +18,11 @@ const Page = async () => {
   const data = await db.logs.findMany({
     where: {
       departmentId: department?.id,
+      User: {
+        Employee: {
+          branchId: user?.Employee.branchId,
+        }
+      }
     },
     orderBy: {
       createdAt: "desc",

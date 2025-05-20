@@ -7,9 +7,17 @@ import db from "@/lib/db";
 import { ItemColumn } from "./_components/column";
 import { format } from "date-fns";
 import ItemClient from "./_components/client";
+import { useUser } from "@/hooks/use-user";
 
 const Page = async () => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { user } = await useUser();
   const data = await db.items.findMany({
+    where: {
+      Supplier: {
+        branchId: user?.Employee.branchId,
+      },
+    },
     orderBy: {
       createdAt: "desc",
     },

@@ -519,12 +519,12 @@ export const sendInitialInterviewEmployee = async (
 
   const { date, time, location } = validatedField.data;
 
-  // Create date object in UTC
+  // Create date objects
   const dateObj = new Date(date);
   const timeObj = new Date(time);
 
-  // Combine date and time in UTC
-  const combinedDateTime = new Date(
+  // Combine date and time
+  const interviewStartTime = new Date(
     dateObj.getFullYear(),
     dateObj.getMonth(),
     dateObj.getDate(),
@@ -532,72 +532,74 @@ export const sendInitialInterviewEmployee = async (
     timeObj.getMinutes()
   );
 
-  // Format for display in Asia/Manila timezone
-  const formattedDate = combinedDateTime.toLocaleDateString("en-US", {
-    timeZone: "Asia/Manila",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
-
-  const formattedTime = combinedDateTime.toLocaleTimeString("en-US", {
-    timeZone: "Asia/Manila",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  });
-
-  // For database storage, store as ISO string or UTC timestamp
-  const dbTimestamp = combinedDateTime.toISOString(); // UTC format
-
-  const htmlContent = await InitialInterviewDetailsHTML({
-    email: email,
-    date: formattedDate,
-    time: formattedTime,
-    department,
-    jobTitle,
-    branch,
-    location,
-  });
-
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: "bats3curity.9395@gmail.com",
-      pass: "wfffyihhttplludl",
-    },
-  });
-
-  const message = {
-    from: "bats3curity.9395@gmail.com",
-    to: email,
-    subject: "Initial Interview Invitation - BAT Security Services INC.",
-    text: `Hello ${email},
-
-Congratulations! You are invited for an Initial Interview at BAT Security Services INC.
-
-Date: ${formattedDate}
-Time: ${formattedTime} (Philippine Time)
-Location: ${location}
-
-Please arrive 10-15 minutes before your scheduled time and bring a valid ID and supporting documents.
-
-Thank you and we look forward to meeting you!`,
-    html: htmlContent,
-  };
+  // Add 1 hour for end time
+  const interviewEndTime = new Date(interviewStartTime);
+  interviewEndTime.setHours(interviewEndTime.getHours() + 1);
 
   try {
-    await transporter.sendMail(message);
+    // Save to database first
+    await db.applicantList.update({
+      where: { email },
+      data: {
+        interviewDate: interviewStartTime,
+        interviewStartTime,
+        interviewEndTime,
+        interviewLocation: location,
+        status: "Scheduled",
+      },
+    });
+
+    // Format for display
+    const formattedDate = interviewStartTime.toLocaleDateString("en-US", {
+      timeZone: "Asia/Manila",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+
+    const formattedTime = interviewStartTime.toLocaleTimeString("en-US", {
+      timeZone: "Asia/Manila",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+    // Send email
+    const htmlContent = await InitialInterviewDetailsHTML({
+      email,
+      date: formattedDate,
+      time: formattedTime,
+      department,
+      jobTitle,
+      branch,
+      location,
+    });
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER || "bats3curity.9395@gmail.com",
+        pass: process.env.EMAIL_PASSWORD || "wfffyihhttplludl",
+      },
+    });
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER || "bats3curity.9395@gmail.com",
+      to: email,
+      subject: "Initial Interview Invitation - BAT Security Services INC.",
+      text: `Hello ${email},\n\nInterview details...`,
+      html: htmlContent,
+    });
 
     await createDepartmentLog(
       "Human Resource",
-      `Sent an email to ${email} for Initial Interview at ${dbTimestamp}`
+      `Scheduled interview for ${email} at ${interviewStartTime.toISOString()}`
     );
 
-    return { success: "Email has been sent." };
+    return { success: "Interview scheduled and email sent successfully." };
   } catch (error) {
-    console.error("Error sending notification", error);
-    return { message: "An error occurred. Please try again." };
+    console.error("Error:", error);
+    return { error: "Failed to schedule interview. Please try again." };
   }
 };
 
@@ -631,6 +633,14 @@ export const sendEmployeeStatus = async (
 
   if (!employee || !employee.UserAccount || employee.UserAccount.length === 0) {
     return { error: "Employee not found or missing user account" };
+  }
+
+  if (currentStatus === "Initial Interview" && status === "Passed") {
+    await db.applicantList.delete({
+      where: {
+        email: employee.UserAccount[0].email,
+      },
+    });
   }
 
   // Define status flow based on job title
@@ -2699,6 +2709,7 @@ export const deleteClient = async (id: string) => {
 export const createSupplier = async (
   values: z.infer<typeof SupplierManagementValidators>
 ) => {
+  const { user } = await useUser();
   const validatedField = SupplierManagementValidators.safeParse(values);
 
   if (!validatedField.success) {
@@ -2716,6 +2727,7 @@ export const createSupplier = async (
         password,
         address: "",
         contactNo: "",
+        branchId: user?.Employee.branchId,
       },
     });
 
@@ -2805,9 +2817,12 @@ export const deleteSupplier = async (id: string) => {
   }
 };
 
-export const getAllClients = async () => {
+export const getAllClients = async (branchId: string) => {
   try {
     const clients = await db.client.findMany({
+      where: {
+        branchId,
+      },
       orderBy: {
         name: "asc",
       },
@@ -4052,7 +4067,10 @@ export const getEmployeeLeaveBalance = async (
       });
     }
 
-    return balance;
+    return {
+      paidLeaveTotal: balance.paidLeaveTotal,
+      paidLeaveUsed: balance.paidLeaveUsed,
+    };
   } catch (error) {
     console.error("Error in getEmployeeLeaveBalance:", error);
     throw error;
@@ -4924,6 +4942,54 @@ export const employeeContractSigning = async (
     console.error("Error signing contract", error);
     return {
       error: `Failed to sign contract. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export async function getScheduledInterviews(date: Date) {
+  try {
+    // Get all interviews for the selected date
+    const interviews = await db.applicantList.findMany({
+      where: {
+        interviewDate: {
+          gte: new Date(date.setHours(0, 0, 0, 0)),
+          lt: new Date(date.setHours(23, 59, 59, 999)),
+        },
+      },
+      select: {
+        interviewStartTime: true,
+        interviewEndTime: true,
+      },
+    });
+
+    return interviews.map((interview) => ({
+      start: interview.interviewStartTime!,
+      end: interview.interviewEndTime!,
+    }));
+  } catch (error) {
+    console.error("Error fetching scheduled interviews:", error);
+    return [];
+  }
+}
+
+export const assignShiftEmployee = async (id: string, shift: string) => {
+  if (!id || !shift) {
+    return { error: "Employee ID and shift are required" };
+  }
+
+  try {
+    await db.employee.update({
+      where: { id },
+      data: {
+        shift,
+      },
+    });
+
+    return { success: "Shift assigned successfully" };
+  } catch (error: any) {
+    console.error("Error assigning shift", error);
+    return {
+      error: `Failed to assign shift. Please try again. ${error.message || ""}`,
     };
   }
 };

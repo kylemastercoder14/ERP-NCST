@@ -176,6 +176,8 @@ export const SendEmailEmployeeValidators = z.object({
     invalid_type_error: "Invalid time format",
   }),
   location: z.string().min(1, { message: "Location is required" }),
+  interviewStartTime: z.date().optional(),
+  interviewEndTime: z.date().optional(),
 });
 
 export const SendApplicantStatusValidators = z.object({

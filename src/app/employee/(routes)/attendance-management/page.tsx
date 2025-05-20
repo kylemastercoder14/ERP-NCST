@@ -33,6 +33,7 @@ const Page = async () => {
           middleName: true,
           lastName: true,
           licenseNo: true,
+          shift: true,
           Department: {
             select: {
               name: true,
@@ -88,6 +89,7 @@ const Page = async () => {
       timeOut: item.timeOut || "--",
       attendanceStatus: item.status,
       date: item.date,
+      shift: item.Employee.shift || "N/A",
       createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),
       hasOvertime: hasOvertime,
     };
@@ -100,7 +102,7 @@ const Page = async () => {
           title={`Today's Attendance: ${todayDate} at ${currentTime}`}
           description="Monitor all your attendance records here."
         />
-        <ClockInOut todayDate={todayDate} employeeId={user.employeeId} />
+        <ClockInOut todayDate={todayDate} shift={user.Employee.shift as string} employeeId={user.employeeId} />
       </div>
       <Separator className="my-5" />
       <AttendanceClient data={formattedData} />

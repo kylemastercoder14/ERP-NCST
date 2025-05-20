@@ -44,7 +44,7 @@ const PayslipGenerationForm = ({
 
   const numberOfPaidLeaves =
     initialData?.LeaveManagement.filter(
-      (leave) => leave.leaveType === "Paid Leave"
+      (leave) => leave.isPaid
     ).length || 0;
 
   const leavePay = numberOfPaidLeaves * dailyRate;
@@ -118,10 +118,54 @@ const PayslipGenerationForm = ({
 
   const absentDeduction = absentDays * dailyRate;
 
+  const nightShift = initialData?.shift === "Night Shift";
+
+  // Calculate night differential - updated implementation
+  let nightDiffHours = 0;
+  const nightDiffStartHour = 22; // 10:00 PM
+  const nightDiffEndHour = 6; // 6:00 AM
+
+  if (nightShift) {
+    initialData?.Attendance.forEach((att) => {
+      if (att.timeIn && att.timeOut) {
+        const timeIn = new Date(att.timeIn);
+        const timeOut = new Date(att.timeOut);
+
+        // Adjust for overnight shifts (e.g., 6PM-6AM)
+        if (timeOut < timeIn) {
+          timeOut.setDate(timeOut.getDate() + 1);
+        }
+
+        // Calculate night differential hours between 10PM-6AM
+        const startNightDiff = new Date(timeIn);
+        startNightDiff.setHours(nightDiffStartHour, 0, 0, 0);
+
+        const endNightDiff = new Date(startNightDiff);
+        endNightDiff.setHours(nightDiffEndHour + 24, 0, 0, 0); // Add 24 hours to handle overnight
+
+        // Get the overlapping hours between shift and night differential period
+        const overlapStart = new Date(
+          Math.max(timeIn.getTime(), startNightDiff.getTime())
+        );
+        const overlapEnd = new Date(
+          Math.min(timeOut.getTime(), endNightDiff.getTime())
+        );
+
+        if (overlapStart < overlapEnd) {
+          const diffHours =
+            (overlapEnd.getTime() - overlapStart.getTime()) / (1000 * 60 * 60);
+          nightDiffHours += diffHours;
+        }
+      }
+    });
+  }
+
   // Calculate undertime (same as before)
   let undertimeHours = 0;
-  const standardWorkingHours = 8;
+  const standardWorkingHours = 12;
   const hourlyRate = dailyRate / standardWorkingHours;
+
+  const nightDifferential = nightShift ? nightDiffHours * hourlyRate * 0.1 : 0;
 
   initialData?.Attendance.forEach((att) => {
     if (att.timeIn && att.timeOut) {
@@ -157,7 +201,7 @@ const PayslipGenerationForm = ({
   // Check if paidLeaveUsed is 0 for the current year
   const hasBonus = currentYearLeaveBalance?.paidLeaveUsed === 0;
   const bonus = hasBonus ? baseSalary * 0.1 : 0;
-  const netPay = totalEarnings + bonus - totalDeductions;
+  const netPay = totalEarnings + bonus + nightDifferential - totalDeductions;
 
   const printRef = React.useRef<HTMLDivElement>(null);
 
@@ -383,7 +427,10 @@ const PayslipGenerationForm = ({
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell></TableCell>
+              <TableCell>
+                Night Differential Pay ₱
+                {parseFloat(nightDifferential.toFixed(2)).toLocaleString()}
+              </TableCell>
               <TableCell>
                 Undertime Deduction ({undertimeHours.toFixed(1)} hrs): ₱
                 {parseFloat(undertimeDeduction.toFixed(2)).toLocaleString()}

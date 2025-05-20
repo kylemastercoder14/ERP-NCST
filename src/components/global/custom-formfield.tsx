@@ -97,6 +97,7 @@ interface CustomProps {
   tooltipContent?: string;
   imageCount?: number;
   isBirthdate?: boolean;
+  bookedTimes?: { start: Date; end: Date }[];
 }
 
 const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
@@ -116,6 +117,7 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
     government,
     imageCount,
     isBirthdate = true,
+    bookedTimes
   } = props;
 
   const [showPassword, setShowPassword] = useState(false);
@@ -483,6 +485,7 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
           <FormControl>
             <TimePicker
               disabled={disabled}
+              bookedTimes={bookedTimes}
               value={field.value}
               onChangeAction={field.onChange}
             />

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import React from "react";
 import { Separator } from "@/components/ui/separator";
 import Heading from "@/components/ui/heading";
@@ -7,13 +8,17 @@ import { format } from "date-fns";
 import PurchaseRequestClient from "./_components/client";
 import { useSupplier } from "@/hooks/use-supplier";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useUser } from "@/hooks/use-user";
 
 const Page = async () => {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { userType } = await useSupplier();
+  const { user } = await useUser();
   const data = await db.purchaseRequest.findMany({
     where: {
       financeStatus: "Approved",
+      requestedBy: {
+        branchId: user?.Employee.branchId,
+      },
     },
     orderBy: {
       createdAt: "desc",

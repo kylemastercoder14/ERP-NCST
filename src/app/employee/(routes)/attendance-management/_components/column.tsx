@@ -12,6 +12,7 @@ export type AttendanceColumn = {
   timeIn: string;
   timeOut: string;
   attendanceStatus: string;
+  shift: string;
   hasOvertime: boolean;
   createdAt: string;
 };
@@ -52,6 +53,16 @@ export const columns: ColumnDef<AttendanceColumn>[] = [
           Date
           <ChevronsUpDown className="ml-2 h-4 w-4 no-print" />
         </span>
+      );
+    },
+    cell: ({ row }) => {
+      return (
+        <div className="flex flex-col">
+          <span className="text-sm">{row.original.date}</span>
+          <span className="text-muted-foreground text-[12px]">
+            Shift: {row.original.shift}
+          </span>
+        </div>
       );
     },
   },

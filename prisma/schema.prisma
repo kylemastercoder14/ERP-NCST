@@ -63,6 +63,11 @@ model ApplicantList {
   JobPosting   JobPosting? @relation(fields: [jobPostingId], references: [id])
   jobPostingId String?
 
+  interviewDate      DateTime?
+  interviewStartTime DateTime?
+  interviewEndTime   DateTime?
+  interviewLocation  String?
+
   @@index([jobPostingId])
   @@index([departmentId])
   @@index([jobTitleId])
@@ -210,6 +215,8 @@ model Employee {
 
   isSignedContract Boolean @default(false)
   signedContract   String?
+
+  shift String? // Morning, Night
 
   Children              Children[]
   EducationRecord       EducationRecord[]

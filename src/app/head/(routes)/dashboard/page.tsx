@@ -28,9 +28,9 @@ const Page = async () => {
   } else if (department?.name === "Procurement") {
     return <ProcurementDashboard branchId={branchId} />;
   } else if (department?.name === "Inventory") {
-    return <InventoryDashboard />;
+    return <InventoryDashboard branchId={branchId} />;
   } else if (department?.name === "Customer Relationship") {
-    return <CRMDashboard />;
+    return <CRMDashboard branchId={branchId} />;
   } else {
     return (
       <div className="flex flex-1 items-center justify-center">

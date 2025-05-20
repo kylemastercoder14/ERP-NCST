@@ -35,12 +35,14 @@ interface CellActionProps {
   id: string;
   trainingStatus: string;
   email: string;
+  branchId: string;
 }
 
 export const CellAction: React.FC<CellActionProps> = ({
   id,
   trainingStatus,
-  email
+  email,
+  branchId,
 }) => {
   const router = useRouter();
   const [finalOpen, setFinalOpen] = React.useState(false);
@@ -50,7 +52,7 @@ export const CellAction: React.FC<CellActionProps> = ({
 
   React.useEffect(() => {
     const fetchClients = async () => {
-      const res = await getAllClients();
+      const res = await getAllClients(branchId);
       if (res.data) {
         setClientsData(res.data);
       } else {
@@ -58,7 +60,7 @@ export const CellAction: React.FC<CellActionProps> = ({
       }
     };
     fetchClients();
-  }, []);
+  }, [branchId]);
 
   const onFinal = async () => {
     setLoading(true);

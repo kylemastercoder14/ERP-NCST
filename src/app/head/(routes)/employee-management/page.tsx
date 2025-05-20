@@ -23,6 +23,7 @@ const Page = async () => {
     include: {
       JobTitle: true,
       Department: true,
+      UserAccount: true,
     },
   });
 
@@ -38,6 +39,9 @@ const Page = async () => {
         department: item.Department.name,
         gender: item.sex,
         civilStatus: item.civilStatus,
+        clientId: item.clientId || "",
+        branchId: item.branchId,
+        email: item.UserAccount[0]?.email || "N/A",
         createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),
       };
     }) || [];

@@ -12,19 +12,31 @@ import {
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-const WORK_START = parse("08:00 AM", "hh:mm a", new Date());
-const WORK_END = parse("05:00 PM", "hh:mm a", new Date());
-
 const ClockInOut = ({
   todayDate,
   employeeId,
+  shift,
 }: {
   todayDate: string;
   employeeId: string;
+  shift: string;
 }) => {
   const router = useRouter();
   const [attendance, setAttendance] = useState<Attendance | null>(null);
   const [loading, setLoading] = useState(false);
+
+  let WORK_START;
+  let WORK_END;
+  if (shift === "Day Shift") {
+    WORK_START = parse("06:00 AM", "hh:mm a", new Date());
+    WORK_END = parse("06:00 PM", "hh:mm a", new Date());
+  } else if (shift === "Night Shift") {
+    WORK_START = parse("06:00 PM", "hh:mm a", new Date());
+    WORK_END = parse("06:00 AM", "hh:mm a", new Date());
+  } else {
+    WORK_START = parse("08:00 AM", "hh:mm a", new Date());
+    WORK_END = parse("05:00 PM", "hh:mm a", new Date());
+  }
 
   // Get today's attendance
   useEffect(() => {

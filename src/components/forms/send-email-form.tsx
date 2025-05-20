@@ -12,7 +12,10 @@ import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import CustomFormField from "@/components/global/custom-formfield";
 import { FormFieldType } from "@/lib/constants";
-import { sendInitialInterviewEmployee } from "@/actions";
+import {
+  getScheduledInterviews,
+  sendInitialInterviewEmployee,
+} from "@/actions";
 
 const SendEmailForm = ({
   email,
@@ -28,29 +31,100 @@ const SendEmailForm = ({
   branch?: string;
 }) => {
   const router = useRouter();
+  const [bookedTimes, setBookedTimes] = React.useState<
+    { start: Date; end: Date }[]
+  >([]);
+  const [selectedDate, setSelectedDate] = React.useState<string>("");
 
   const form = useForm<z.infer<typeof SendEmailEmployeeValidators>>({
     resolver: zodResolver(SendEmailEmployeeValidators),
     defaultValues: {
-      date: "",
-      time: undefined,
+      date: new Date().toISOString().split("T")[0],
+      time: new Date(new Date().setHours(8, 0, 0, 0)), // Default to 9:00 AM
       location: "",
+      interviewStartTime: undefined,
+      interviewEndTime: undefined,
     },
   });
 
   const { isSubmitting } = form.formState;
+  const watchDate = form.watch("date");
+
+  React.useEffect(() => {
+    if (watchDate) {
+      setSelectedDate(watchDate);
+      // Fetch booked times for the selected date
+      const fetchBookedTimes = async () => {
+        try {
+          const date = new Date(watchDate);
+          const result = await getScheduledInterviews(date);
+          setBookedTimes(result);
+        } catch (error) {
+          console.error("Failed to fetch booked times:", error);
+        }
+      };
+      fetchBookedTimes();
+    }
+  }, [watchDate]);
 
   const onSubmit = async (
     values: z.infer<typeof SendEmailEmployeeValidators>
   ) => {
     try {
+      // Combine date and time
+      const date = new Date(values.date);
+      const time = values.time;
+
+      const interviewStartTime = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate(),
+        time.getHours(),
+        time.getMinutes()
+      );
+
+      // Assuming 1 hour duration for interview
+      const interviewEndTime = new Date(interviewStartTime);
+      interviewEndTime.setHours(interviewEndTime.getHours() + 1);
+
+      // Update form values with calculated times
+      form.setValue("interviewStartTime", interviewStartTime);
+      form.setValue("interviewEndTime", interviewEndTime);
+
+      // Check if time is already booked
+      const isBooked = bookedTimes.some((booked) => {
+        return (
+          (interviewStartTime >= booked.start &&
+            interviewStartTime < booked.end) ||
+          (interviewEndTime > booked.start && interviewEndTime <= booked.end) ||
+          (interviewStartTime <= booked.start && interviewEndTime >= booked.end)
+        );
+      });
+
+      if (isBooked) {
+        toast.error(
+          "This time slot is already booked. Please choose another time."
+        );
+        return;
+      }
+
+      // Create the payload with all required fields
+      const payload = {
+        date: values.date,
+        time: values.time,
+        location: values.location,
+        interviewStartTime,
+        interviewEndTime,
+      };
+
       const res = await sendInitialInterviewEmployee(
-        values,
+        payload,
         email as string,
         departmentId as string,
         jobTitleId as string,
         branch as string
       );
+
       if (res.success) {
         toast.success(res.success);
         router.refresh();
@@ -82,9 +156,10 @@ const SendEmailForm = ({
           fieldType={FormFieldType.TIME_PICKER}
           isRequired={true}
           name="time"
-          disabled={isSubmitting}
+          disabled={isSubmitting || !selectedDate}
           label="Time of Initial Interview"
           placeholder="Select a time"
+          bookedTimes={bookedTimes}
         />
         <CustomFormField
           control={form.control}

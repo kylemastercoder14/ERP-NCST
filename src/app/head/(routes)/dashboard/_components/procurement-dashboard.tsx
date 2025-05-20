@@ -51,8 +51,21 @@ const ProcurementDashboard = async ({ branchId }: { branchId: string }) => {
       await Promise.all([
         // Total Items Count
         Promise.all([
-          db.items.count(),
-          db.items.count({ where: { createdAt: { lte: lastMonthEnd } } }),
+          db.items.count({
+            where: {
+              Supplier: {
+                branchId,
+              },
+            },
+          }),
+          db.items.count({
+            where: {
+              createdAt: { lte: lastMonthEnd },
+              Supplier: {
+                branchId,
+              },
+            },
+          }),
         ]),
 
         // Pending Approvals
@@ -61,12 +74,18 @@ const ProcurementDashboard = async ({ branchId }: { branchId: string }) => {
             where: {
               financeStatus: "Pending",
               createdAt: { gte: currentMonthStart, lte: currentMonthEnd },
+              requestedBy: {
+                branchId,
+              },
             },
           }),
           db.purchaseRequest.count({
             where: {
               financeStatus: "Pending",
               createdAt: { gte: lastMonthStart, lte: lastMonthEnd },
+              requestedBy: {
+                branchId,
+              },
             },
           }),
         ]),
@@ -87,6 +106,7 @@ const ProcurementDashboard = async ({ branchId }: { branchId: string }) => {
                   },
                 },
               },
+              branchId,
             },
           }),
           db.supplier.count({
@@ -100,6 +120,7 @@ const ProcurementDashboard = async ({ branchId }: { branchId: string }) => {
                   },
                 },
               },
+              branchId,
             },
           }),
         ]),
@@ -111,6 +132,11 @@ const ProcurementDashboard = async ({ branchId }: { branchId: string }) => {
             where: {
               createdAt: { gte: currentMonthStart, lte: currentMonthEnd },
               financeItemStatus: "Approved",
+              Item: {
+                Supplier: {
+                  branchId,
+                },
+              },
             },
           }),
           db.purchaseRequestItem.aggregate({
@@ -118,6 +144,11 @@ const ProcurementDashboard = async ({ branchId }: { branchId: string }) => {
             where: {
               createdAt: { gte: lastMonthStart, lte: lastMonthEnd },
               financeItemStatus: "Approved",
+              Item: {
+                Supplier: {
+                  branchId,
+                },
+              },
             },
           }),
         ]),
@@ -217,12 +248,16 @@ const ProcurementDashboard = async ({ branchId }: { branchId: string }) => {
             const [requests, approved, spend, pendingDelivery] =
               await Promise.all([
                 db.purchaseRequest.count({
-                  where: { createdAt: { gte: monthStart, lte: monthEnd } },
+                  where: {
+                    createdAt: { gte: monthStart, lte: monthEnd },
+                    requestedBy: { branchId },
+                  },
                 }),
                 db.purchaseRequest.count({
                   where: {
                     financeStatus: "Approved",
                     createdAt: { gte: monthStart, lte: monthEnd },
+                    requestedBy: { branchId },
                   },
                 }),
                 db.purchaseRequestItem.aggregate({
@@ -230,12 +265,18 @@ const ProcurementDashboard = async ({ branchId }: { branchId: string }) => {
                   where: {
                     financeItemStatus: "Approved",
                     createdAt: { gte: monthStart, lte: monthEnd },
+                    Item: {
+                      Supplier: {
+                        branchId,
+                      },
+                    },
                   },
                 }),
                 db.purchaseRequest.count({
                   where: {
                     supplierStatus: "In transit",
                     createdAt: { gte: monthStart, lte: monthEnd },
+                    requestedBy: { branchId },
                   },
                 }),
               ]);
@@ -258,6 +299,9 @@ const ProcurementDashboard = async ({ branchId }: { branchId: string }) => {
     }
 
     const suppliersWithItemCounts = await db.supplier.findMany({
+      where: {
+        branchId,
+      },
       include: {
         Items: {
           select: {

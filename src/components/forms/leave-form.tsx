@@ -9,7 +9,6 @@ import { LeaveManagementValidators } from "@/validators";
 import { toast } from "sonner";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import CustomFormField from "@/components/global/custom-formfield";
@@ -26,8 +25,14 @@ const LeaveForm = ({
   employeeId: string;
 }) => {
   const router = useRouter();
-  const [availablePaidLeave, setAvailablePaidLeave] = React.useState<number>(5);
+  const [leaveBalance, setLeaveBalance] = React.useState<{
+    total: number;
+    used: number;
+    available: number;
+  }>({ total: 5, used: 0, available: 5 });
+
   const [isCalculating, setIsCalculating] = React.useState(false);
+  const [isInitializing, setIsInitializing] = React.useState(true);
 
   const title = initialData ? "Edit Requested Leave" : "Request Leave";
   const description = initialData
@@ -51,20 +56,44 @@ const LeaveForm = ({
 
   const { isSubmitting } = form.formState;
   const isPaidLeave = form.watch("isPaid");
+  const startDate = form.watch("startDate");
+  const endDate = form.watch("endDate");
 
+  // Initialize leave balance
   React.useEffect(() => {
-    const calculateLeave = async () => {
-      const startDate = form.watch("startDate");
-      const endDate = form.watch("endDate");
+    const initializeBalance = async () => {
+      try {
+        const year = new Date().getFullYear();
+        const balance = await getEmployeeLeaveBalance(employeeId, year);
 
-      if (!employeeId || !startDate || !endDate) return;
+        setLeaveBalance({
+          total: balance.paidLeaveTotal,
+          used: balance.paidLeaveUsed,
+          available: balance.paidLeaveTotal - balance.paidLeaveUsed,
+        });
+      } catch (error) {
+        console.error("Failed to initialize leave balance:", error);
+        setLeaveBalance({
+          total: 5,
+          used: 0,
+          available: 5,
+        });
+      } finally {
+        setIsInitializing(false);
+      }
+    };
 
-      setIsCalculating(true);
+    initializeBalance();
+  }, [employeeId]);
+
+  // Calculate leave days when dates change
+  React.useEffect(() => {
+    const calculateLeaveDays = () => {
+      if (!startDate || !endDate) return;
 
       try {
         const start = new Date(startDate);
         const end = new Date(endDate);
-        const year = start.getFullYear();
 
         if (end < start) {
           form.setError("endDate", {
@@ -74,44 +103,60 @@ const LeaveForm = ({
           return;
         }
 
+        // Calculate difference in days (inclusive of both start and end dates)
         const timeDiff = end.getTime() - start.getTime();
-        const daysRequested = Math.ceil(timeDiff / (1000 * 3600 * 24));
+        const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
 
-        const balance = await getEmployeeLeaveBalance(employeeId, year);
-        const remainingPaidLeave =
-          balance.paidLeaveTotal - balance.paidLeaveUsed;
-
-        setAvailablePaidLeave(remainingPaidLeave);
-        form.setValue("daysUsed", daysRequested);
-        form.setValue("year", year);
-
-        // Only auto-set isPaid if it hasn't been manually changed
-        if (!form.formState.touchedFields.isPaid) {
-          const canBePaid = daysRequested <= remainingPaidLeave;
-          form.setValue("isPaid", canBePaid);
-
-          if (!canBePaid) {
-            toast.warning(
-              `Only ${remainingPaidLeave} paid leave days left. This leave will be unpaid.`
-            );
-          }
-        }
+        form.setValue("daysUsed", daysDiff);
       } catch (error) {
-        console.error("Error calculating leave:", error);
-        toast.error("Failed to calculate leave days.");
-      } finally {
-        setIsCalculating(false);
+        console.error("Error calculating leave days:", error);
       }
     };
 
-    const subscription = form.watch((value, { name }) => {
-      if (name === "startDate" || name === "endDate") {
-        calculateLeave();
-      }
-    });
+    calculateLeaveDays();
+  }, [startDate, endDate, form]);
 
-    return () => subscription.unsubscribe();
-  }, [form, employeeId]);
+  const calculateLeaveBalance = async () => {
+    if (!employeeId || !startDate || !endDate) return;
+
+    setIsCalculating(true);
+
+    try {
+      const start = new Date(startDate);
+      const year = start.getFullYear();
+      const balance = await getEmployeeLeaveBalance(employeeId, year);
+      const remainingPaidLeave = balance.paidLeaveTotal - balance.paidLeaveUsed;
+
+      setLeaveBalance({
+        total: balance.paidLeaveTotal,
+        used: balance.paidLeaveUsed,
+        available: remainingPaidLeave,
+      });
+
+      if (!form.formState.touchedFields.isPaid) {
+        const daysRequested = form.getValues("daysUsed");
+        const canBePaid = daysRequested <= remainingPaidLeave;
+        form.setValue("isPaid", canBePaid);
+
+        if (!canBePaid) {
+          toast.warning(
+            `Only ${remainingPaidLeave} paid leave days left. This leave will be unpaid.`
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Error calculating leave balance:", error);
+      toast.error("Failed to calculate leave balance.");
+    } finally {
+      setIsCalculating(false);
+    }
+  };
+
+  // Calculate leave balance when relevant values change
+  React.useEffect(() => {
+    calculateLeaveBalance();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [employeeId, startDate, form.watch("daysUsed")]);
 
   const onSubmit = async (
     values: z.infer<typeof LeaveManagementValidators>
@@ -154,9 +199,14 @@ const LeaveForm = ({
           onSubmit={form.handleSubmit(onSubmit)}
           className="grid mt-5 gap-6"
         >
-          {!isCalculating && (
+          {isInitializing ? (
             <div className="text-sm text-muted-foreground">
-              Available paid leave: {availablePaidLeave} days (out of 5)
+              Loading leave balance...
+            </div>
+          ) : (
+            <div className="text-sm text-muted-foreground">
+              Available paid leave: {leaveBalance.available} days (out of{" "}
+              {leaveBalance.total})
             </div>
           )}
 
@@ -206,7 +256,7 @@ const LeaveForm = ({
               fieldType={FormFieldType.INPUT}
               isRequired={true}
               name="daysUsed"
-              disabled={true} // Disabled as it's auto-calculated
+              disabled={true}
               label="Days used"
               placeholder="Enter days used"
             />
@@ -215,7 +265,7 @@ const LeaveForm = ({
               fieldType={FormFieldType.INPUT}
               isRequired={true}
               name="year"
-              disabled={true} // Disabled as it's auto-calculated
+              disabled={true}
               label="Year"
               placeholder="Enter year"
             />
@@ -227,6 +277,7 @@ const LeaveForm = ({
               disabled={isSubmitting}
               label="Start Date"
               placeholder="Select start date"
+              isBirthdate={false}
             />
             <CustomFormField
               control={form.control}
@@ -262,7 +313,10 @@ const LeaveForm = ({
             <Button onClick={() => router.back()} type="button" variant="ghost">
               Cancel
             </Button>
-            <Button disabled={isSubmitting || isCalculating} type="submit">
+            <Button
+              disabled={isSubmitting || isCalculating || isInitializing}
+              type="submit"
+            >
               {isCalculating ? "Calculating..." : action}
             </Button>
           </div>
