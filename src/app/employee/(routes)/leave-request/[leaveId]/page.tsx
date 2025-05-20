@@ -16,7 +16,11 @@ const Page = async (props: {
       id: params.leaveId,
     },
     include: {
-      Employee: true,
+      Employee: {
+        include: {
+          EmployeeLeaveBalance: true,
+        },
+      },
       ApprovedBy: true,
     },
   });
