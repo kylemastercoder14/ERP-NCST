@@ -17,7 +17,7 @@ import {
   SendIcon,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import React from "react";
 import { assignToClient, getAllClients } from "@/actions";
 import { Modal } from "@/components/ui/modal";
@@ -40,9 +40,10 @@ interface CellActionProps {
 export const CellAction: React.FC<CellActionProps> = ({
   id,
   trainingStatus,
-  email
+  email,
 }) => {
   const router = useRouter();
+  const params = useParams();
   const [finalOpen, setFinalOpen] = React.useState(false);
   const [clientId, setClientId] = React.useState("");
   const [clientsData, setClientsData] = React.useState<Client[]>([]);
@@ -50,7 +51,7 @@ export const CellAction: React.FC<CellActionProps> = ({
 
   React.useEffect(() => {
     const fetchClients = async () => {
-      const res = await getAllClients();
+      const res = await getAllClients(params.branchId as string);
       if (res.data) {
         setClientsData(res.data);
       } else {
@@ -58,7 +59,7 @@ export const CellAction: React.FC<CellActionProps> = ({
       }
     };
     fetchClients();
-  }, []);
+  }, [params.branchId]);
 
   const onFinal = async () => {
     setLoading(true);
