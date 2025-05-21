@@ -3,8 +3,8 @@ import { Separator } from "@/components/ui/separator";
 import Heading from "@/components/ui/heading";
 import db from "@/lib/db";
 import { ExtraShiftColumn } from "./_components/column";
-import { parseISO } from "date-fns";
-import { format as tzFormat } from "date-fns-tz";
+import { format, parseISO } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 import ExtraShiftClient from "./_components/client";
 import { useUser } from "@/hooks/use-user";
 import { Button } from "@/components/ui/button";
@@ -27,8 +27,10 @@ const formatInManila = (
     if (isNaN(date.getTime())) {
       throw new Error("Invalid date");
     }
-    // Convert to Manila timezone and format
-    return tzFormat(date, formatString, { timeZone: TIMEZONE });
+    // Convert to Manila timezone
+    const manilaDate = toZonedTime(date, TIMEZONE);
+    // Format the date
+    return format(manilaDate, formatString);
   } catch (error) {
     console.error("Error formatting date:", error);
     return "Invalid date";
@@ -37,13 +39,10 @@ const formatInManila = (
 
 const Page = async () => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const { userId } = await useUser();
+  const { user } = await useUser();
+  const departmentSession = user?.Employee.Department.name;
 
-  const user = await db.userAccount.findUnique({
-    where: { id: userId },
-    select: { employeeId: true },
-  });
-
+  // For employees, only show their own requests
   const data = await db.extraShift.findMany({
     where: {
       employeeId: user?.employeeId,
@@ -56,25 +55,29 @@ const Page = async () => {
     },
   });
 
-  const formattedData: ExtraShiftColumn[] =
-    data.map((item) => {
-      return {
-        id: item.id,
-        type: item.type,
-        timeIn: formatInManila(item.timeStart, "hh:mm a"),
-        timeOut: formatInManila(item.timeEnd, "hh:mm a"),
-        status: item.status,
-        date: formatInManila(item.date, "MMMM dd, yyyy"),
-        createdAt: formatInManila(item.createdAt, "MMMM dd, yyyy"),
-      };
-    }) || [];
+  const formattedData: ExtraShiftColumn[] = data.map((item) => {
+    return {
+      id: item.id,
+      licenseNo: item.Employee.licenseNo || "N/A",
+      name: `${item.Employee.firstName} ${item.Employee.middleName || ""} ${item.Employee.lastName}`.trim(),
+      type: item.type,
+      // Format times in Manila timezone
+      timeIn: formatInManila(item.timeStart, "hh:mm a"),
+      timeOut: formatInManila(item.timeEnd, "hh:mm a"),
+      status: item.status,
+      departmentSession: departmentSession || "",
+      // Format dates in Manila timezone
+      date: formatInManila(item.date, "MMMM dd, yyyy"),
+      createdAt: formatInManila(item.createdAt, "MMMM dd, yyyy"),
+    };
+  });
 
   return (
     <div>
       <div className="flex items-center justify-between">
         <Heading
-          title="List of Requested Overtime"
-          description="Manage all the list of your requested overtime. You can also update the request."
+          title="Your Overtime Requests"
+          description="View and manage all of your submitted overtime requests."
         />
         <Button size="sm">
           <Link href={`/employee/overtime-request/create`}>
