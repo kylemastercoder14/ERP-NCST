@@ -11,30 +11,33 @@ const Page = async () => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { user } = await useUser();
   const data = await db.jobPosting.findMany({
-	orderBy: {
-	  createdAt: "desc",
-	},
-	include: {
-	  applicantList: true
-	},
+    where: {
+      branchId: user?.Employee?.branchId,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      applicantList: true,
+    },
   });
 
   const department = user?.Employee?.Department.name;
 
   return (
-	<div>
-	  <div className="flex items-center justify-between">
-		<Heading
-		  title="List of Job Posting"
-		  description="Manage all the job posting here. This is where you can view all the job posting."
-		/>
-		<Button size="sm">
-		  <Link href={`/head/job-posting/create`}>+ Create new job post</Link>
-		</Button>
-	  </div>
-	  <Separator className="my-5" />
-	  <JobPosting data={data} department={department as string} />
-	</div>
+    <div>
+      <div className="flex items-center justify-between">
+        <Heading
+          title="List of Job Posting"
+          description="Manage all the job posting here. This is where you can view all the job posting."
+        />
+        <Button size="sm">
+          <Link href={`/head/job-posting/create`}>+ Create new job post</Link>
+        </Button>
+      </div>
+      <Separator className="my-5" />
+      <JobPosting data={data} department={department as string} />
+    </div>
   );
 };
 
