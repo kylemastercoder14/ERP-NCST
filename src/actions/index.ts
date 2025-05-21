@@ -54,7 +54,8 @@ import { ForgotPasswordEmailHTML } from "@/components/email-templates/forgot-pas
 import { InquiryEmailHTML } from "@/components/email-templates/contact";
 import { TicketStatus } from "@prisma/client";
 import { useDepartmentLog } from "@/hooks/use-department-log";
-import { ContractEmailHTML } from "../components/email-templates/client-contract";
+import { ContractEmailHTML } from "@/components/email-templates/client-contract";
+import { getManilaNow } from "@/lib/timezone-utils";
 
 const { createDepartmentLog } = useDepartmentLog();
 
@@ -1825,13 +1826,15 @@ export const createExtraShift = async (
       select: { employeeId: true },
     });
 
-    const todayStart = new Date();
+    // Create date bounds in Manila timezone
+    const today = getManilaNow();
+    const todayStart = new Date(today);
     todayStart.setHours(0, 0, 0, 0);
 
-    const todayEnd = new Date();
+    const todayEnd = new Date(today);
     todayEnd.setHours(23, 59, 59, 999);
 
-    // ✅ Check if a request already exists for today
+    // Check if a request already exists for today
     const existingShift = await db.extraShift.findFirst({
       where: {
         employeeId: user?.employeeId,
@@ -1848,13 +1851,14 @@ export const createExtraShift = async (
       };
     }
 
+    // Format times properly with Manila timezone in mind
     await db.extraShift.create({
       data: {
         employeeId: user?.employeeId as string,
         type,
-        timeStart: timeIn.toISOString(),
-        timeEnd: timeOut.toISOString(),
-        date: new Date().toISOString(),
+        timeStart: timeIn.toISOString(), // The TimePicker component now properly handles the timezone
+        timeEnd: timeOut.toISOString(), // The TimePicker component now properly handles the timezone
+        date: getManilaNow().toISOString(), // Current date in Manila timezone
         status: "Pending",
       },
     });

@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from "react";
@@ -16,18 +17,33 @@ import { createExtraShift, updateExtraShift } from "@/actions";
 import Heading from "@/components/ui/heading";
 import { ExtraShiftWithProps } from "@/types";
 
+
+// Helper function to get current time in Manila timezone
+const getManilaTime = (): Date => {
+  const now = new Date();
+  const manilaOffset = 8 * 60; // Manila is UTC+8 (8 hours * 60 minutes)
+  const localOffset = now.getTimezoneOffset();
+  const totalOffsetMinutes = manilaOffset + localOffset;
+
+  const manilaTime = new Date(now.getTime() + totalOffsetMinutes * 60000);
+  return manilaTime;
+};
+
 const ExtraShiftForm = ({
   initialData,
 }: {
   initialData: ExtraShiftWithProps | null;
 }) => {
-  const now = new Date();
+  // Get current time in Manila timezone for defaults
+  const now = getManilaTime();
+
   const router = useRouter();
   const title = initialData ? "Edit Requested Overtime" : "Request Overtime";
   const description = initialData
     ? "Please fill all the information to update the overtime."
     : "Please fill all the information to add a new overtime.";
   const action = initialData ? "Save Changes" : "Submit";
+
   const form = useForm<z.infer<typeof ExtraShiftValidators>>({
     resolver: zodResolver(ExtraShiftValidators),
     defaultValues: {
@@ -41,8 +57,19 @@ const ExtraShiftForm = ({
 
   const onSubmit = async (values: z.infer<typeof ExtraShiftValidators>) => {
     try {
+      // Make sure values are in the correct format
+      const processedValues = {
+        ...values,
+        // Ensure dates are properly formatted with timezone information
+        timeIn: values.timeIn,
+        timeOut: values.timeOut,
+      };
+
       if (initialData) {
-        const res = await updateExtraShift(values, initialData?.id as string);
+        const res = await updateExtraShift(
+          processedValues,
+          initialData?.id as string
+        );
         if (res.success) {
           toast.success(res.success);
           router.back();
@@ -53,7 +80,7 @@ const ExtraShiftForm = ({
           toast.error(res.error);
         }
       } else {
-        const res = await createExtraShift(values);
+        const res = await createExtraShift(processedValues);
         if (res.success) {
           toast.success(res.success);
           router.back();
@@ -69,6 +96,7 @@ const ExtraShiftForm = ({
       console.error(error);
     }
   };
+
   return (
     <div className="pb-10">
       <Heading title={title} description={description} />

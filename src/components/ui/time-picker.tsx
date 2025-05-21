@@ -11,7 +11,29 @@ import {
 } from "@/components/ui/popover";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Clock } from "lucide-react";
-import { toZonedTime } from "date-fns-tz";
+
+// Create a timezone helper to handle Asia/Manila timezone
+const TIMEZONE = 'Asia/Manila';
+
+// Helper functions for timezone handling
+const formatInTimezone = (date: Date): string => {
+  return date.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+    timeZone: TIMEZONE
+  });
+};
+
+const getLocalTimeInManila = (): Date => {
+  const now = new Date();
+  const manilaOffset = 8 * 60; // Manila is UTC+8 (8 hours * 60 minutes)
+  const localOffset = now.getTimezoneOffset();
+  const totalOffsetMinutes = manilaOffset + localOffset;
+
+  const manilaTime = new Date(now.getTime() + totalOffsetMinutes * 60000);
+  return manilaTime;
+};
 
 export type TimePickerProps = {
   value?: Date | string;
@@ -22,83 +44,83 @@ export type TimePickerProps = {
   bookedTimes?: { start: Date; end: Date }[];
 };
 
-const MANILA_TIMEZONE = "Asia/Manila";
-
 export function TimePicker({
   value,
   onChangeAction,
   placeholder = "Select a time",
   className,
   disabled,
-  bookedTimes = [],
+  bookedTimes = []
 }: TimePickerProps) {
-  // Convert UTC to Manila time for display
-  const safeValue =
-    value instanceof Date
-      ? toZonedTime(value, MANILA_TIMEZONE)
-      : value
-        ? toZonedTime(new Date(value), MANILA_TIMEZONE)
-        : null;
+  // Handle value safely, ensuring it's a Date object in Manila timezone
+  const safeValue = React.useMemo(() => {
+    if (!value) return null;
+
+    const dateObj = value instanceof Date ? value : new Date(value);
+    return dateObj;
+  }, [value]);
 
   function isTimeBooked(hour: number, minute: number, ampm: string): boolean {
     if (!bookedTimes.length) return false;
 
-    const selectedHour =
-      ampm === "PM" && hour !== 12
-        ? hour + 12
-        : ampm === "AM" && hour === 12
-          ? 0
-          : hour;
+    const selectedHour = ampm === "PM" && hour !== 12 ? hour + 12 : ampm === "AM" && hour === 12 ? 0 : hour;
     const selectedDate = new Date();
     selectedDate.setHours(selectedHour, minute, 0, 0);
 
-    // Convert from Manila time to UTC for comparison
-    const selectedTimeInManila = toZonedTime(selectedDate, MANILA_TIMEZONE);
-    const selectedTimeUTC = new Date(selectedTimeInManila);
-    selectedTimeUTC.setMinutes(
-      selectedTimeUTC.getMinutes() - selectedTimeUTC.getTimezoneOffset()
-    );
-
-    return bookedTimes.some((booked) => {
+    return bookedTimes.some(booked => {
       const start = new Date(booked.start);
       const end = new Date(booked.end);
-      return selectedTimeUTC >= start && selectedTimeUTC < end;
+      return selectedDate >= start && selectedDate < end;
     });
   }
 
   function handleTimeChange(type: "hour" | "minute" | "ampm", val: string) {
-    const newDate = safeValue ? new Date(safeValue) : new Date();
+    // Base the new date off of the current value or create a new Manila time
+    const newDate = safeValue ? new Date(safeValue) : getLocalTimeInManila();
 
     if (type === "hour") {
       const hour = parseInt(val, 10);
-      newDate.setHours(newDate.getHours() >= 12 ? hour + 12 : hour);
+      const isPM = newDate.getHours() >= 12;
+      // Set hour (0-23) based on AM/PM
+      newDate.setHours(isPM ? (hour % 12) + 12 : hour % 12);
     } else if (type === "minute") {
       newDate.setMinutes(parseInt(val, 10));
     } else if (type === "ampm") {
-      const hours = newDate.getHours();
-      if (val === "AM" && hours >= 12) {
-        newDate.setHours(hours - 12);
-      } else if (val === "PM" && hours < 12) {
-        newDate.setHours(hours + 12);
+      const currentHour = newDate.getHours();
+      const currentHourIn12 = currentHour % 12;
+
+      if (val === "AM" && currentHour >= 12) {
+        newDate.setHours(currentHourIn12);
+      } else if (val === "PM" && currentHour < 12) {
+        newDate.setHours(currentHourIn12 + 12);
       }
     }
 
-    // Convert Manila time back to UTC before saving
-    const utcDate = new Date(newDate);
-    utcDate.setMinutes(utcDate.getMinutes() - utcDate.getTimezoneOffset());
-    onChangeAction(utcDate);
+    onChangeAction(newDate);
   }
 
   function handleQuickSelect(option: "today" | "last30" | "last1hr") {
-    const now = new Date();
+    const now = getLocalTimeInManila();
     if (option === "last30") now.setMinutes(now.getMinutes() - 30);
     if (option === "last1hr") now.setHours(now.getHours() - 1);
-
-    // Convert to UTC
-    const utcDate = new Date(now);
-    utcDate.setMinutes(utcDate.getMinutes() - utcDate.getTimezoneOffset());
-    onChangeAction(utcDate);
+    onChangeAction(now);
   }
+
+  // Get actual hour and period (AM/PM) for the value
+  const getHour = (): number => {
+    if (!safeValue) return 12;
+    const hour = safeValue.getHours() % 12;
+    return hour === 0 ? 12 : hour;
+  };
+
+  const getMinute = (): number => {
+    return safeValue?.getMinutes() || 0;
+  };
+
+  const getAMPM = (): 'AM' | 'PM' => {
+    if (!safeValue) return 'AM';
+    return safeValue.getHours() >= 12 ? 'PM' : 'AM';
+  };
 
   return (
     <Popover>
@@ -113,11 +135,7 @@ export function TimePicker({
         >
           <span>
             {safeValue
-              ? safeValue.toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: true,
-                })
+              ? formatInTimezone(safeValue)
               : placeholder}
           </span>
           <Clock className="h-4 w-4 opacity-50" />
@@ -151,21 +169,13 @@ export function TimePicker({
           <ScrollArea className="w-24">
             <div className="flex flex-col p-2">
               {Array.from({ length: 12 }, (_, i) => i + 1).map((hour) => {
-                const isBooked = isTimeBooked(
-                  hour,
-                  safeValue?.getMinutes() || 0,
-                  (safeValue ? safeValue.getHours() : 0) >= 12 ? "PM" : "AM"
-                );
+                const isBooked = isTimeBooked(hour, getMinute(), getAMPM());
 
                 return (
                   <Button
                     key={hour}
                     size="icon"
-                    variant={
-                      safeValue && safeValue.getHours() % 12 === hour % 12
-                        ? "default"
-                        : "ghost"
-                    }
+                    variant={getHour() === hour ? "default" : "ghost"}
                     className="w-full"
                     onClick={() => handleTimeChange("hour", hour.toString())}
                     disabled={isBooked}
@@ -182,23 +192,15 @@ export function TimePicker({
           <ScrollArea className="w-24">
             <div className="flex flex-col p-2">
               {Array.from({ length: 12 }, (_, i) => i * 5).map((minute) => {
-                const isBooked = isTimeBooked(
-                  (safeValue ? safeValue.getHours() : 0) % 12 || 12,
-                  minute,
-                  (safeValue ? safeValue.getHours() : 0) >= 12 ? "PM" : "AM"
-                );
+                const isBooked = isTimeBooked(getHour(), minute, getAMPM());
 
                 return (
                   <Button
                     key={minute}
                     size="icon"
-                    variant={
-                      safeValue?.getMinutes() === minute ? "default" : "ghost"
-                    }
+                    variant={getMinute() === minute ? "default" : "ghost"}
                     className="w-full"
-                    onClick={() =>
-                      handleTimeChange("minute", minute.toString())
-                    }
+                    onClick={() => handleTimeChange("minute", minute.toString())}
                     disabled={isBooked}
                   >
                     {minute.toString().padStart(2, "0")}
@@ -213,23 +215,13 @@ export function TimePicker({
           <ScrollArea className="w-24">
             <div className="flex flex-col p-2">
               {["AM", "PM"].map((ampm) => {
-                const isBooked = isTimeBooked(
-                  (safeValue ? safeValue.getHours() : 0) % 12 || 12,
-                  safeValue?.getMinutes() || 0,
-                  ampm
-                );
+                const isBooked = isTimeBooked(getHour(), getMinute(), ampm);
 
                 return (
                   <Button
                     key={ampm}
                     size="icon"
-                    variant={
-                      safeValue &&
-                      ((ampm === "AM" && safeValue.getHours() < 12) ||
-                        (ampm === "PM" && safeValue.getHours() >= 12))
-                        ? "default"
-                        : "ghost"
-                    }
+                    variant={getAMPM() === ampm ? "default" : "ghost"}
                     className="w-full"
                     onClick={() => handleTimeChange("ampm", ampm)}
                     disabled={isBooked}
