@@ -8,13 +8,19 @@ import { AccountPayableColumn } from "./_components/column";
 import { format } from "date-fns";
 import PurchaseRequestClient from "./_components/client";
 
-const Page = async () => {
+const Page = async (props: {
+  params: Promise<{
+    branchId: string;
+  }>;
+}) => {
+	  const params = await props.params;
   const data = await db.transaction.findMany({
 	orderBy: {
 	  createdAt: "desc",
 	},
 	where: {
-		type: "CREDIT"
+		type: "CREDIT",
+		branchId: params.branchId,
 	},
 	include: {
 	  Supplier: true,

@@ -5,6 +5,7 @@ import AccountPayableForm from "@/components/forms/account-payable-form";
 const Page = async (props: {
   params: Promise<{
     payableId: string;
+    branchId: string;
   }>;
 }) => {
   const params = await props.params;
@@ -17,6 +18,9 @@ const Page = async (props: {
   const suppliers = await db.supplier.findMany({
     orderBy: {
       name: "asc",
+    },
+    where: {
+      branchId: params.branchId,
     },
   });
 

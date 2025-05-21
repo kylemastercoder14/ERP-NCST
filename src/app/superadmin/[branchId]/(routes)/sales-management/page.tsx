@@ -9,8 +9,16 @@ import { format } from "date-fns";
 import LedgerClient from "./_components/client";
 import ExportToExcel from "./_components/export-to-excel";
 
-const Page = async () => {
+const Page = async (props: {
+  params: Promise<{
+    branchId: string;
+  }>;
+}) => {
+  const params = await props.params;
   const data = await db.transaction.findMany({
+    where: {
+      branchId: params.branchId,
+    },
     orderBy: {
       createdAt: "desc",
     },

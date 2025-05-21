@@ -7,48 +7,53 @@ import db from "@/lib/db";
 import { AccountPayableColumn } from "./_components/column";
 import { format } from "date-fns";
 import PurchaseRequestClient from "./_components/client";
+import { useUser } from "@/hooks/use-user";
 
 const Page = async () => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { user } = await useUser();
   const data = await db.transaction.findMany({
-	orderBy: {
-	  createdAt: "desc",
-	},
-	where: {
-		type: "CREDIT"
-	},
-	include: {
-	  Supplier: true,
-	},
+    orderBy: {
+      createdAt: "desc",
+    },
+    where: {
+      type: "CREDIT",
+      branchId: user?.Employee?.branchId,
+    },
+    include: {
+      Supplier: true,
+    },
   });
 
-
   const formattedData: AccountPayableColumn[] =
-	data.map((request) => {
-	  return {
-		id: request.id,
-		name: request.name,
-		supplier: request?.Supplier?.name || "N/A",
-		amount: `₱${request.amount.toLocaleString()}`,
-		accountType: request.accountType,
-		status: request.status,
-		createdAt: format(new Date(request.createdAt), "MMMM dd, yyyy"),
-	  };
-	}) || [];
+    data.map((request) => {
+      return {
+        id: request.id,
+        name: request.name,
+        supplier: request?.Supplier?.name || "N/A",
+        amount: `₱${request.amount.toLocaleString()}`,
+        accountType: request.accountType,
+        status: request.status,
+        createdAt: format(new Date(request.createdAt), "MMMM dd, yyyy"),
+      };
+    }) || [];
 
   return (
-	<div>
-	  <div className="flex items-center justify-between">
-		<Heading
-		  title="List of Account Payable"
-		  description="Manage all the account payable here."
-		/>
-		<Button size="sm">
-		  <Link href={`/head/sales-management/accounts-payable/create`}>+ Add new payable</Link>
-		</Button>
-	  </div>
-	  <Separator className="my-5" />
-	  <PurchaseRequestClient data={formattedData} />
-	</div>
+    <div>
+      <div className="flex items-center justify-between">
+        <Heading
+          title="List of Account Payable"
+          description="Manage all the account payable here."
+        />
+        <Button size="sm">
+          <Link href={`/head/sales-management/accounts-payable/create`}>
+            + Add new payable
+          </Link>
+        </Button>
+      </div>
+      <Separator className="my-5" />
+      <PurchaseRequestClient data={formattedData} />
+    </div>
   );
 };
 
