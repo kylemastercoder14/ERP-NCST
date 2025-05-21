@@ -306,6 +306,7 @@ const LeaveForm = ({
               disabled={isSubmitting}
               label="End Date"
               placeholder="Select end date"
+              isBirthdate={false}
             />
           </div>
 
