@@ -3,11 +3,27 @@ import { Separator } from "@/components/ui/separator";
 import Heading from "@/components/ui/heading";
 import db from "@/lib/db";
 import { ExtraShiftColumn } from "./_components/column";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 import ExtraShiftClient from "./_components/client";
 import { useUser } from "@/hooks/use-user";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+
+// Manila timezone
+const TIMEZONE = "Asia/Manila";
+
+/**
+ * Helper function to format dates in Manila timezone
+ */
+const formatInManila = (dateString: string, formatString: string): string => {
+  // Parse the ISO string
+  const date = parseISO(dateString);
+  // Convert to Manila timezone
+  const manilaDate = toZonedTime(date, TIMEZONE);
+  // Format the date
+  return format(manilaDate, formatString);
+};
 
 const Page = async () => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -16,7 +32,7 @@ const Page = async () => {
 
   let data;
 
-  if(departmentSession === "Human Resource") {
+  if (departmentSession === "Human Resource") {
     data = await db.extraShift.findMany({
       orderBy: {
         createdAt: "desc",
@@ -25,7 +41,7 @@ const Page = async () => {
         Employee: true,
       },
     });
-  }else {
+  } else {
     data = await db.extraShift.findMany({
       where: {
         employeeId: user?.employeeId,
@@ -46,12 +62,14 @@ const Page = async () => {
         licenseNo: item.Employee.licenseNo || "N/A",
         name: `${item.Employee.firstName} ${item.Employee.middleName || ""} ${item.Employee.lastName}`.trim(),
         type: item.type,
-        timeIn: format(new Date(item.timeStart), "hh:mm a"),
-        timeOut: format(new Date(item.timeEnd), "hh:mm a"),
+        // Format times in Manila timezone
+        timeIn: formatInManila(item.timeStart, "hh:mm a"),
+        timeOut: formatInManila(item.timeEnd, "hh:mm a"),
         status: item.status,
         departmentSession: departmentSession || "",
-        date: format(new Date(item.date), "MMMM dd, yyyy"),
-        createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),
+        // Format dates in Manila timezone
+        date: formatInManila(item.date, "MMMM dd, yyyy"),
+        createdAt: formatInManila(item.createdAt.toString(), "MMMM dd, yyyy"),
       };
     }) || [];
 
