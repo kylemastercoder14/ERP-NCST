@@ -4,7 +4,7 @@ import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { BaseSalaryValidators } from "@/validators";
 import { toast } from "sonner";
 
@@ -20,11 +20,14 @@ import { BaseSalaryWithProps } from "@/types";
 const BaseSalaryForm = ({
   initialData,
   employees,
+  session,
 }: {
   initialData: BaseSalaryWithProps | null;
   employees: Employee[];
+  session: string;
 }) => {
   const router = useRouter();
+  const params = useParams();
   const title = initialData ? "Edit Base Salary" : "Create Base Salary";
   const description = initialData
     ? "Please fill all the information to update the base salary."
@@ -51,7 +54,13 @@ const BaseSalaryForm = ({
         );
         if (res.success) {
           toast.success(res.success);
-          router.push("/head/payroll-management/base-salary");
+          if (session === "superadmin") {
+            router.push(
+              `/superadmin/${params.branchId}/payroll-management/base-salary`
+            );
+          } else {
+            router.push("/head/payroll-management/base-salary");
+          }
         } else {
           toast.error(res.error);
         }
@@ -59,7 +68,13 @@ const BaseSalaryForm = ({
         const res = await createBaseSalary(values, "superadmin");
         if (res.success) {
           toast.success(res.success);
-          router.push("/head/payroll-management/base-salary");
+          if (session === "superadmin") {
+            router.push(
+              `/superadmin/${params.branchId}/payroll-management/base-salary`
+            );
+          } else {
+            router.push("/head/payroll-management/base-salary");
+          }
         } else {
           toast.error(res.error);
         }

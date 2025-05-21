@@ -55,7 +55,7 @@ const Page = async (props: {
           description="Manage all the base salary here. This will help the system in computing the employee's salary."
         />
         <Button size="sm">
-          <Link href={`/head/payroll-management/base-salary/create`}>
+          <Link href={`/superadmin/${params.branchId}/payroll-management/base-salary/create`}>
             + Add Base Salary
           </Link>
         </Button>
