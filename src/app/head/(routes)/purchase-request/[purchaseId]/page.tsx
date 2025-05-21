@@ -29,6 +29,11 @@ const Page = async (props: {
 
   if (department === "Procurement" || department === "Inventory") {
     items = await db.items.findMany({
+      where: {
+        Supplier: {
+          branchId: user?.Employee?.branchId,
+        },
+      },
       orderBy: {
         name: "asc",
       },
@@ -37,6 +42,9 @@ const Page = async (props: {
     items = await db.items.findMany({
       where: {
         isSmallItem: true,
+        Supplier: {
+          branchId: user?.Employee?.branchId,
+        },
       },
       orderBy: {
         name: "asc",
@@ -46,7 +54,11 @@ const Page = async (props: {
 
   return (
     <div>
-      <PurchaseRequestForm initialData={purchaseRequest} items={items} department={department as string} />
+      <PurchaseRequestForm
+        initialData={purchaseRequest}
+        items={items}
+        department={department as string}
+      />
     </div>
   );
 };

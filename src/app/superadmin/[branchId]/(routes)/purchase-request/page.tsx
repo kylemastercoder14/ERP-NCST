@@ -9,10 +9,26 @@ import { format } from "date-fns";
 import PurchaseRequestClient from "./_components/client";
 import { useUser } from "@/hooks/use-user";
 
-const Page = async () => {
+const Page = async (props: {
+  params: Promise<{
+    branchId: string;
+  }>;
+}) => {
+  const params = await props.params;
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { user } = await useUser();
   const data = await db.purchaseRequest.findMany({
+    where: {
+      PurchaseRequestItem: {
+        every: {
+          Item: {
+            Supplier: {
+              branchId: params.branchId,
+            },
+          },
+        },
+      },
+    },
     orderBy: {
       createdAt: "desc",
     },

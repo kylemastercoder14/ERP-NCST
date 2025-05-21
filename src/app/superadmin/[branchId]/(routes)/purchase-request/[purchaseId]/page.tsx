@@ -6,6 +6,7 @@ import { useUser } from "@/hooks/use-user";
 const Page = async (props: {
   params: Promise<{
     purchaseId: string;
+    branchId: string;
   }>;
 }) => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -32,11 +33,19 @@ const Page = async (props: {
       orderBy: {
         name: "asc",
       },
+      where: {
+        Supplier: {
+          branchId: params.branchId,
+        },
+      },
     });
   } else {
     items = await db.items.findMany({
       where: {
         isSmallItem: true,
+        Supplier: {
+          branchId: params.branchId,
+        },
       },
       orderBy: {
         name: "asc",
@@ -46,7 +55,11 @@ const Page = async (props: {
 
   return (
     <div>
-      <PurchaseRequestForm initialData={purchaseRequest} items={items} department={department as string} />
+      <PurchaseRequestForm
+        initialData={purchaseRequest}
+        items={items}
+        department={department as string}
+      />
     </div>
   );
 };

@@ -9,10 +9,26 @@ import { format } from "date-fns";
 import WithdrawalClient from "./_components/client";
 import { useUser } from "@/hooks/use-user";
 
-const Page = async () => {
+const Page = async (props: {
+  params: Promise<{
+    branchId: string;
+  }>;
+}) => {
+  const params = await props.params;
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { user } = await useUser();
   const data = await db.withdrawal.findMany({
+    where: {
+      WithdrawalItem: {
+        every: {
+          Item: {
+            Supplier: {
+              branchId: params.branchId,
+            },
+          },
+        },
+      },
+    },
     orderBy: {
       createdAt: "desc",
     },
@@ -60,7 +76,9 @@ const Page = async () => {
           description="Manage all the requested withdrawal here. Wait for the approval of your request."
         />
         <Button size="sm">
-          <Link href={`/head/withdrawal-management/create`}>+ Create Withdrawal</Link>
+          <Link href={`/head/withdrawal-management/create`}>
+            + Create Withdrawal
+          </Link>
         </Button>
       </div>
       <Separator className="my-5" />

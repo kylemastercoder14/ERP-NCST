@@ -16,8 +16,14 @@ const Page = async () => {
   const data = await db.purchaseRequest.findMany({
     where: {
       financeStatus: "Approved",
-      requestedBy: {
-        branchId: user?.Employee.branchId,
+      PurchaseRequestItem: {
+        every: {
+          Item: {
+            Supplier: {
+              branchId: user?.Employee.branchId,
+            },
+          },
+        },
       },
     },
     orderBy: {

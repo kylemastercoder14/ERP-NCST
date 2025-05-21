@@ -1,29 +1,33 @@
 import React from "react";
 import db from "@/lib/db";
-import ItemForm from '@/components/forms/item-form';
+import ItemForm from "@/components/forms/item-form";
 
 const Page = async (props: {
   params: Promise<{
-	itemId: string;
+    itemId: string;
+    branchId: string;
   }>;
 }) => {
   const params = await props.params;
   const item = await db.items.findUnique({
-	where: {
-	  id: params.itemId,
-	},
+    where: {
+      id: params.itemId,
+    },
   });
 
   const suppliers = await db.supplier.findMany({
-	orderBy: {
-		name: "asc",
-	}
-  })
+    where: {
+      branchId: params.branchId,
+    },
+    orderBy: {
+      name: "asc",
+    },
+  });
 
   return (
-	<div>
-	  <ItemForm initialData={item} suppliers={suppliers} />
-	</div>
+    <div>
+      <ItemForm initialData={item} suppliers={suppliers} />
+    </div>
   );
 };
 

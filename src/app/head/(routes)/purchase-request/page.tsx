@@ -14,8 +14,14 @@ const Page = async () => {
   const { user } = await useUser();
   const data = await db.purchaseRequest.findMany({
     where: {
-      requestedBy: {
-        branchId: user?.Employee.branchId,
+      PurchaseRequestItem: {
+        every: {
+          Item: {
+            Supplier: {
+              branchId: user?.Employee.branchId,
+            },
+          },
+        },
       },
     },
     orderBy: {

@@ -5,7 +5,7 @@ import { useUser } from "@/hooks/use-user";
 
 const Page = async (props: {
   params: Promise<{
-	withdrawalId: string;
+    withdrawalId: string;
   }>;
 }) => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -13,41 +13,53 @@ const Page = async (props: {
   const department = user?.Employee?.Department.name;
   const params = await props.params;
   const withdrawal = await db.withdrawal.findUnique({
-	where: {
-	  id: params.withdrawalId,
-	},
-	include: {
-	  WithdrawalItem: {
-		include: {
-		  Item: true,
-		},
-	  },
-	},
+    where: {
+      id: params.withdrawalId,
+    },
+    include: {
+      WithdrawalItem: {
+        include: {
+          Item: true,
+        },
+      },
+    },
   });
 
   let items;
 
   if (department === "Procurement" || department === "Inventory") {
-	items = await db.items.findMany({
-	  orderBy: {
-		name: "asc",
-	  },
-	});
+    items = await db.items.findMany({
+      where: {
+        Supplier: {
+          branchId: user?.Employee?.branchId,
+        },
+      },
+      orderBy: {
+        name: "asc",
+      },
+    });
   } else {
-	items = await db.items.findMany({
-	  where: {
-		isSmallItem: true,
-	  },
-	  orderBy: {
-		name: "asc",
-	  },
-	});
+    items = await db.items.findMany({
+      where: {
+        isSmallItem: true,
+        Supplier: {
+          branchId: user?.Employee?.branchId,
+        },
+      },
+      orderBy: {
+        name: "asc",
+      },
+    });
   }
 
   return (
-	<div>
-	  <WithdrawalRequestForm initialData={withdrawal} items={items} department={department as string} />
-	</div>
+    <div>
+      <WithdrawalRequestForm
+        initialData={withdrawal}
+        items={items}
+        department={department as string}
+      />
+    </div>
   );
 };
 
