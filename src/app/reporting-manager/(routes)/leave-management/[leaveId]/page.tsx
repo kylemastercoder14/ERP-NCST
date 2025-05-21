@@ -27,7 +27,7 @@ const Page = async (props: {
 
   return (
     <div>
-      <LeaveForm initialData={leave} employeeId={user?.employeeId as string} />
+      <LeaveForm initialData={leave} employeeId={user?.employeeId as string} session='manager' />
     </div>
   );
 };

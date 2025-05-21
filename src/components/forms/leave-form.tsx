@@ -4,7 +4,7 @@ import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { LeaveManagementValidators } from "@/validators";
 import { toast } from "sonner";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -20,11 +20,14 @@ import { LeaveManagementWithProps } from "@/types";
 const LeaveForm = ({
   initialData,
   employeeId,
+  session,
 }: {
   initialData: LeaveManagementWithProps | null;
   employeeId: string;
+  session: string;
 }) => {
   const router = useRouter();
+  const params = useParams();
   const [leaveBalance, setLeaveBalance] = React.useState<{
     total: number;
     used: number;
@@ -155,7 +158,7 @@ const LeaveForm = ({
   // Calculate leave balance when relevant values change
   React.useEffect(() => {
     calculateLeaveBalance();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [employeeId, startDate, form.watch("daysUsed")]);
 
   const onSubmit = async (
@@ -172,7 +175,15 @@ const LeaveForm = ({
         const res = await updateLeave(leaveData, initialData.id);
         if (res.success) {
           toast.success(res.success);
-          router.back();
+          if (session === "superadmin") {
+            router.push(`/superadmin/${params.branchId}/leave-management`);
+          } else if (session === "head") {
+            router.push(`/head/leave-management`);
+          } else if (session === "employee") {
+            router.push(`/employee/leave-request`);
+          } else {
+            router.push(`/reporting-manager/leave-management`);
+          }
         } else {
           toast.error(res.error);
         }
@@ -180,7 +191,15 @@ const LeaveForm = ({
         const res = await createLeave(leaveData);
         if (res.success) {
           toast.success(res.success);
-          router.back();
+          if (session === "superadmin") {
+            router.push(`/superadmin/${params.branchId}/leave-management`);
+          } else if (session === "head") {
+            router.push(`/head/leave-management`);
+          } else if (session === "employee") {
+            router.push(`/employee/leave-request`);
+          } else {
+            router.push(`/reporting-manager/leave-management`);
+          }
         } else {
           toast.error(res.error);
         }
