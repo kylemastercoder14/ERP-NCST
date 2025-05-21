@@ -5005,3 +5005,22 @@ export const assignShiftEmployee = async (id: string, shift: string) => {
     };
   }
 };
+
+export const deleteJobPosting = async (id: string) => {
+  if (!id) {
+    return { error: "Job ID is required" };
+  }
+
+  try {
+    await db.jobPosting.delete({
+      where: { id },
+    });
+
+    return { success: "Job posting deleted successfully" };
+  } catch (error: any) {
+    console.error("Error deleting job posting", error);
+    return {
+      error: `Failed to delete job posting. Please try again. ${error.message || ""}`,
+    };
+  }
+};

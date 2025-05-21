@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { useParams, useRouter } from "next/navigation";
 import AlertModal from "@/components/ui/alert-modal";
 import React from "react";
-import { deleteLeave } from "@/actions";
+import { deleteJobPosting } from "@/actions";
 import { Modal } from "@/components/ui/modal";
 import PurchaseRequestDetails from "./purchase-request-details";
 
@@ -37,7 +37,7 @@ export const CellAction: React.FC<CellActionProps> = ({
     setLoading(true);
     setOpen(false);
     try {
-      const res = await deleteLeave(id);
+      const res = await deleteJobPosting(id);
       if (res.success) {
         toast.success(res.success);
         router.refresh();

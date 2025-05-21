@@ -1,6 +1,4 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import Heading from "@/components/ui/heading";
 import db from "@/lib/db";
@@ -65,9 +63,6 @@ const Page = async (props: {
           title="Leave Management"
           description="Manage all the requested leave here. You can also approve or reject the leave request."
         />
-        <Button size="sm">
-          <Link href={`/head/leave-management/request`}>+ Request Leave</Link>
-        </Button>
       </div>
       <Separator className="my-5" />
       <ApplicantClient data={formattedData} />

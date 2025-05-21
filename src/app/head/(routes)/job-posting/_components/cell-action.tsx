@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import AlertModal from "@/components/ui/alert-modal";
 import React from "react";
-import { deleteLeave } from "@/actions";
+import { deleteJobPosting } from "@/actions";
 import { Modal } from "@/components/ui/modal";
 import PurchaseRequestDetails from "./purchase-request-details";
 
@@ -36,7 +36,7 @@ export const CellAction: React.FC<CellActionProps> = ({
     setLoading(true);
     setOpen(false);
     try {
-      const res = await deleteLeave(id);
+      const res = await deleteJobPosting(id);
       if (res.success) {
         toast.success(res.success);
         router.refresh();
@@ -84,10 +84,12 @@ export const CellAction: React.FC<CellActionProps> = ({
             Edit
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem disabled onClick={() => setOpen(true)}>
-            <Trash className="w-4 h-4 mr-2" />
-            Delete
-          </DropdownMenuItem>
+          {departmentSession === "Human Resource" && (
+            <DropdownMenuItem onClick={() => setOpen(true)}>
+              <Trash className="w-4 h-4 mr-2" />
+              Delete
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </>
