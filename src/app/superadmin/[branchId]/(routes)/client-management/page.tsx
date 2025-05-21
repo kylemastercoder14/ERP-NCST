@@ -8,8 +8,16 @@ import { ClientColumn } from "./_components/column";
 import { format } from "date-fns";
 import CompanyClient from "./_components/client";
 
-const Page = async () => {
+const Page = async (props: {
+  params: Promise<{
+    branchId: string;
+  }>;
+}) => {
+  const params = await props.params;
   const data = await db.client.findMany({
+    where: {
+      branchId: params.branchId,
+    },
     orderBy: {
       createdAt: "desc",
     },
@@ -25,7 +33,8 @@ const Page = async () => {
         name: item.name,
         logo: item.logo || "",
         email: item.email,
-        contactNo: item.contactNo === "" ? "No contact number provided" : item.contactNo,
+        contactNo:
+          item.contactNo === "" ? "No contact number provided" : item.contactNo,
         address: item.address === "" ? "No address provided" : item.address,
         employeeCount: item.Employee.length,
         createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),
