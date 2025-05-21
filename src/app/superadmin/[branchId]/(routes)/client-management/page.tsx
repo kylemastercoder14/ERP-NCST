@@ -48,7 +48,7 @@ const Page = async (props: {
           description="Manage all the clients information here."
         />
         <Button size="sm">
-          <Link href={`/head/client-management/create`}>+ Add Client</Link>
+          <Link href={`/superadmin/${params.branchId}/client-management/create`}>+ Add Client</Link>
         </Button>
       </div>
       <Separator className="my-5" />

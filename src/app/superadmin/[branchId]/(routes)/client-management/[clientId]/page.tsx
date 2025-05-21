@@ -19,7 +19,7 @@ const Page = async (props: {
 
   return (
 	<div>
-	  <ClientForm initialData={client} />
+	  <ClientForm initialData={client} session="superadmin" />
 	</div>
   );
 };
