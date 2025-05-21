@@ -4423,6 +4423,10 @@ export const assignToClient = async (
       },
     });
 
+    if (!userAccount) {
+      return { error: "User account not found" };
+    }
+
     const client = await db.client.findUnique({
       where: { id: clientId },
     });
@@ -4435,6 +4439,10 @@ export const assignToClient = async (
         trainingStatus: "Deployed",
       },
     });
+
+    const fullName = `${userAccount.Employee.firstName} ${userAccount.Employee.lastName}`;
+
+    await sendAccountToEmail(email, userAccount.password, fullName);
 
     // Calculate date 2 days from now
     const twoDaysLater = new Date();
