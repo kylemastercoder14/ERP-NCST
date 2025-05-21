@@ -16,7 +16,6 @@ const SPLITTER_REGEX = /[\n#?=&\t,./-]+/;
 /**
  * used for formatting the pasted element for the correct value format to be added
  */
-
 const FORMATTING_REGEX = /^[^a-zA-Z0-9]*|[^a-zA-Z0-9]*$/g;
 
 interface TagsInputProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -59,6 +58,7 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
     const [disableButton, setDisableButton] = React.useState(false);
     const [isValueSelected, setIsValueSelected] = React.useState(false);
     const [selectedValue, setSelectedValue] = React.useState("");
+    const [isComposing, setIsComposing] = React.useState(false);
 
     const parseMinItems = minItems ?? 0;
     const parseMaxItems = maxItems ?? Infinity;
@@ -69,16 +69,19 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
           onValueChange([...value, val]);
         }
       },
-      [value]
+      [value, parseMaxItems, onValueChange]
     );
 
     const RemoveValue = React.useCallback(
       (val: string) => {
-        if (value.includes(val) && value.length > parseMinItems) {
-          onValueChange(value.filter((item) => item !== val));
+        if (value.includes(val)) {
+          const newValue = value.filter((item) => item !== val);
+          if (newValue.length >= parseMinItems) {
+            onValueChange(newValue);
+          }
         }
       },
-      [value]
+      [value, parseMinItems, onValueChange]
     );
 
     const handlePaste = React.useCallback(
@@ -99,7 +102,7 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
         onValueChange(newValue);
         setInputValue("");
       },
-      [value]
+      [value, parseMaxItems, onValueChange]
     );
 
     const handleSelect = React.useCallback(
@@ -116,8 +119,6 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
       [inputValue]
     );
 
-    // ? suggest : a refactor rather then using a useEffect
-
     React.useEffect(() => {
       const VerifyDisable = () => {
         if (value.length - 1 >= parseMinItems) {
@@ -132,18 +133,19 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
         }
       };
       VerifyDisable();
-    }, [value]);
+    }, [value, parseMinItems, parseMaxItems]);
 
-    // ? check: Under build , default option support
-    // * support : for the uncontrolled && controlled ui
-
-    /*  React.useEffect(() => {
-      if (!defaultOptions) return;
-      onValueChange([...value, ...defaultOptions]);
-    }, []); */
+    const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (inputValue.trim() !== "") {
+        onValueChangeHandler(inputValue);
+        setInputValue("");
+      }
+    };
 
     const handleKeyDown = React.useCallback(
       async (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (isComposing) return;
         e.stopPropagation();
 
         const moveNext = () => {
@@ -167,11 +169,19 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
               : activeIndex - 1;
           setActiveIndex(newIndex);
         };
+
         const target = e.currentTarget;
+        const key = e.key;
 
-        // ? Suggest : the multi select should support the same pattern
+        // Handle both Enter and "Go" (mobile keyboard) actions
+        if ((key === "Enter" || key === "Go") && inputValue.trim() !== "") {
+          e.preventDefault();
+          onValueChangeHandler(inputValue);
+          setInputValue("");
+          return;
+        }
 
-        switch (e.key) {
+        switch (key) {
           case "ArrowLeft":
             if (dir === "rtl") {
               if (value.length > 0 && activeIndex !== -1) {
@@ -216,17 +226,19 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
             const newIndex = activeIndex === -1 ? value.length - 1 : -1;
             setActiveIndex(newIndex);
             break;
-
-          case "Enter":
-            if (inputValue.trim() !== "") {
-              e.preventDefault();
-              onValueChangeHandler(inputValue);
-              setInputValue("");
-            }
-            break;
         }
       },
-      [activeIndex, value, inputValue, RemoveValue]
+      [
+        activeIndex,
+        value,
+        inputValue,
+        RemoveValue,
+        selectedValue,
+        isValueSelected,
+        dir,
+        isComposing,
+        onValueChangeHandler,
+      ]
     );
 
     const mousePreventDefault = React.useCallback((e: React.MouseEvent) => {
@@ -240,6 +252,14 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
       },
       []
     );
+
+    const handleCompositionStart = () => {
+      setIsComposing(true);
+    };
+
+    const handleCompositionEnd = () => {
+      setIsComposing(false);
+    };
 
     return (
       <TagInputContext.Provider
@@ -256,8 +276,9 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
           {...props}
           ref={ref}
           dir={dir}
+          onSubmit={handleSubmit}
           className={cn(
-            "flex items-center flex-wrap gap-1 p-1 rounded-lg bg-background overflow-hidden ring-1 ring-muted  ",
+            "flex items-center flex-wrap gap-1 p-1 rounded-lg bg-background overflow-hidden ring-1 ring-muted",
             {
               "focus-within:ring-ring": activeIndex === -1,
             },
@@ -291,6 +312,8 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
             </Badge>
           ))}
           <Input
+            type="text"
+            inputMode="text"
             tabIndex={0}
             aria-label="input tag"
             disabled={disableInput}
@@ -301,6 +324,8 @@ export const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
             onChange={activeIndex === -1 ? handleChange : undefined}
             placeholder={placeholder}
             onClick={() => setActiveIndex(-1)}
+            onCompositionStart={handleCompositionStart}
+            onCompositionEnd={handleCompositionEnd}
             className={cn(
               "outline-0 border-none h-7 min-w-fit flex-1 focus-visible:outline-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-0 placeholder:text-muted-foreground px-1",
               activeIndex !== -1 && "caret-transparent"
