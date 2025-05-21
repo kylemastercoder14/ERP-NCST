@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/popover";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Clock } from "lucide-react";
+import { toZonedTime } from "date-fns-tz";
 
 export type TimePickerProps = {
   value?: Date | string;
@@ -21,27 +22,47 @@ export type TimePickerProps = {
   bookedTimes?: { start: Date; end: Date }[];
 };
 
+const MANILA_TIMEZONE = "Asia/Manila";
+
 export function TimePicker({
   value,
   onChangeAction,
   placeholder = "Select a time",
   className,
   disabled,
-  bookedTimes = []
+  bookedTimes = [],
 }: TimePickerProps) {
-  const safeValue = value instanceof Date ? value : value ? new Date(value) : null;
+  // Convert UTC to Manila time for display
+  const safeValue =
+    value instanceof Date
+      ? toZonedTime(value, MANILA_TIMEZONE)
+      : value
+        ? toZonedTime(new Date(value), MANILA_TIMEZONE)
+        : null;
 
   function isTimeBooked(hour: number, minute: number, ampm: string): boolean {
     if (!bookedTimes.length) return false;
 
-    const selectedHour = ampm === "PM" && hour !== 12 ? hour + 12 : ampm === "AM" && hour === 12 ? 0 : hour;
+    const selectedHour =
+      ampm === "PM" && hour !== 12
+        ? hour + 12
+        : ampm === "AM" && hour === 12
+          ? 0
+          : hour;
     const selectedDate = new Date();
     selectedDate.setHours(selectedHour, minute, 0, 0);
 
-    return bookedTimes.some(booked => {
+    // Convert from Manila time to UTC for comparison
+    const selectedTimeInManila = toZonedTime(selectedDate, MANILA_TIMEZONE);
+    const selectedTimeUTC = new Date(selectedTimeInManila);
+    selectedTimeUTC.setMinutes(
+      selectedTimeUTC.getMinutes() - selectedTimeUTC.getTimezoneOffset()
+    );
+
+    return bookedTimes.some((booked) => {
       const start = new Date(booked.start);
       const end = new Date(booked.end);
-      return selectedDate >= start && selectedDate < end;
+      return selectedTimeUTC >= start && selectedTimeUTC < end;
     });
   }
 
@@ -62,14 +83,21 @@ export function TimePicker({
       }
     }
 
-    onChangeAction(newDate);
+    // Convert Manila time back to UTC before saving
+    const utcDate = new Date(newDate);
+    utcDate.setMinutes(utcDate.getMinutes() - utcDate.getTimezoneOffset());
+    onChangeAction(utcDate);
   }
 
   function handleQuickSelect(option: "today" | "last30" | "last1hr") {
     const now = new Date();
     if (option === "last30") now.setMinutes(now.getMinutes() - 30);
     if (option === "last1hr") now.setHours(now.getHours() - 1);
-    onChangeAction(now);
+
+    // Convert to UTC
+    const utcDate = new Date(now);
+    utcDate.setMinutes(utcDate.getMinutes() - utcDate.getTimezoneOffset());
+    onChangeAction(utcDate);
   }
 
   return (
@@ -123,8 +151,11 @@ export function TimePicker({
           <ScrollArea className="w-24">
             <div className="flex flex-col p-2">
               {Array.from({ length: 12 }, (_, i) => i + 1).map((hour) => {
-                const isBooked = isTimeBooked(hour, safeValue?.getMinutes() || 0,
-                  (safeValue ? safeValue.getHours() : 0) >= 12 ? "PM" : "AM");
+                const isBooked = isTimeBooked(
+                  hour,
+                  safeValue?.getMinutes() || 0,
+                  (safeValue ? safeValue.getHours() : 0) >= 12 ? "PM" : "AM"
+                );
 
                 return (
                   <Button
@@ -165,7 +196,9 @@ export function TimePicker({
                       safeValue?.getMinutes() === minute ? "default" : "ghost"
                     }
                     className="w-full"
-                    onClick={() => handleTimeChange("minute", minute.toString())}
+                    onClick={() =>
+                      handleTimeChange("minute", minute.toString())
+                    }
                     disabled={isBooked}
                   >
                     {minute.toString().padStart(2, "0")}
