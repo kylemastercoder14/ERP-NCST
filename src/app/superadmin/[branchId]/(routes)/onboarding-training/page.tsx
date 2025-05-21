@@ -8,12 +8,18 @@ import ApplicantClient from "./_components/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUser } from "@/hooks/use-user";
 
-const Page = async () => {
+const Page = async (props: {
+  params: Promise<{
+    branchId: string;
+  }>;
+}) => {
+  const params = await props.params;
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { user } = await useUser();
   const data = await db.employee.findMany({
     where: {
       isNewEmployee: true,
+      branchId: params.branchId,
     },
     orderBy: {
       createdAt: "desc",
