@@ -3,8 +3,32 @@ import { Separator } from "@/components/ui/separator";
 import Heading from "@/components/ui/heading";
 import db from "@/lib/db";
 import { ExtraShiftColumn } from "./_components/column";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 import ExtraShiftClient from "./_components/client";
+
+// Manila timezone
+const TIMEZONE = "Asia/Manila";
+
+/**
+ * Helper function to format dates in Manila timezone
+ */
+const formatInManila = (dateString: string | Date, formatString: string): string => {
+  try {
+    // Handle both string and Date inputs
+    const date = typeof dateString === 'string' ? parseISO(dateString) : dateString;
+    if (isNaN(date.getTime())) {
+      throw new Error("Invalid date");
+    }
+    // Convert to Manila timezone
+    const manilaDate = toZonedTime(date, TIMEZONE);
+    // Format the date
+    return format(manilaDate, formatString);
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return "Invalid date";
+  }
+};
 
 const Page = async (props: {
   params: Promise<{
@@ -26,20 +50,21 @@ const Page = async (props: {
     },
   });
 
-  const formattedData: ExtraShiftColumn[] =
-    data.map((item) => {
-      return {
-        id: item.id,
-        licenseNo: item.Employee.licenseNo || "N/A",
-        name: `${item.Employee.firstName} ${item.Employee.middleName || ""} ${item.Employee.lastName}`.trim(),
-        type: item.type,
-        timeIn: format(new Date(item.timeStart), "hh:mm a"),
-        timeOut: format(new Date(item.timeEnd), "hh:mm a"),
-        status: item.status,
-        date: format(new Date(item.date), "MMMM dd, yyyy"),
-        createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),
-      };
-    }) || [];
+  const formattedData: ExtraShiftColumn[] = data.map((item) => {
+    return {
+      id: item.id,
+      licenseNo: item.Employee.licenseNo || "N/A",
+      name: `${item.Employee.firstName} ${item.Employee.middleName || ""} ${item.Employee.lastName}`.trim(),
+      type: item.type,
+      // Format times in Manila timezone
+      timeIn: formatInManila(item.timeStart, "hh:mm a"),
+      timeOut: formatInManila(item.timeEnd, "hh:mm a"),
+      status: item.status,
+      // Format dates in Manila timezone
+      date: formatInManila(item.date, "MMMM dd, yyyy"),
+      createdAt: formatInManila(item.createdAt, "MMMM dd, yyyy"),
+    };
+  }) || [];
 
   return (
     <div>

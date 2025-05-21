@@ -3,32 +3,49 @@ import { Separator } from "@/components/ui/separator";
 import Heading from "@/components/ui/heading";
 import db from "@/lib/db";
 import { ExtraShiftColumn } from "./_components/column";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 import ExtraShiftClient from "./_components/client";
 import { useUser } from "@/hooks/use-user";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
+// Manila timezone
+const TIMEZONE = "Asia/Manila";
+
+/**
+ * Helper function to format dates in Manila timezone
+ */
+const formatInManila = (
+  dateString: string | Date,
+  formatString: string
+): string => {
+  try {
+    // Handle both string and Date inputs
+    const date =
+      typeof dateString === "string" ? parseISO(dateString) : dateString;
+    if (isNaN(date.getTime())) {
+      throw new Error("Invalid date");
+    }
+    // Convert to Manila timezone
+    const manilaDate = toZonedTime(date, TIMEZONE);
+    // Format the date
+    return format(manilaDate, formatString);
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return "Invalid date";
+  }
+};
+
 const Page = async () => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { user } = await useUser();
+  const departmentSession = user?.Employee.Department.name;
 
-  const employee = await db.employee.findFirst({
-    where: {
-      id: user?.employeeId,
-    },
-    include: {
-      Department: true,
-    },
-  });
-
+  // For employees, only show their own requests
   const data = await db.extraShift.findMany({
     where: {
-      Employee: {
-        Department: {
-          name: employee?.Department.name,
-        },
-      },
+      employeeId: user?.employeeId,
     },
     orderBy: {
       createdAt: "desc",
@@ -38,37 +55,31 @@ const Page = async () => {
     },
   });
 
-  const formattedData: ExtraShiftColumn[] =
-    data.map((item) => {
-      return {
-        id: item.id,
-        licenseNo: item.Employee.licenseNo || "N/A",
-        name: `${item.Employee.firstName} ${item.Employee.middleName || ""} ${item.Employee.lastName}`.trim(),
-        type: item.type,
-        timeIn: format(new Date(item.timeStart), "hh:mm a"),
-        timeOut: format(new Date(item.timeEnd), "hh:mm a"),
-        status: item.status,
-        date: format(new Date(item.date), "MMMM dd, yyyy"),
-        createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),
-      };
-    }) || [];
-
-  const now = new Date();
-  const currentHour = now.getHours(); // 24-hour format
-  const isAfter5PM = currentHour >= 17;
+  const formattedData: ExtraShiftColumn[] = data.map((item) => {
+    return {
+      id: item.id,
+      licenseNo: item.Employee.licenseNo || "N/A",
+      name: `${item.Employee.firstName} ${item.Employee.middleName || ""} ${item.Employee.lastName}`.trim(),
+      type: item.type,
+      // Format times in Manila timezone
+      timeIn: formatInManila(item.timeStart, "hh:mm a"),
+      timeOut: formatInManila(item.timeEnd, "hh:mm a"),
+      status: item.status,
+      departmentSession: departmentSession || "",
+      // Format dates in Manila timezone
+      date: formatInManila(item.date, "MMMM dd, yyyy"),
+      createdAt: formatInManila(item.createdAt, "MMMM dd, yyyy"),
+    };
+  });
 
   return (
     <div>
       <div className="flex items-center justify-between">
         <Heading
-          title="List of Requested Overtime"
-          description="Manage the list of requested overtime. You can approve or reject the request."
+          title="Your Overtime Requests"
+          description="View and manage all of your submitted overtime requests."
         />
-        <Button
-          size="sm"
-          disabled={!isAfter5PM}
-          className={!isAfter5PM ? "cursor-not-allowed opacity-50" : ""}
-        >
+        <Button size="sm">
           <Link href={`/reporting-manager/overtime-request/create`}>
             + Request Overtime
           </Link>
