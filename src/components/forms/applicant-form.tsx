@@ -298,8 +298,10 @@ const ApplicantForm = ({
           toast.success(res.success);
           if (session === "superadmin") {
             router.push(`/superadmin/${params.branchId}/employee-management`);
-          } else {
+          } else if (session === "head") {
             router.push(`/head/employee-management`);
+          } else {
+            router.push("/");
           }
         } else {
           toast.error(res.error);
@@ -313,8 +315,10 @@ const ApplicantForm = ({
           } else {
             if (session === "superadmin") {
               router.push(`/superadmin/${params.branchId}/employee-management`);
-            } else {
+            } else if (session === "head") {
               router.push(`/head/employee-management`);
+            } else {
+              router.push("/");
             }
           }
         } else {

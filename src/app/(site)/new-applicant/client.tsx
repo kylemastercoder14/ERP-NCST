@@ -16,6 +16,7 @@ const Client = ({
   return (
     <Suspense fallback="">
       <ApplicantForm
+      session='new'
         branches={branches}
         jobTitles={jobTitles}
         departments={departments}

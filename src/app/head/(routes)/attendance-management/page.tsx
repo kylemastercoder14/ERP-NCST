@@ -57,7 +57,6 @@ const Page = async () => {
   });
 
   const formattedData: AttendanceColumn[] = data.map((item) => {
-    // Helper function to safely format dates
     const safeFormat = (
       dateString: string | Date | null | undefined,
       formatStr: string
@@ -71,12 +70,10 @@ const Page = async () => {
       }
     };
 
-    // Format both dates to the same format for comparison
     const formatDateForComparison = (dateString: string) => {
       return format(new Date(dateString), "yyyy-MM-dd");
     };
 
-    // Check if there's approved overtime for this attendance date
     const hasOvertime = overtimeData.some(
       (ot) =>
         formatDateForComparison(ot.date) === formatDateForComparison(item.date)
@@ -95,8 +92,9 @@ const Page = async () => {
     };
   });
 
+  // Use ISO format for reliable date comparison
   const now = new Date();
-  const todayDate = format(now, "MMMM dd, yyyy");
+  const todayDate = format(now, "yyyy-MM-dd");
 
   return (
     <div>

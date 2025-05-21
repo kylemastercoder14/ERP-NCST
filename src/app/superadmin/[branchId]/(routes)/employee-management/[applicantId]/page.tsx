@@ -59,6 +59,7 @@ const Page = async (props: {
   return (
     <div>
       <ApplicantForm
+        session="superadmin"
         jobTitles={jobTitles}
         departments={departments}
         branches={branches}
