@@ -1226,11 +1226,6 @@ export const deleteApplicant = async (id: string) => {
       where: { employeeId: id },
     });
 
-    await createDepartmentLog(
-      "Human Resource",
-      `Deleted employee with ID ${id}`
-    );
-
     return { success: "Employee successfully deleted!" };
   } catch (error: any) {
     console.error("Error deleting employee", error);

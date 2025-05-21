@@ -3,7 +3,7 @@
 
 import React, { useEffect } from "react";
 import { EmployeeWithProps } from "@/types";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -28,6 +28,7 @@ const ApplicantForm = ({
   isNewApplicant = false,
   branches,
   initialBranch,
+  session,
 }: {
   initialData: EmployeeWithProps | null;
   jobTitles: JobTitle[];
@@ -35,9 +36,11 @@ const ApplicantForm = ({
   isNewApplicant?: boolean;
   branches: Branch[];
   initialBranch?: string;
+  session: string;
 }) => {
   const action = initialData ? "Save Changes" : "Submit";
   const router = useRouter();
+  const params = useParams();
   const searchParams = useSearchParams();
   const departmentId = searchParams.get("department");
   const jobTitleId = searchParams.get("jobTitle");
@@ -293,10 +296,11 @@ const ApplicantForm = ({
         const res = await updateApplicant(initialData.id, values);
         if (res.success) {
           toast.success(res.success);
-          setTimeout(() => {
-            window.location.reload();
-            router.refresh();
-          }, 2000);
+          if (session === "superadmin") {
+            router.push(`/superadmin/${params.branchId}/employee-management`);
+          } else {
+            router.push(`/head/employee-management`);
+          }
         } else {
           toast.error(res.error);
         }
@@ -307,10 +311,11 @@ const ApplicantForm = ({
           if (isNewApplicant) {
             router.push("/");
           } else {
-            setTimeout(() => {
-              window.location.reload();
-              router.refresh();
-            }, 2000);
+            if (session === "superadmin") {
+              router.push(`/superadmin/${params.branchId}/employee-management`);
+            } else {
+              router.push(`/head/employee-management`);
+            }
           }
         } else {
           toast.error(res.error);
