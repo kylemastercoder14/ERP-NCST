@@ -3,11 +3,37 @@ import { Separator } from "@/components/ui/separator";
 import Heading from "@/components/ui/heading";
 import db from "@/lib/db";
 import { ExtraShiftColumn } from "./_components/column";
-import { format } from "date-fns";
+import { parseISO } from "date-fns";
+import { format as tzFormat } from "date-fns-tz";
 import ExtraShiftClient from "./_components/client";
 import { useUser } from "@/hooks/use-user";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+
+// Manila timezone
+const TIMEZONE = "Asia/Manila";
+
+/**
+ * Helper function to format dates in Manila timezone
+ */
+const formatInManila = (
+  dateString: string | Date,
+  formatString: string
+): string => {
+  try {
+    // Handle both string and Date inputs
+    const date =
+      typeof dateString === "string" ? parseISO(dateString) : dateString;
+    if (isNaN(date.getTime())) {
+      throw new Error("Invalid date");
+    }
+    // Convert to Manila timezone and format
+    return tzFormat(date, formatString, { timeZone: TIMEZONE });
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return "Invalid date";
+  }
+};
 
 const Page = async () => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -35,11 +61,11 @@ const Page = async () => {
       return {
         id: item.id,
         type: item.type,
-        timeIn: format(new Date(item.timeStart), "hh:mm a"),
-        timeOut: format(new Date(item.timeEnd), "hh:mm a"),
+        timeIn: formatInManila(item.timeStart, "hh:mm a"),
+        timeOut: formatInManila(item.timeEnd, "hh:mm a"),
         status: item.status,
-        date: format(new Date(item.date), "MMMM dd, yyyy"),
-        createdAt: format(new Date(item.createdAt), "MMMM dd, yyyy"),
+        date: formatInManila(item.date, "MMMM dd, yyyy"),
+        createdAt: formatInManila(item.createdAt, "MMMM dd, yyyy"),
       };
     }) || [];
 
@@ -50,9 +76,7 @@ const Page = async () => {
           title="List of Requested Overtime"
           description="Manage all the list of your requested overtime. You can also update the request."
         />
-        <Button
-          size="sm"
-        >
+        <Button size="sm">
           <Link href={`/employee/overtime-request/create`}>
             + Request Overtime
           </Link>
