@@ -18,6 +18,11 @@ const Page = async () => {
 
   if (departmentSession === "Human Resource") {
     data = await db.leaveManagement.findMany({
+      where: {
+        Employee: {
+          branchId: user?.Employee.branchId,
+        },
+      },
       orderBy: {
         createdAt: "desc",
       },
@@ -34,6 +39,9 @@ const Page = async () => {
     data = await db.leaveManagement.findMany({
       where: {
         employeeId: user?.employeeId,
+        Employee: {
+          branchId: user?.Employee.branchId,
+        },
       },
       orderBy: {
         createdAt: "desc",
@@ -54,11 +62,13 @@ const Page = async () => {
 
     // Case 1: ApprovedBy relation exists
     if (item.ApprovedBy?.Employee) {
-      approvedByName = `${item.ApprovedBy.Employee.firstName} ${item.ApprovedBy.Employee.middleName || ""} ${item.ApprovedBy.Employee.lastName}`.trim();
+      approvedByName =
+        `${item.ApprovedBy.Employee.firstName} ${item.ApprovedBy.Employee.middleName || ""} ${item.ApprovedBy.Employee.lastName}`.trim();
     }
     // Case 2: Self-approved (approvedById matches employeeId)
     else if (item.approvedById && item.approvedById === item.employeeId) {
-      approvedByName = `${item.Employee.firstName} ${item.Employee.middleName || ""} ${item.Employee.lastName}`.trim();
+      approvedByName =
+        `${item.Employee.firstName} ${item.Employee.middleName || ""} ${item.Employee.lastName}`.trim();
     }
 
     return {

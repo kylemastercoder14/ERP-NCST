@@ -17,6 +17,11 @@ const Page = async () => {
 
   if (departmentSession === "Human Resource") {
     data = await db.attendance.findMany({
+      where: {
+        Employee: {
+          branchId: user?.Employee.branchId,
+        },
+      },
       orderBy: {
         createdAt: "desc",
       },
@@ -28,6 +33,9 @@ const Page = async () => {
     data = await db.attendance.findMany({
       where: {
         employeeId: user?.employeeId,
+        Employee: {
+          branchId: user?.Employee.branchId,
+        },
       },
       orderBy: {
         createdAt: "desc",
