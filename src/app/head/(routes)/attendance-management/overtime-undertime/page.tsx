@@ -17,12 +17,20 @@ const TIMEZONE = "Asia/Manila";
  * Helper function to format dates in Manila timezone
  */
 const formatInManila = (dateString: string, formatString: string): string => {
-  // Parse the ISO string
-  const date = parseISO(dateString);
-  // Convert to Manila timezone
-  const manilaDate = toZonedTime(date, TIMEZONE);
-  // Format the date
-  return format(manilaDate, formatString);
+  try {
+    // Parse the ISO string
+    const date = parseISO(dateString);
+    if (isNaN(date.getTime())) {
+      throw new Error("Invalid date");
+    }
+    // Convert to Manila timezone
+    const manilaDate = toZonedTime(date, TIMEZONE);
+    // Format the date
+    return format(manilaDate, formatString);
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return "Invalid date";
+  }
 };
 
 const Page = async () => {
@@ -55,23 +63,22 @@ const Page = async () => {
     });
   }
 
-  const formattedData: ExtraShiftColumn[] =
-    data.map((item) => {
-      return {
-        id: item.id,
-        licenseNo: item.Employee.licenseNo || "N/A",
-        name: `${item.Employee.firstName} ${item.Employee.middleName || ""} ${item.Employee.lastName}`.trim(),
-        type: item.type,
-        // Format times in Manila timezone
-        timeIn: formatInManila(item.timeStart, "hh:mm a"),
-        timeOut: formatInManila(item.timeEnd, "hh:mm a"),
-        status: item.status,
-        departmentSession: departmentSession || "",
-        // Format dates in Manila timezone
-        date: formatInManila(item.date, "MMMM dd, yyyy"),
-        createdAt: formatInManila(item.createdAt.toString(), "MMMM dd, yyyy"),
-      };
-    }) || [];
+  const formattedData: ExtraShiftColumn[] = data.map((item) => {
+    return {
+      id: item.id,
+      licenseNo: item.Employee.licenseNo || "N/A",
+      name: `${item.Employee.firstName} ${item.Employee.middleName || ""} ${item.Employee.lastName}`.trim(),
+      type: item.type,
+      // Format times in Manila timezone
+      timeIn: formatInManila(item.timeStart, "hh:mm a"),
+      timeOut: formatInManila(item.timeEnd, "hh:mm a"),
+      status: item.status,
+      departmentSession: departmentSession || "",
+      // Format dates in Manila timezone
+      date: formatInManila(item.date, "MMMM dd, yyyy"),
+      createdAt: formatInManila(item.createdAt.toString(), "MMMM dd, yyyy"),
+    };
+  });
 
   return (
     <div>
