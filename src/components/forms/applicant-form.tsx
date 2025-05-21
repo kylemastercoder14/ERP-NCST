@@ -327,8 +327,8 @@ const ApplicantForm = ({
     College: 1,
     Vocational: 2,
     "Senior High School": 3,
-    "Junior High School": 3,
-    Elementary: 4,
+    "Junior High School": 4,
+    Elementary: 5,
   };
 
   const educationSortFn = (a: any, b: any) => {
