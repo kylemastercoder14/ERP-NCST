@@ -103,7 +103,7 @@ export const CellAction: React.FC<CellActionProps> = ({
 
           {treshold > stock && (
             <DropdownMenuItem
-            onClick={() => router.push(`/head/purchase-request/${id}`)}
+            onClick={() => router.push("/head/purchase-request/create")}
             >
               <Undo2Icon className="w-4 h-4 mr-2" />
               Re-order Item
