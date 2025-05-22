@@ -28,7 +28,7 @@ const Page = async (props: {
 
   return (
     <div>
-      <ItemForm initialData={item} suppliers={suppliers} />
+      <ItemForm initialData={item} suppliers={suppliers} session="head" />
     </div>
   );
 };

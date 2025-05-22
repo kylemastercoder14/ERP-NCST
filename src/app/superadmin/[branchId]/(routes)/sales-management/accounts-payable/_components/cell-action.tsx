@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { useParams, useRouter } from "next/navigation";
 import AlertModal from "@/components/ui/alert-modal";
 import React from "react";
-import { deleteLeave, markAsPaid } from "@/actions";
+import { deleteTransaction, markAsPaid } from "@/actions";
 
 interface CellActionProps {
   id: string;
@@ -35,7 +35,7 @@ export const CellAction: React.FC<CellActionProps> = ({
     setLoading(true);
     setOpen(false);
     try {
-      const res = await deleteLeave(id);
+      const res = await deleteTransaction(id);
       if (res.success) {
         toast.success(res.success);
         router.refresh();

@@ -48,7 +48,7 @@ const Page = async (props: {
           description="Manage all the account receivable here."
         />
         <Button size="sm">
-          <Link href={`/head/sales-management/accounts-receivable/create`}>
+          <Link href={`/superadmin/${params.branchId}/sales-management/accounts-receivable/create`}>
             + Add new receivable
           </Link>
         </Button>

@@ -45,7 +45,7 @@ const Page = async (props: {
       <div className="flex items-center justify-between">
         <Heading title="Items List" description="Manage all the items here." />
         <Button size="sm">
-          <Link href={`/head/items-list/create`}>+ Add new item</Link>
+          <Link href={`/superadmin/${params.branchId}/items-list/create`}>+ Add new item</Link>
         </Button>
       </div>
       <Separator className="my-5" />

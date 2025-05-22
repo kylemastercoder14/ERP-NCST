@@ -4,7 +4,7 @@ import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { TransactionValidators } from "@/validators";
 import { toast } from "sonner";
 
@@ -20,12 +20,15 @@ const AccountTransactionForm = ({
   initialData,
   suppliers,
   clients,
+  session,
 }: {
   initialData: Transaction | null;
   suppliers: Supplier[];
   clients: Client[];
+  session: string;
 }) => {
   const router = useRouter();
+  const params = useParams();
   const title = initialData ? "Edit Transaction" : "Add Transaction";
   const description = initialData
     ? "Please fill all the information to update the transaction."
@@ -54,7 +57,11 @@ const AccountTransactionForm = ({
         const res = await updateTransaction(values, initialData?.id as string);
         if (res.success) {
           toast.success(res.success);
-          router.push("/head/sales-management");
+          if (session === "superadmin") {
+            router.push(`/superadmin/${params.branchId}/sales-management`);
+          } else {
+            router.push("/head/sales-management");
+          }
         } else {
           toast.error(res.error);
         }
@@ -62,7 +69,11 @@ const AccountTransactionForm = ({
         const res = await createTransaction(values);
         if (res.success) {
           toast.success(res.success);
-          router.push("/head/sales-management");
+          if (session === "superadmin") {
+            router.push(`/superadmin/${params.branchId}/sales-management`);
+          } else {
+            router.push("/head/sales-management");
+          }
         } else {
           toast.error(res.error);
         }

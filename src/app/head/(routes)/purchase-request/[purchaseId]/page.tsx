@@ -58,6 +58,7 @@ const Page = async (props: {
         initialData={purchaseRequest}
         items={items}
         department={department as string}
+        session="head"
       />
     </div>
   );

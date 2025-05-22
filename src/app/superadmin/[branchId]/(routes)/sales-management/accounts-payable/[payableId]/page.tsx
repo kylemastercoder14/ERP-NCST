@@ -26,7 +26,7 @@ const Page = async (props: {
 
   return (
     <div>
-      <AccountPayableForm initialData={payable} suppliers={suppliers} />
+      <AccountPayableForm initialData={payable} suppliers={suppliers} session="superadmin" />
     </div>
   );
 };

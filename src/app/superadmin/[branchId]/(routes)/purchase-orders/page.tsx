@@ -8,12 +8,26 @@ import PurchaseRequestClient from "./_components/client";
 import { useSupplier } from "@/hooks/use-supplier";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const Page = async () => {
+const Page = async (props: {
+  params: Promise<{
+    branchId: string;
+  }>;
+}) => {
+  const params = await props.params;
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { userType } = await useSupplier();
   const data = await db.purchaseRequest.findMany({
     where: {
       financeStatus: "Approved",
+      PurchaseRequestItem: {
+        every: {
+          Item: {
+            Supplier: {
+              branchId: params.branchId,
+            },
+          },
+        },
+      },
     },
     orderBy: {
       createdAt: "desc",

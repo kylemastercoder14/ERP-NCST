@@ -8,8 +8,16 @@ import { SupplierColumn } from "./_components/column";
 import { format } from "date-fns";
 import SupplierClient from "./_components/client";
 
-const Page = async () => {
+const Page = async (props: {
+  params: Promise<{
+    branchId: string;
+  }>;
+}) => {
+  const params = await props.params;
   const data = await db.supplier.findMany({
+    where: {
+      branchId: params.branchId,
+    },
     orderBy: {
       createdAt: "desc",
     },
@@ -40,7 +48,11 @@ const Page = async () => {
           description="Manage all the suppliers here."
         />
         <Button size="sm">
-          <Link href={`/head/supplier-management/create`}>+ Add Supplier</Link>
+          <Link
+            href={`/superadmin/${params.branchId}/supplier-management/create`}
+          >
+            + Add Supplier
+          </Link>
         </Button>
       </div>
       <Separator className="my-5" />

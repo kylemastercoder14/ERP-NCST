@@ -49,7 +49,7 @@ const Page = async (props: {
 		  description="Manage all the account payable here."
 		/>
 		<Button size="sm">
-		  <Link href={`/head/sales-management/accounts-payable/create`}>+ Add new payable</Link>
+		  <Link href={`/superadmin/${params.branchId}/sales-management/accounts-payable/create`}>+ Add new payable</Link>
 		</Button>
 	  </div>
 	  <Separator className="my-5" />

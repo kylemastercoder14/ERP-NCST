@@ -83,7 +83,7 @@ const Page = async (props: {
           description="Manage all the requested purchase here. Wait for the approval of your request."
         />
         <Button size="sm">
-          <Link href={`/head/purchase-request/create`}>+ Request Purchase</Link>
+          <Link href={`/superadmin/${params.branchId}/purchase-request/create`}>+ Request Purchase</Link>
         </Button>
       </div>
       <Separator className="my-5" />

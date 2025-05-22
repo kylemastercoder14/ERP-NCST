@@ -8,6 +8,7 @@ import { LedgerColumn } from "./_components/column";
 import { format } from "date-fns";
 import LedgerClient from "./_components/client";
 import ExportToExcel from "./_components/export-to-excel";
+import ImportFromExcel from './_components/import-from-excel';
 
 const Page = async (props: {
   params: Promise<{
@@ -65,8 +66,9 @@ const Page = async (props: {
         />
         <div className="flex items-center gap-2">
           <ExportToExcel data={formattedData} />
+          <ImportFromExcel />
           <Button size="sm">
-            <Link href={`/head/sales-management/create`}>
+            <Link href={`/superadmin/${params.branchId}/sales-management/create`}>
               + Record new transaction
             </Link>
           </Button>

@@ -16,7 +16,7 @@ const Page = async (props: {
 
   return (
 	<div>
-	  <SupplierForm initialData={supplier} />
+	  <SupplierForm initialData={supplier} session="superadmin" />
 	</div>
   );
 };

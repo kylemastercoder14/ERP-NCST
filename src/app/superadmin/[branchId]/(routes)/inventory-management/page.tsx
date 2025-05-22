@@ -6,8 +6,18 @@ import { ItemColumn } from "./_components/column";
 import { format } from "date-fns";
 import ItemClient from "./_components/client";
 
-const Page = async () => {
+const Page = async (props: {
+  params: Promise<{
+    branchId: string;
+  }>;
+}) => {
+  const params = await props.params;
   const data = await db.inventory.findMany({
+    where: {
+      Supplier: {
+        branchId: params.branchId,
+      },
+    },
     orderBy: {
       createdAt: "desc",
     },
@@ -30,7 +40,7 @@ const Page = async () => {
         } else if (item.quantity < 10) {
           status = "Running Out";
         }
-      }else {
+      } else {
         status = "In stock";
       }
 

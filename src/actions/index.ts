@@ -5019,3 +5019,60 @@ export const deleteJobPosting = async (id: string) => {
     };
   }
 };
+
+export const deleteTransaction = async (id: string) => {
+  if (!id) {
+    return { error: "Transaction ID is required" };
+  }
+
+  try {
+    await db.transaction.delete({
+      where: { id },
+    });
+
+    return { success: "Transaction deleted successfully" };
+  } catch (error: any) {
+    console.error("Error deleting transaction", error);
+    return {
+      error: `Failed to delete transaction. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const deletePurchaseRequest = async (id: string) => {
+  if (!id) {
+    return { error: "Purchase request ID is required" };
+  }
+
+  try {
+    await db.purchaseRequest.delete({
+      where: { id },
+    });
+
+    return { success: "Purchase request deleted successfully" };
+  } catch (error: any) {
+    console.error("Error deleting purchase request", error);
+    return {
+      error: `Failed to delete purchase request. Please try again. ${error.message || ""}`,
+    };
+  }
+};
+
+export const deleteWithdrawal = async (id: string) => {
+  if (!id) {
+    return { error: "Withdrawal ID is required" };
+  }
+
+  try {
+    await db.withdrawal.delete({
+      where: { id },
+    });
+
+    return { success: "Withdrawal deleted successfully" };
+  } catch (error: any) {
+    console.error("Error deleting withdrawal", error);
+    return {
+      error: `Failed to delete withdrawal. Please try again. ${error.message || ""}`,
+    };
+  }
+};

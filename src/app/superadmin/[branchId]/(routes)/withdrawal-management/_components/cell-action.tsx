@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { useParams, useRouter } from "next/navigation";
 import AlertModal from "@/components/ui/alert-modal";
 import React from "react";
-import { deleteLeave } from "@/actions";
+import { deleteWithdrawal } from "@/actions";
 import { Modal } from "@/components/ui/modal";
 import WithdrawalDetails from "./withdrawal-details";
 
@@ -39,7 +39,7 @@ export const CellAction: React.FC<CellActionProps> = ({
     setLoading(true);
     setOpen(false);
     try {
-      const res = await deleteLeave(id);
+      const res = await deleteWithdrawal(id);
       if (res.success) {
         toast.success(res.success);
         router.refresh();
@@ -106,7 +106,7 @@ export const CellAction: React.FC<CellActionProps> = ({
             Edit
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem disabled onClick={() => setOpen(true)}>
+          <DropdownMenuItem onClick={() => setOpen(true)}>
             <Trash className="w-4 h-4 mr-2" />
             Delete
           </DropdownMenuItem>

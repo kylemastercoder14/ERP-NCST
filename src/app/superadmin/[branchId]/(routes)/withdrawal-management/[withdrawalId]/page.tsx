@@ -59,6 +59,7 @@ const Page = async (props: {
         initialData={withdrawal}
         items={items}
         department={department as string}
+        session="superadmin"
       />
     </div>
   );

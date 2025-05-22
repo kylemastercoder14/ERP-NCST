@@ -4,7 +4,7 @@ import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { PurchaseRequestValidators } from "@/validators";
 import { toast } from "sonner";
 
@@ -21,12 +21,15 @@ const PurchaseRequestForm = ({
   initialData,
   items,
   department,
+  session,
 }: {
   initialData: PurchaseRequestWithProps | null;
   items: Items[];
   department: string | null;
+  session: string;
 }) => {
   const router = useRouter();
+  const params = useParams();
   const title = initialData ? "Edit Requested Purchase" : "Request Purchase";
   const description = initialData
     ? "Please fill all the information to update the requested purchase."
@@ -50,7 +53,6 @@ const PurchaseRequestForm = ({
   });
 
   const { isSubmitting } = form.formState;
-
 
   const onSubmit = async (
     values: z.infer<typeof PurchaseRequestValidators>
@@ -84,7 +86,11 @@ const PurchaseRequestForm = ({
         );
         if (res.success) {
           toast.success(res.success);
-          router.push("/head/purchase-request");
+          if (session === "superadmin") {
+            router.push(`/superadmin/${params.branchId}/purchase-request`);
+          } else {
+            router.push("/head/purchase-request");
+          }
         } else {
           toast.error(res.error);
         }
@@ -92,7 +98,11 @@ const PurchaseRequestForm = ({
         const res = await createPurchaseRequest(payload);
         if (res.success) {
           toast.success(res.success);
-          router.push("/head/purchase-request");
+          if (session === "superadmin") {
+            router.push(`/superadmin/${params.branchId}/purchase-request`);
+          } else {
+            router.push("/head/purchase-request");
+          }
         } else {
           toast.error(res.error);
         }

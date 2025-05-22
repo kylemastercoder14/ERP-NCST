@@ -76,7 +76,7 @@ const Page = async (props: {
           description="Manage all the requested withdrawal here. Wait for the approval of your request."
         />
         <Button size="sm">
-          <Link href={`/head/withdrawal-management/create`}>
+          <Link href={`/superadmin/${params.branchId}/withdrawal-management/create`}>
             + Create Withdrawal
           </Link>
         </Button>

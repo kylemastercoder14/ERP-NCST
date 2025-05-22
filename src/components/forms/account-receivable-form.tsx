@@ -4,7 +4,7 @@ import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { AccountReceivableValidators } from "@/validators";
 import { toast } from "sonner";
 
@@ -19,11 +19,14 @@ import Heading from "@/components/ui/heading";
 const AccountReceivableForm = ({
   initialData,
   clients,
+  session,
 }: {
   initialData: Transaction | null;
   clients: Client[];
+  session: string;
 }) => {
   const router = useRouter();
+  const params = useParams();
   const title = initialData
     ? "Edit Account Receivable"
     : "Add Account Receivable";
@@ -57,7 +60,13 @@ const AccountReceivableForm = ({
         );
         if (res.success) {
           toast.success(res.success);
-          router.push("/head/sales-management/accounts-receivable");
+          if (session === "superadmin") {
+            router.push(
+              `/superadmin/${params.branchId}/sales-management/accounts-receivable`
+            );
+          } else {
+            router.push("/head/sales-management/accounts-receivable");
+          }
         } else {
           toast.error(res.error);
         }
@@ -65,7 +74,13 @@ const AccountReceivableForm = ({
         const res = await createAccountReceivable(values);
         if (res.success) {
           toast.success(res.success);
-          router.push("/head/sales-management/accounts-receivable");
+          if (session === "superadmin") {
+            router.push(
+              `/superadmin/${params.branchId}/sales-management/accounts-receivable`
+            );
+          } else {
+            router.push("/head/sales-management/accounts-receivable");
+          }
         } else {
           toast.error(res.error);
         }

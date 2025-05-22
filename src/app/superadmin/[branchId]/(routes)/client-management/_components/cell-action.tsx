@@ -9,9 +9,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Trash } from "lucide-react";
+import { Edit, MoreHorizontal, Trash } from "lucide-react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import AlertModal from "@/components/ui/alert-modal";
 import React from "react";
 import { deleteClient } from "@/actions";
@@ -22,6 +22,7 @@ interface CellActionProps {
 
 export const CellAction: React.FC<CellActionProps> = ({ id }) => {
   const router = useRouter();
+  const params = useParams();
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
@@ -49,7 +50,7 @@ export const CellAction: React.FC<CellActionProps> = ({ id }) => {
       <AlertModal
         onConfirm={onDelete}
         isOpen={open}
-        description='Are you sure you want to delete this client? This action cannot be undone and all the employees associated with this client will also be deleted.'
+        description="Are you sure you want to delete this client? This action cannot be undone and all the employees associated with this client will also be deleted."
         onClose={() => setOpen(false)}
         loading={loading}
       />
@@ -63,6 +64,16 @@ export const CellAction: React.FC<CellActionProps> = ({ id }) => {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={() =>
+              router.push(
+                `/superadmin/${params.branchId}/client-management/${id}`
+              )
+            }
+          >
+            <Edit className="w-4 h-4 mr-2" />
+            Edit
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setOpen(true)}>
             <Trash className="w-4 h-4 mr-2" />
             Delete

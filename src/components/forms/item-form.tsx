@@ -4,7 +4,7 @@ import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { ItemValidators } from "@/validators";
 import { toast } from "sonner";
 
@@ -19,11 +19,14 @@ import Heading from "@/components/ui/heading";
 const AccountPayableForm = ({
   initialData,
   suppliers,
+  session,
 }: {
   initialData: Items | null;
   suppliers: Supplier[];
+  session: string;
 }) => {
   const router = useRouter();
+  const params = useParams();
   const title = initialData ? "Edit Item" : "Add Item";
   const description = initialData
     ? "Please fill all the information to update the item."
@@ -49,7 +52,11 @@ const AccountPayableForm = ({
         const res = await updateItem(values, initialData?.id as string);
         if (res.success) {
           toast.success(res.success);
-          router.push("/head/items-list");
+          if (session === "superadmin") {
+            router.push(`/superadmin/${params.branchId}/items-list`);
+          } else {
+            router.push(`/head/items-list`);
+          }
         } else {
           toast.error(res.error);
         }
@@ -57,7 +64,11 @@ const AccountPayableForm = ({
         const res = await createItem(values);
         if (res.success) {
           toast.success(res.success);
-          router.push("/head/items-list");
+          if (session === "superadmin") {
+            router.push(`/superadmin/${params.branchId}/items-list`);
+          } else {
+            router.push(`/head/items-list`);
+          }
         } else {
           toast.error(res.error);
         }

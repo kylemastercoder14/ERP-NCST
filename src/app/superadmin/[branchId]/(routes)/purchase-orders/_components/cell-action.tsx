@@ -22,7 +22,10 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import AlertModal from "@/components/ui/alert-modal";
 import React from "react";
-import { changePurchaseRequestStatusSupplier, deleteLeave } from "@/actions";
+import {
+  changePurchaseRequestStatusSupplier,
+  deletePurchaseRequest,
+} from "@/actions";
 import { Modal } from "@/components/ui/modal";
 import PurchaseRequestDetails from "./purchase-request-details";
 
@@ -39,7 +42,7 @@ export const CellAction: React.FC<CellActionProps> = ({
   financeStatus,
   departmentSession,
   supplierStatus,
-  inventoryStatus
+  inventoryStatus,
 }) => {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
@@ -54,7 +57,7 @@ export const CellAction: React.FC<CellActionProps> = ({
     setLoading(true);
     setOpen(false);
     try {
-      const res = await deleteLeave(id);
+      const res = await deletePurchaseRequest(id);
       if (res.success) {
         toast.success(res.success);
         router.refresh();
@@ -179,12 +182,10 @@ export const CellAction: React.FC<CellActionProps> = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          {departmentSession === "Finance" && financeStatus === "Pending" && (
-            <DropdownMenuItem onClick={() => setModalOpen(true)}>
-              <FolderOpen className="w-4 h-4 mr-2" />
-              View Details
-            </DropdownMenuItem>
-          )}
+          <DropdownMenuItem onClick={() => setModalOpen(true)}>
+            <FolderOpen className="w-4 h-4 mr-2" />
+            View Details
+          </DropdownMenuItem>
 
           {supplierStatus === "Pending" && departmentSession === "Supplier" && (
             <DropdownMenuItem onClick={() => setPreparingModalOpen(true)}>
@@ -218,7 +219,9 @@ export const CellAction: React.FC<CellActionProps> = ({
             )}
 
           {supplierStatus === "Received" && (
-            <DropdownMenuItem onClick={() => router.push(`/print-invoice/${id}`)}>
+            <DropdownMenuItem
+              onClick={() => router.push(`/print-invoice/${id}`)}
+            >
               <Printer className="w-4 h-4 mr-2" />
               Print Invoice
             </DropdownMenuItem>

@@ -4,7 +4,7 @@ import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { AccountPayableValidators } from "@/validators";
 import { toast } from "sonner";
 
@@ -19,11 +19,14 @@ import Heading from "@/components/ui/heading";
 const AccountPayableForm = ({
   initialData,
   suppliers,
+  session,
 }: {
   initialData: Transaction | null;
   suppliers: Supplier[];
+  session: string;
 }) => {
   const router = useRouter();
+  const params = useParams();
   const title = initialData ? "Edit Account Payable" : "Add Account Payable";
   const description = initialData
     ? "Please fill all the information to update the account payable."
@@ -53,7 +56,13 @@ const AccountPayableForm = ({
         );
         if (res.success) {
           toast.success(res.success);
-          router.push("/head/sales-management/accounts-payable");
+          if (session === "superadmin") {
+            router.push(
+              `/superadmin/${params.branchId}/sales-management/accounts-payable`
+            );
+          } else {
+            router.push("/head/sales-management/accounts-payable");
+          }
         } else {
           toast.error(res.error);
         }
@@ -61,7 +70,13 @@ const AccountPayableForm = ({
         const res = await createAccountPayable(values);
         if (res.success) {
           toast.success(res.success);
-          router.push("/head/sales-management/accounts-payable");
+          if (session === "superadmin") {
+            router.push(
+              `/superadmin/${params.branchId}/sales-management/accounts-payable`
+            );
+          } else {
+            router.push("/head/sales-management/accounts-payable");
+          }
         } else {
           toast.error(res.error);
         }

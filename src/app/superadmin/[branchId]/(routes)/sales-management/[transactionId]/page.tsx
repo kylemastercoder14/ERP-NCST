@@ -36,6 +36,7 @@ const Page = async (props: {
   return (
     <div>
       <AccountTransactionForm
+        session="superadmin"
         initialData={transaction}
         suppliers={suppliers}
         clients={clients}

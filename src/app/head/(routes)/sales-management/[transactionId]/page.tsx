@@ -38,6 +38,7 @@ const Page = async (props: {
   return (
     <div>
       <AccountTransactionForm
+      session='head'
         initialData={transaction}
         suppliers={suppliers}
         clients={clients}
