@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Edit, MoreHorizontal, Trash, User } from "lucide-react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import AlertModal from "@/components/ui/alert-modal";
 import React from "react";
 import { deleteApplicant, isThereAccount } from "@/actions";
@@ -25,6 +25,7 @@ interface CellActionProps {
 
 export const CellAction: React.FC<CellActionProps> = ({ id, name }) => {
   const router = useRouter();
+  const params = useParams();
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [hasAccount, setHasAccount] = React.useState(false);
@@ -93,7 +94,7 @@ export const CellAction: React.FC<CellActionProps> = ({ id, name }) => {
             Create Account
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => router.push(`/head/employee-management/${id}`)}
+            onClick={() => router.push(`/superadmin/${params.branchId}/employee-management/${id}`)}
           >
             <Edit className="w-4 h-4 mr-2" />
             Edit

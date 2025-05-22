@@ -7,6 +7,7 @@ import {
   EducationRecord,
   EmploymentRecord,
   CharacterReferences,
+  Branch,
 } from "@prisma/client";
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,9 @@ export function EmployeeProfileView({
   department,
   jobTitle,
 }: {
-  employee: Employee;
+  employee: Employee & {
+    Branch: Branch;
+  };
   childrenData: Children[];
   education: EducationRecord[];
   employment: EmploymentRecord[];
@@ -336,7 +339,7 @@ export function EmployeeProfileView({
                 </p>
                 <p>
                   <span className="font-medium">Branch:</span>{" "}
-                  {employee.branchId}
+                  {employee.Branch?.name || "N/A"}
                 </p>
                 <p>
                   <span className="font-medium">Training Status:</span>{" "}

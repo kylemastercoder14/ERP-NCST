@@ -20,6 +20,7 @@ const Page = async (props: {
       JobTitle: true,
       Department: true,
       UserAccount: true,
+      Branch: true
     },
   });
 
